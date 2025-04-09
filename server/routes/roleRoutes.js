@@ -3,6 +3,6 @@ const express = require('express');
 const router = express.Router();
 const roleController = require('../controllers/roleController');
 
-router.get('/', roleController.getAllRoles);
+router.get('/get-all', roleController.getAllRoles);
 
 module.exports = router;

@@ -1,17 +1,25 @@
-const db = require('../config/db'); 
+// controllers/roleController.js
+const Role = require('../models/role');  // Import mô hình role
 
-// Hàm lấy danh sách tất cả các role
-exports.getAllRoles = (req, res) => {
-    db.query('SELECT * FROM role', (err, results) => {
-      if (err) {
-        console.error('Lỗi khi truy vấn cơ sở dữ liệu:', err);
-        return res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu' });
-      }
-  
-      if (!results || results.length === 0) {
-        return res.status(404).json({ message: 'Không tìm thấy dữ liệu' });
-      }
-  
-      res.json(results);
-    });
+// Hàm lấy tất cả các role từ cơ sở dữ liệu
+exports.getAllRoles = async (req, res) => {
+  try {
+    const roles = await Role.findAll();  // Lấy tất cả các role
+    res.json(roles);
+  } catch (err) {
+    console.error('Lỗi khi truy vấn cơ sở dữ liệu:', err);
+    res.status(500).json({ message: 'Lỗi truy vấn cơ sở dữ liệu' });
+  }
+};
+
+// Hàm tạo mới một role
+exports.createRole = async (req, res) => {
+  const { name, description } = req.body;
+  try {
+    const role = await Role.create({ name, description });  // Tạo role mới
+    res.status(201).json(role);  // Trả về role vừa tạo
+  } catch (err) {
+    console.error('Lỗi khi tạo role:', err);
+    res.status(500).json({ message: 'Lỗi khi tạo role' });
+  }
 };
