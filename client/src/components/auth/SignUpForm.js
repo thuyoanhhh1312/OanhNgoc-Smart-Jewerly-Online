@@ -11,41 +11,26 @@ export default function SignUpForm() {
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
-      <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
-        <Link
-          to="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          <ChevronLeftIcon className="size-5" />
-          Back to dashboard
-        </Link>
-      </div>
-
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div className="mb-5 sm:mb-8">
-          <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+        <div className="mb-5 sm:mb-8 flex justify-center items-center">
+          <div className="mb-2 font-semibold text-gray-800 text-[24px] dark:text-white/90 sm:text-[32px]">
             Sign Up
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Enter your email and password to sign up!
-          </p>
+          </div>
         </div>
 
         {/* Social buttons */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
+        {/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
           <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-            {/* Google icon SVG */}
             Sign up with Google
           </button>
 
           <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-            {/* X icon SVG */}
             Sign up with X
           </button>
-        </div>
+        </div> */}
 
         {/* Or divider */}
-        <div className="relative py-3 sm:py-5">
+        {/* <div className="relative py-3 sm:py-5">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
           </div>
@@ -54,7 +39,7 @@ export default function SignUpForm() {
               Or
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Form */}
         <form>
