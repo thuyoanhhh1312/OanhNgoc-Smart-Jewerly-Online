@@ -33,4 +33,4 @@ const login = async (email, password) => {
 export default {
     register,
     login,
-};
+};                                    

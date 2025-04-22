@@ -4,6 +4,7 @@ import ProductAdmin from "./pages/admin/Products";
 import './App.css';
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
+import Category from "./pages/admin/Category/index";
 
 function App() {
   return (
@@ -11,9 +12,11 @@ function App() {
       <Routes>
         <Route element={<AdminLayout />}>
           <Route index path="/" element={<ProductAdmin />} />
+          <Route path="/categories" element={<Category />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+
       </Routes>
     </Router>
   );

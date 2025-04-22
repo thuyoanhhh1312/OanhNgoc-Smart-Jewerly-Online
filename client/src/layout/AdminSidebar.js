@@ -29,8 +29,8 @@ const navItems = [
   },
   {
     icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
+    name: "Category",
+    path: "/categories",
   },
   {
     icon: <UserCircleIcon />,
