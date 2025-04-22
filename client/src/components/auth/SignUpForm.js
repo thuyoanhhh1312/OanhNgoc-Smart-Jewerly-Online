@@ -1,14 +1,27 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link , useNavigate} from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
-
+import authServices from "../../services/authServices";
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try{
+      const data = await authServices.register(name, email, password);
+      localStorage.setItem('token', data.token);
+      navigate('/');
+    }catch(err){
+      console.error(err);
+    }
+  }
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
@@ -42,30 +55,30 @@ export default function SignUpForm() {
         </div> */}
 
         {/* Form */}
-        <form>
+        <form onSubmit={handleSubmit} method="POST">
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <Label>First Name<span className="text-error-500">*</span></Label>
+                <Label>Name<span className="text-error-500">*</span></Label>
                 <Input
                   type="text"
-                  name="fname"
-                  placeholder="Enter your first name"
-                />
-              </div>
-              <div>
-                <Label>Last Name<span className="text-error-500">*</span></Label>
-                <Input
-                  type="text"
-                  name="lname"
-                  placeholder="Enter your last name"
+                  name="name"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e?.target?.value)}
                 />
               </div>
             </div>
 
             <div>
               <Label>Email<span className="text-error-500">*</span></Label>
-              <Input type="email" name="email" placeholder="Enter your email" />
+              <Input
+                type="text" 
+                name="email" 
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e?.target?.value)}                 
+                />
             </div>
 
             <div>
@@ -74,6 +87,9 @@ export default function SignUpForm() {
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e?.target?.value)}
+                  name="password"
                 />
                 <span
                   onClick={() => setShowPassword(!showPassword)}
