@@ -267,5 +267,125 @@ code {
   }
 }
 
+/* Tạo kiểu cho bảng */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Xóa khoảng cách giữa các ô */
+  margin: 20px 0; /* Thêm khoảng cách từ trên và dưới */
+}
+
+/* Tạo kiểu cho các ô bảng */
+th, td {
+  padding: 12px;
+  text-align: left; /* Căn trái nội dung */
+}
+
+/* Chỉ tạo đường kẻ ngang */
+td, th {
+  border-bottom: 1px solid #ddd; /* Đường kẻ ngang */
+}
+
+/* Không hiển thị đường kẻ dọc */
+td:first-child, th:first-child {
+  border-left: none; /* Xóa đường kẻ dọc bên trái */
+}
+
+/* Kiểu cho hàng đầu tiên (header) */
+th {
+  background-color: #4CAF50;
+  color: black;
+}
+
+/* Tạo đường kẻ ngang mảnh */
+td {
+  border-bottom: 1px solid #ddd; /* Đoạn này tạo đường kẻ ngang mảnh */
+}
+
+/* Sử dụng màu sắc nhẹ để làm đường kẻ mảnh hơn */
+table, tr {
+  border: none;  /* Không tạo viền cho bảng và hàng */
+}
+
+/* Tùy chỉnh paginator */
+.p-paginator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f9f9f9; /* Màu nền của paginator */
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* Tùy chỉnh nút trước và sau */
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next {
+  background-color: white; /* Màu nền của nút chuyển trang */
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 5px;
+  color: black
+}
+
+.p-paginator .p-paginator-prev:hover {
+  background-color: #3B82F6; /* Màu nền khi hover */
+  color: white; /* Màu chữ khi hover */
+}
+
+.p-paginator .p-paginator-next:hover {
+  background-color: #3B82F6; /* Màu nền khi hover */
+  color: white; /* Màu chữ khi hover */
+}
+
+.p-paginator .p-paginator-prev:disabled {
+  background-color: #e0e0e0; /* Màu nền khi không thể chuyển trang */
+  color: #a0a0a0; /* Màu chữ khi không thể chuyển trang */
+  cursor: not-allowed;
+}
+
+.p-paginator .p-paginator-next:disabled {
+  background-color: #e0e0e0; /* Màu nền khi không thể chuyển trang */
+  color: #a0a0a0; /* Màu chữ khi không thể chuyển trang */
+  cursor: not-allowed;
+}
+
+
+
+/* Tùy chỉnh nút "các số trang" */
+.p-paginator .p-paginator-pages .p-paginator-page {
+  background-color: #ffffff; /* Màu nền của các nút trang */
+  border: 1px solid #ddd; /* Viền mảnh cho các nút */
+  color: #333;
+  padding: 6px 12px;
+  margin: 0 3px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Đổi màu khi hover vào nút trang */
+.p-paginator .p-paginator-pages .p-paginator-page:hover {
+  background-color: #3B82F6; /* Màu nền khi hover */
+  color: white; /* Màu chữ khi hover */
+}
+
+/* Tùy chỉnh nút trang hiện tại */
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background-color: #3B82F6; /* Màu nền cho trang hiện tại */
+  color: white; /* Màu chữ cho trang hiện tại */
+  font-weight: bold;
+}
+
+/* Tùy chỉnh bộ chọn số trang */
+.p-paginator .p-dropdown {
+  margin-left: 15px;
+}
+
+
+
+
 
 
