@@ -1,11 +1,12 @@
-import React, {useState, useEffect, use} from "react";
+import React, {useState, useEffect} from "react";
 import Input from "../../../components/form/input/InputField";
 import Label from "../../../components/form/Label";
 import Button from "../../../components/ui/button/Button"; 
 import categoryApi from "../../../api/categoryApi";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams  } from "react-router";
 
-const EditCategory = ({id}) => {
+const EditCategory = () => {
+    const { id } = useParams();
     const [categoryName, setCategoryName] = useState('');
     const [description, setDescription] = useState('');
     const navigate = useNavigate();
