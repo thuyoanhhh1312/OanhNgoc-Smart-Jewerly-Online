@@ -23,10 +23,12 @@ const getCategoryById = async (req, res) => {
 }
 
 const createCategory = async (req, res) => {
-    const {categories_name, description} = req.body;
+    const {category_name, description} = req.body;
+    console.log(category_name, description);
+    
     try{
         const newCategory = await Category.create({
-            categories_name,
+          category_name,
             description
         });
         res.status(201).json(newCategory);
@@ -37,13 +39,13 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     const { id } = req.params;
-    const { categories_name, description } = req.body;
+    const { category_name, description } = req.body;
     try {
         const category = await Category.findByPk(id);
         if (!category) {
             return res.status(404).json({ message: "Danh mục không tìm thấy" });
         }
-        category.categories_name = categories_name || category.categories_name;
+        category.category_name = category_name || category.category_name;
         category.description = description || category.description;
 
         await category.save();

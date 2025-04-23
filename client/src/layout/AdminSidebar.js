@@ -298,14 +298,14 @@ const AdminSidebar = () => {
             <>
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="https://cdn.pnj.io/images/logo/pnj.com.vn.png"
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <img
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src="https://cdn.pnj.io/images/logo/pnj.com.vn.png"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -313,7 +313,7 @@ const AdminSidebar = () => {
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Icon.png"
               alt="Logo"
               width={32}
               height={32}

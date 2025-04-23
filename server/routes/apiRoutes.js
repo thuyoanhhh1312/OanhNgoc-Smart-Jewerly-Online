@@ -28,8 +28,8 @@ router.delete('/users/:id', userController.deleteUser); // Xóa người dùng
 // Route để lấy tất cả các danh mục
 router.get('/categories', categoryController.getAllCategories);
 // router.get('/categories/:id', categoryController.getCategoryById); // Lấy danh mục theo ID
-// router.post('/categories', categoryController.createCategory); // Tạo danh mục mới  '
-// router.put('/categories/:id', categoryController.updateCategory); // Cập nhật danh mục
+router.post('/categories', categoryController.createCategory); // Tạo danh mục mới  '
+router.put('/categories/:id', categoryController.updateCategory); // Cập nhật danh mục
 // router.delete('/categories/:id', categoryController.deleteCategory); // Xóa danh mục
 
 // Các route API khác có thể được thêm ở đây

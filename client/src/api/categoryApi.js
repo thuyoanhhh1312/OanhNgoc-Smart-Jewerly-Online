@@ -11,6 +11,45 @@ const getCategories = async () => {
   }
 };
 
+const createCategory = async (categoryName, description) => {
+  try {
+    const response = await axios.post(`${API_URL}/categories`,{
+      category_name: categoryName,
+      description: description,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating category:", error);
+    throw error;
+  }
+};
+
+const getCategoryById = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/categories/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching category by ID:", error);
+    throw error;
+  }
+}
+
+const updateCategory = async (id, categoryName, description) => {
+  try{
+    const response = await axios.put(`${API_URL}/categories/${id}`, {
+      category_name: categoryName,
+      description: description,
+    });
+    return response.data;
+  }catch (error) {
+    console.error("Error updating category:", error);
+    throw error;
+  }
+}
+
 export default {
     getCategories,
+    createCategory,
+    getCategoryById,
+    updateCategory,
 };
