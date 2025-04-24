@@ -6,6 +6,7 @@ const roleController = require('../controllers/roleController');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
+const productController = require('../controllers/productController');
 
 // Route để lấy tất cả các role
 router.get('/role', roleController.getAllRoles);
@@ -32,6 +33,12 @@ router.post('/categories', categoryController.createCategory); // Tạo danh m�
 router.put('/categories/:id', categoryController.updateCategory); // Cập nhật danh mục
 // router.delete('/categories/:id', categoryController.deleteCategory); // Xóa danh mục
 
+// Các route liên quan đến sản phẩm
+router.get('/products', productController.getAllProducts); // Lấy tất cả sản phẩm
+router.get('/products/:id', productController.getProductById); // Lấy sản phẩm theo ID
+router.post('/products', productController.createProduct); // Tạo sản phẩm mới
+router.put('/products/:id', productController.updateProduct); // Cập nhật sản phẩm
+router.delete('/products/:id', productController.deleteProduct); // Xóa sản phẩm
 // Các route API khác có thể được thêm ở đây
 
 module.exports = router;
