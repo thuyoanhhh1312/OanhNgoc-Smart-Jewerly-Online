@@ -26,10 +26,10 @@ const Product = sequelize.define('Product', {
         type: DataTypes.INTEGER,
         defaultValue: 0,  // Mặc định số lượng là 0
     },
-    image_url: {
-        type: DataTypes.STRING,
-        allowNull: true,  // Đường dẫn hình ảnh là tùy chọn
-    },
+    // image_url: {
+    //     type: DataTypes.STRING,
+    //     allowNull: true,  // Đường dẫn hình ảnh là tùy chọn
+    // },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,  // Thời gian tạo mặc định là thời gian hiện tại
