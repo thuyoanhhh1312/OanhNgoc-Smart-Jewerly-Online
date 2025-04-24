@@ -24,8 +24,8 @@ import {
 const navItems = [
   {
     icon: <GridIcon />,
-    name: "Sản Phẩm",
-    path: "/",
+    name: "Product",
+    path: "/products",
   },
   {
     icon: <CalenderIcon />,
