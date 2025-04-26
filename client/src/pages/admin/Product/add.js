@@ -5,6 +5,7 @@ import Button from '../../../components/ui/button/Button';
 import { useNavigate } from 'react-router';
 import ProductAPI from '../../../api/productApi';
 import categoryApi from '../../../api/categoryApi';  // API cho Category
+import subCategoryApi from '../../../api/subCategoryApi';
 
 const AddProduct = () => {
   const [productName, setProductName] = useState('');
@@ -12,22 +13,27 @@ const AddProduct = () => {
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [subCategory_id, setSubCategoryId] = useState('');
+  const [subCategories, setSubCategories] = useState([]);
   const [categories, setCategories] = useState([]);
   
   const navigate = useNavigate();
 
-  // Fetch danh sách danh mục khi trang được load
+
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const data = await categoryApi.getCategories();
-        setCategories(data);  // Set danh sách danh mục vào state
+        const [categoriesData, subCategoriesData] = await Promise.all([
+          categoryApi.getCategories(),
+          subCategoryApi.getSubCategories(),
+        ]);
+        setCategories(categoriesData);
+        setSubCategories(subCategoriesData);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
     };
-    fetchCategories();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -40,7 +46,7 @@ const AddProduct = () => {
         price,
         quantity,
         categoryId,
-        imageUrl
+        subCategory_id
       );
       
       // Reset form sau khi tạo sản phẩm thành công
@@ -49,7 +55,7 @@ const AddProduct = () => {
       setPrice('');
       setQuantity('');
       setCategoryId('');
-      setImageUrl('');
+      setSubCategoryId('');
 
       // Chuyển hướng về trang danh sách sản phẩm
       navigate('/products');
@@ -57,6 +63,10 @@ const AddProduct = () => {
       console.error('Error creating product:', error);
     }
   };
+    // Lọc subcategories theo categoryId
+    const filteredSubCategories = subCategories.filter(
+      (sub) => sub.category_id === Number(categoryId)
+    );
 
   return (
     <div className="flex flex-col flex-1">
@@ -116,37 +126,48 @@ const AddProduct = () => {
                 />
               </div>
 
-              {/* Category */}
-              <div>
-                <Label>Category <span className="text-red">*</span></Label>
-                <select
-                  name="category"
-                  id="category"
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+               {/* Category */}
+            <div>
+              <Label>Category <span className="text-red">*</span></Label>
+              <select
+                name="category"
+                id="category"
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setSubCategoryId(''); // Reset subcategory khi đổi category
+                }}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.category_id} value={category.category_id}>
+                    {category.category_name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Image URL */}
-              <div>
-                <Label>Image URL <span className="text-red">*</span></Label>
-                <Input
-                  type="text"
-                  name="image_url"
-                  id="image_url"
-                  placeholder="Image URL"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e?.target?.value)}
-                />
-              </div>
+            {filteredSubCategories.length > 0 && (
+  <div>
+    <Label>SubCategory <span className="text-red">*</span></Label>
+    <select
+      name="subcategory"
+      id="subcategory"
+      value={subCategory_id}
+      onChange={(e) => setSubCategoryId(e.target.value)}
+      className="w-full p-2 border rounded"
+    >
+      <option value="">Select SubCategory</option>
+      {filteredSubCategories.map((sub) => (
+        <option key={sub.subcategory_id} value={sub.subcategory_id}>
+          {sub.subcategory_name}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+
 
               {/* Submit Button */}
               <div>

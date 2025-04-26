@@ -11,6 +11,10 @@ import EditCategory from "./pages/admin/Category/edit";
 import Product from "./pages/admin/Product/index";
 import AddProduct from "./pages/admin/Product/add";
 import EditProduct from "./pages/admin/Product/edit";
+
+import SubCategory from "./pages/admin/SubCategory/index";
+import AddSubCategory from "./pages/admin/SubCategory/add";
+import EditSubCategory from "./pages/admin/SubCategory/edit";
 function App() {
   return (
     <Router>
@@ -23,6 +27,9 @@ function App() {
           <Route path="/products" element={<Product />} />
           <Route path="/products/add" element={<AddProduct />} />
           <Route path="/products/edit/:id" element={<EditProduct />} />
+          <Route path="/subcategories" element={<SubCategory />} />
+          <Route path="/subcategories/add" element={<AddSubCategory />} />
+          <Route path="/subcategories/edit/:id" element={<EditSubCategory />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />

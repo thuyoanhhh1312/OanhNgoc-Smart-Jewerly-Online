@@ -2,41 +2,43 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db'); 
 const Category = require('./category');
 
-const subCategory = sequelize.define('subCategory', {
-    subCategory_id: {
+const SubCategory = sequelize.define('SubCategory', {
+    subcategory_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,  // Tự động tăng
+        autoIncrement: true,
     },
-    subCategory_name: {
+    subcategory_name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,  // Tên subCategory phải là duy nhất
+        unique: true,
     },
-    Category_id: {
+    category_id: {
         type: DataTypes.INTEGER,
-        references: {//khoa ngoại
-            model: Category,  // Tham chiếu đến bảng Category
-            key: 'category_id',  // Khóa chính trong bảng Category
+        allowNull: false,
+        references: {
+            model: Category,
+            key: 'category_id',
         },
-        allowNull: false,  // Không cho phép null
     },
     description: {
         type: DataTypes.TEXT,
-        allowNull: true,  // Mô tả là tùy chọn
+        allowNull: true,
     },
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian tạo mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
     updated_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian cập nhật mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
+}, {
+    tableName: 'sub_category',
+    timestamps: false,
+});
 
-},{
-    tableName: 'sub_category',  // Tên bảng trong cơ sở dữ liệu
-    timestamps: false,  // Nếu không sử dụng cột createdAt và updatedAt
-})
+// ➡️ Thêm dòng này để Sequelize hiểu mối quan hệ:
+SubCategory.belongsTo(Category, { foreignKey: 'category_id' });
 
-module.exports = subCategory;
+module.exports = SubCategory;
