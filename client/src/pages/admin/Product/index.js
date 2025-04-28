@@ -16,10 +16,19 @@ const Product = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    //await deleteProduct(id);
-    setProducts(products.filter((product) => product.product_id !== id));
+    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+      try {
+        await ProductAPI.deleteProduct(id);
+        alert("Xóa sản phẩm thành công!");
+        // Xóa luôn sản phẩm đó ra khỏi danh sách hiển thị
+        setProducts(products.filter((product) => product.product_id !== id));
+      } catch (error) {
+        console.error("Lỗi khi xóa sản phẩm:", error);
+        alert("Đã xảy ra lỗi khi xóa sản phẩm!");
+      }
+    }
   };
-
+  
   return (
     <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
       {/* Tiêu đề */}
@@ -39,6 +48,9 @@ const Product = () => {
         <Column field="description" header="Description" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="price" header="Price" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="quantity" header="Quantity" sortable headerClassName='bg-[#d2d4d6]'></Column>
+        <Column field="Category.category_name" header="Category" sortable headerClassName='bg-[#d2d4d6]' />
+        <Column field="SubCategory.subcategory_name" header="SubCategory" sortable headerClassName='bg-[#d2d4d6]' />
+        
         <Column
           body={(rowData) => (
             <div className='flex flex-row gap-2'>

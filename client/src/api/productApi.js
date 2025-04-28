@@ -13,7 +13,7 @@ const getProducts = async () => {
   };
 
 // Tạo một sản phẩm mới
-const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, imageUrl) => {
+const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId) => {
     try {
       const response = await axios.post(`${API_URL}/products`, {
         product_name: productName,
@@ -21,8 +21,7 @@ const createProduct = async (productName, description, price, quantity, category
         price: price,
         quantity: quantity,
         category_id: categoryId,
-        subcategory_id: subcategoryId,
-        image_url: imageUrl
+        subcategory_id: subcategoryId
       });
       return response.data;
     } catch (error) {
@@ -51,8 +50,7 @@ const createProduct = async (productName, description, price, quantity, category
         price: price,
         quantity: quantity,
         category_id: categoryId,
-        subcategory_id: subcategoryId,
-        image_url: imageUrl
+        subcategory_id: subcategoryId
       });
       return response.data;
     } catch (error) {

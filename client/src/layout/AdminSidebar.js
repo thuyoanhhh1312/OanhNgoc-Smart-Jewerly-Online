@@ -33,6 +33,11 @@ const navItems = [
     path: "/categories",
   },
   {
+    icon: <CalenderIcon />,   // Dùng lại icon Calendar (hoặc bạn chọn icon khác cũng được)
+    name: "Subcategory",
+    path: "/subcategories",    // <-- Đường dẫn tới trang subcategory
+  },
+  {
     icon: <UserCircleIcon />,
     name: "User Profile",
     path: "/profile",

@@ -15,11 +15,21 @@ const Category = () => {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id) => {
-    //await deleteCategory(id);
-    setCategories(categories.filter((category) => category.category_id !== id));
-  };
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
+      try {
+        await CategoryAPI.deleteCategory(id);
+        alert("Xóa danh mục thành công!");
+        // Xóa khỏi danh sách hiển thị
+        setCategories(categories.filter((category) => category.category_id !== id));
+      } catch (error) {
+        console.error("Lỗi khi xóa danh mục:", error);
+        alert("Đã xảy ra lỗi khi xóa danh mục!");
+      }
+    }
+  };
+  
   return (
     <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
       {/* Tiêu đề */}

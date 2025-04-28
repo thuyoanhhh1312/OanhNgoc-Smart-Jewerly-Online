@@ -1,37 +1,51 @@
-const product = require('../models/product');
+const Product = require('../models/product');
+const Category = require('../models/category');// Thêm dòng này
+const SubCategory = require('../models/subcategory'); // Thêm dòng này
 
 const getAllProducts = async (req, res) => {
-    try {
-        const products = await product.findAll();
-        res.status(200).json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm", error: error.message });
-        
-    }
-}
+  try {
+    const products = await Product.findAll({
+      include: [
+        {
+          model: Category,
+          attributes: ['category_name'],
+        },
+        {
+          model: SubCategory,
+          attributes: ['subcategory_name'],
+        }
+      ]
+    });
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching products", error: error.message });
+  }
+};
 
 const getProductById = async (req, res) => {
     const { id } = req.params;
     try {
-        const productItem = await product.findByPk(id);
-        if (!productItem) {
-            return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
-        }
-        res.status(200).json(productItem);
+      const product = await Product.findByPk(id);
+  
+      if (!product) {
+        return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+      }
+  
+      res.status(200).json(product); // Quan trọng: trả đúng dữ liệu product
     } catch (error) {
-        res.status(500).json({ message: "Lỗi khi lấy sản phẩm", error: error.message });
+      console.error('Error fetching product:', error);
+      res.status(500).json({ message: "Error fetching product", error: error.message });
     }
-}
+  };
 
 const createProduct = async (req, res) => {
-    const { product_name, description, price, quantity, image_url, category_id, subcategory_id } = req.body;
+    const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
     try {
-        const newProduct = await product.create({
+        const newProduct = await Product.create({
             product_name,
             description,
             price,
             quantity,
-            image_url,
             category_id,
             subcategory_id
         });
@@ -42,7 +56,7 @@ const createProduct = async (req, res) => {
 }
 const updateProduct = async (req, res) => {
     const { id } = req.params;
-    const { product_name, description, price, quantity, category_id, subcategory_id, image_url } = req.body;
+    const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
     try {
         const product = await Product.findByPk(id);
         if (!product) {
@@ -54,8 +68,7 @@ const updateProduct = async (req, res) => {
         product.quantity = quantity || product.quantity;
         product.category_id = category_id || product.category_id;
         product.subcategory_id = subcategory_id || product.subcategory_id;
-        product.image_url = image_url || product.image_url;
-
+       
         await product.save();
         res.status(200).json(product);
     } catch (error) {

@@ -47,9 +47,21 @@ const updateCategory = async (id, categoryName, description) => {
   }
 }
 
+  // Xóa sản phẩm
+  const deleteCategory = async (id) => {
+    try {
+      const response = await axios.delete(`${API_URL}/categories/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    }
+  };
+
 export default {
     getCategories,
     createCategory,
     getCategoryById,
     updateCategory,
+    deleteCategory
 };
