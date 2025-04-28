@@ -21,6 +21,8 @@ import {
   UserCircleIcon,
 } from "./../icons";
 
+
+
 const navItems = [
   {
     icon: <GridIcon />,
@@ -31,6 +33,11 @@ const navItems = [
     icon: <CalenderIcon />,
     name: "Category",
     path: "/categories",
+  },
+  {
+    icon: <CalenderIcon />,   // Dùng lại icon Calendar (hoặc bạn chọn icon khác cũng được)
+    name: "Promotion",
+    path: "/promotions",    // <-- Đường dẫn tới trang promotion
   },
   {
     icon: <CalenderIcon />,   // Dùng lại icon Calendar (hoặc bạn chọn icon khác cũng được)

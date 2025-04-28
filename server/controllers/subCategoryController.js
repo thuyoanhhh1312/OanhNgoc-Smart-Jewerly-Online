@@ -12,7 +12,7 @@ const getAllSubCategories = async (req, res) => {
     });
     res.status(200).json(subCategories);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching subcategories", error: error.message });
+    res.status(500).json({ message: "Lỗi khi lấy danh sách danh mục con", error: error.message });
   }
 }
 const getSubCategoryById = async (req, res) => {
@@ -25,11 +25,11 @@ const getSubCategoryById = async (req, res) => {
         },
         });
         if (!subCategory) {
-        return res.status(404).json({ message: "Subcategory not found" });
+        return res.status(404).json({ message: "Không tìm thấy danh mục" });
         }
         res.status(200).json(subCategory);
     } catch (error) {
-        res.status(500).json({ message: "Error fetching subcategory", error: error.message });
+        res.status(500).json({ message: "Lỗi khi lấy danh mục con", error: error.message });
     }
     }
     const createSubCategory = async (req, res) => {
@@ -42,7 +42,7 @@ const getSubCategoryById = async (req, res) => {
             });
             res.status(201).json(newSubCategory);
         } catch (error) {
-            res.status(500).json({ message: "Error creating subcategory", error: error.message });
+            res.status(500).json({ message: "Lỗi khi tạo danh mục con", error: error.message });
         }
     }
     // Update SubCategory
@@ -76,12 +76,12 @@ const getSubCategoryById = async (req, res) => {
         try {
             const subCategory = await SubCategory.findByPk(id);
             if (!subCategory) {
-                return res.status(404).json({ message: "Subcategory not found" });
+                return res.status(404).json({ message: "Không tìm thấy danh mục con" });
             }
             await subCategory.destroy();
-            res.status(200).json({ message: "Subcategory deleted successfully" });
+            res.status(200).json({ message: "Xóa danh mục con thành công" });
         } catch (error) {
-            res.status(500).json({ message: "Error deleting subcategory", error: error.message });
+            res.status(500).json({ message: "Lỗi khi xóa danh mục con", error: error.message });
         }
     }
     module.exports = {

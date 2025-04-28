@@ -18,7 +18,7 @@ const getAllProducts = async (req, res) => {
     });
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching products", error: error.message });
+    res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm", error: error.message });
   }
 };
 
@@ -33,8 +33,8 @@ const getProductById = async (req, res) => {
   
       res.status(200).json(product); // Quan trọng: trả đúng dữ liệu product
     } catch (error) {
-      console.error('Error fetching product:', error);
-      res.status(500).json({ message: "Error fetching product", error: error.message });
+      console.error('Lỗi khi lấy sản phẩm:', error);
+      res.status(500).json({ message: "Lỗi khi lấy sản phẩm", error: error.message });
     }
   };
 

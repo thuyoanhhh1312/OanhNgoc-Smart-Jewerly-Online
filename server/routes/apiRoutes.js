@@ -8,6 +8,7 @@ const authController = require('../controllers/authController');
 const categoryController = require('../controllers/categoryController');
 const productController = require('../controllers/productController');
 const subCategoryController = require('../controllers/subCategoryController');
+const promotionController = require('../controllers/promotionController');
 // Route để lấy tất cả các role
 router.get('/role', roleController.getAllRoles);
 
@@ -45,4 +46,10 @@ router.get('/subcategories/:id', subCategoryController.getSubCategoryById); // L
 router.post('/subcategories', subCategoryController.createSubCategory); // Tạo danh mục con mới
 router.put('/subcategories/:id', subCategoryController.updateSubCategory); // Cập nhật danh mục con
 router.delete('/subcategories/:id', subCategoryController.deleteSubCategory); // Xóa danh mục con
+// Các route liên quan đến khuyến mãi
+router.get('/promotions', promotionController.getAllPromotions); // Lấy tất cả khuyến mãi
+router.get('/promotions/:id', promotionController.getPromotionById); // Lấy khuyến mãi theo ID
+router.post('/promotions', promotionController.createPromotion); // Tạo khuyến mãi mới
+router.put('/promotions/:id', promotionController.updatePromotion); // Cập nhật khuyến mãi
+router.delete('/promotions/:id', promotionController.deletePromotion); // Xóa khuyến mãi
 module.exports = router;
