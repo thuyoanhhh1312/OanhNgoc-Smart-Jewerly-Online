@@ -37,24 +37,29 @@ const EditSubCategory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await SubCategoryAPI.updateSubCategory(id, {
-        subcategory_name: subcategoryName,
-        description,
-        category_id: categoryId
-      });
-      alert('Cập nhật nhóm sản phẩm thành công!');
-      navigate('/subcategories');
-    } catch (error) {
-      console.error('Error updating subcategory:', error);
-      alert('Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!');
+try {
+    if (!subcategoryName || !categoryId) {
+      alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
+      return;
     }
+
+    await SubCategoryAPI.updateSubCategory(id, {
+      subcategory_name: subcategoryName,
+      description,
+      category_id: Number(categoryId),
+    });
+    alert('Cập nhật nhóm sản phẩm thành công!');
+    navigate('/subcategories');
+  } catch (error) {
+    console.error('Error updating subcategory:', error.response?.data || error.message);
+    alert('Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!');
+  }
   };
 
   return (
     <div className="flex flex-col flex-1 bg-white p-4 rounded-lg shadow-md">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} method="POST">
           <div className="space-y-6">
             {/* SubCategory Name */}
             <div>

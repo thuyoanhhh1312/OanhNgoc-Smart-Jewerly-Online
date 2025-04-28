@@ -15,9 +15,25 @@ const SubCategory = () => {
         fetchSubCategories();
     }
 , []);
+
+// const handleDelete = async (id) => {
+//     setSubCategories(subCategories.filter((subCategory) => subCategory.subcategory_id !== id));
+// };
+
 const handleDelete = async (id) => {
-    setSubCategories(subCategories.filter((subCategory) => subCategory.subcategory_id !== id));
-};
+    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
+        try {
+            await SubCategoryAPI.deleteSubCategory(id);
+            alert("Xóa danh mục thành công!");
+            // Xóa khỏi danh sách hiển thị
+            setSubCategories(subCategories.filter((subCategory) => subCategory.subcategory_id !== id));
+        } catch (error) {
+            console.error("Lỗi khi xóa danh mục:", error);
+            alert("Đã xảy ra lỗi khi xóa danh mục!");
+        }
+    }
+}
+
 return (
     
     <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
@@ -43,7 +59,7 @@ return (
               <Link to={`/subcategories/edit/${rowData.subcategory_id}`}>
                 <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
-              <button onClick={() => handleDelete(rowData.subCategory_id)} className="bg-red-500 text-white px-4 py-2 rounded">
+              <button onClick={() => handleDelete(rowData.subcategory_id)} className="bg-red-500 text-white px-4 py-2 rounded">
                 Delete
               </button>
             </div>

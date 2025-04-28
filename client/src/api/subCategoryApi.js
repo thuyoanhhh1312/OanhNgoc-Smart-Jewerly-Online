@@ -36,16 +36,22 @@ const createSubCategory = async (subcategory_name, description, category_id) => 
 };
 
 
-const updateSubCategory = async (id, subcategory_name, description, category_id) => {
+const updateSubCategory = async (id, data) => {
     try {
-        const response = await axios.put(`${API_URL}/subcategories/${id}`, {
-            subcategory_name, // phải đúng key name
-            description,
-            category_id,
-        });
+      const response = await axios.put(`${API_URL}/subcategories/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating subcategory:", error);
+      throw error;
+    }
+  };
+
+const deleteSubCategory = async (id) => {
+    try {
+        const response = await axios.delete(`${API_URL}/subcategories/${id}`);
         return response.data;
     } catch (error) {
-        console.error("Error updating subcategory:", error);
+        console.error("Error deleting subcategory:", error);
         throw error;
     }
 };
@@ -55,5 +61,6 @@ export default {
     createSubCategory,
     getSubCategoryById,
     updateSubCategory,
+    deleteSubCategory,
 };
 
