@@ -1,9 +1,13 @@
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
+
 import AdminLayout from "./layout/AdminLayout";
 import ProductAdmin from "./pages/admin/Products";
 import './App.css';
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
+import SignUpComplete from "./pages/AuthPages/SignUpComplete";
+
 import Category from "./pages/admin/Category/index";
 import AddCategory from "./pages/admin/Category/add";
 import EditCategory from "./pages/admin/Category/edit";
@@ -19,14 +23,36 @@ import EditSubCategory from "./pages/admin/SubCategory/edit";
 import Promotion from "./pages/admin/Promotion/index";
 import AddPromotion from "./pages/admin/Promotion/add";
 import EditPromotion from "./pages/admin/Promotion/edit";
+
+import { useDispatch } from "react-redux"
+import { auth } from "./firebase";
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const idTokenResult = await user.getIdTokenResult();
+        dispatch({
+          type: "LOGGED_IN_USER",
+          payload: {
+            email: user?.email,
+            token: idTokenResult
+          },
+        });
+      }
+    });
+    // cleanup
+    return () => unsubscribe();
+  }, [dispatch]);
+
   return (
     <Router>
       <Routes>
         <Route element={<AdminLayout />}>
           <Route index path="/" element={<ProductAdmin />} />
           {/* categories */}
-          <Route path="/categories" element={<Category />} /> 
+          <Route path="/categories" element={<Category />} />
           <Route path="/categories/add" element={<AddCategory />} />
           <Route path="/categories/edit/:id" element={<EditCategory />} />
           {/* subcategories */}
@@ -46,6 +72,7 @@ function App() {
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/signup/complete" element={<SignUpComplete />} />
 
       </Routes>
     </Router>
