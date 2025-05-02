@@ -54,7 +54,54 @@ const loginUser = async (req, res) => {
   }
 };
 
+const createOrUpdateUser = async (req, res) => {
+  const { name, email } = req.user;
+  console.log("req.user", req.user);
+
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (user) {
+      user.name = name || email.split('@')[0];
+      await user.save();
+      console.log("USER UPDATED", user);
+      res.json(user);
+    } else {
+      const newUser = await User.create({
+        email,
+        name: name || email.split('@')[0],
+        role_id: 2,
+      });
+      console.log("USER CREATED", newUser);
+      res.json(newUser);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Error creating or updating user", error: error.message });
+  }
+};
+
+const currentUser = async (req, res) => {
+  try {
+    const user = await User.findOne({
+      where: { email: req.user.email },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  createOrUpdateUser,
+  currentUser
 };

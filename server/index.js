@@ -7,7 +7,7 @@ app.use(express.json());
 const corsOptions = {
   origin: 'http://localhost:3000', // Chỉ cho phép domain này truy cập
   methods: 'GET,POST,PUT,DELETE',  // Các phương thức cho phép
-  allowedHeaders: 'Content-Type,Authorization', // Các header cho phép
+  allowedHeaders: 'Content-Type,Authorization,authtoken', // Các header cho phép
 };
 
 app.use(cors(corsOptions));

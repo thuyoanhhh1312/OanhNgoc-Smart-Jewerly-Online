@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
+//import middleware
+const { authCheck, adminCheck } = require("../middleware/auth");
+
 // Import các controller
 const roleController = require('../controllers/roleController');
 const userController = require('../controllers/userController');
@@ -17,6 +20,9 @@ router.post('/role', roleController.createRole);
 
 // Route đăng ký người dùng
 router.post('/register', authController.registerUser);
+router.post('/create-or-update-user', authCheck, authController.createOrUpdateUser);
+router.post('/current-user', authCheck, authController.currentUser);
+router.post('/current-admin', authCheck, adminCheck, authController.currentUser);
 
 // Route đăng nhập người dùng
 router.post('/login', authController.loginUser);
@@ -30,9 +36,9 @@ router.delete('/users/:id', userController.deleteUser); // Xóa người dùng
 // Route để lấy tất cả các danh mục
 router.get('/categories', categoryController.getAllCategories);
 router.get('/categories/:id', categoryController.getCategoryById); // Lấy danh mục theo ID
-router.post('/categories', categoryController.createCategory); // Tạo danh mục mới  '
-router.put('/categories/:id', categoryController.updateCategory); // Cập nhật danh mục
-router.delete('/categories/:id', categoryController.deleteCategory); // Xóa danh mục
+router.post('/categories', authCheck, adminCheck, categoryController.createCategory); // Tạo danh mục mới  '
+router.put('/categories/:id', authCheck, adminCheck, categoryController.updateCategory); // Cập nhật danh mục
+router.delete('/categories/:id', authCheck, adminCheck, categoryController.deleteCategory); // Xóa danh mục
 
 // Các route liên quan đến sản phẩm
 router.get('/products', productController.getAllProducts); // Lấy tất cả sản phẩm
@@ -52,4 +58,5 @@ router.get('/promotions/:id', promotionController.getPromotionById); // Lấy kh
 router.post('/promotions', promotionController.createPromotion); // Tạo khuyến mãi mới
 router.put('/promotions/:id', promotionController.updatePromotion); // Cập nhật khuyến mãi
 router.delete('/promotions/:id', promotionController.deletePromotion); // Xóa khuyến mãi
+
 module.exports = router;

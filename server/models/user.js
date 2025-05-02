@@ -17,10 +17,6 @@ const User = sequelize.define('User', {
     allowNull: false,
     unique: true,
   },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   role_id: {
     type: DataTypes.INTEGER,
     defaultValue: 2, // Mặc định là role_id = 2
