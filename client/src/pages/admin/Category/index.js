@@ -1,10 +1,13 @@
 import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';      
+import { Column } from 'primereact/column';
 import React, { useEffect, useState } from "react";
-import CategoryAPI from "../../../api/categoryApi"; // Đường dẫn đến file categoryApi.js
+import CategoryAPI from "../../../api/categoryApi";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
+import Swal from 'sweetalert2';
 
 const Category = () => {
+  const { user } = useSelector((state) => ({ ...state }));
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -17,19 +20,26 @@ const Category = () => {
 
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
+    const result = await Swal.fire({
+      title: 'Bạn có chắc chắn muốn xóa danh mục này không?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'OK',
+      cancelButtonText: 'HỦY',
+    });
+    if (result.isConfirmed) {
       try {
-        await CategoryAPI.deleteCategory(id);
-        alert("Xóa danh mục thành công!");
+        await CategoryAPI.deleteCategory(id, user?.token);
+        Swal.fire('Xóa thành công!', '', 'success');
         // Xóa khỏi danh sách hiển thị
         setCategories(categories.filter((category) => category.category_id !== id));
       } catch (error) {
         console.error("Lỗi khi xóa danh mục:", error);
-        alert("Đã xảy ra lỗi khi xóa danh mục!");
+        Swal.fire('Lỗi', 'Đã xảy ra lỗi khi xóa danh mục!', 'error');
       }
     }
   };
-  
+
   return (
     <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
       {/* Tiêu đề */}
@@ -37,12 +47,12 @@ const Category = () => {
         <h1 className='text-[32px] font-bold '>Category List</h1>
         <div>
           {/* Thêm nút điều hướng */}
-          <Link to="/categories/add">
+          <Link to="/admin/categories/add">
             <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Category</button>
           </Link>
         </div>
       </div>
-      
+
       <DataTable value={categories} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
         <Column field="category_id" header="ID" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="category_name" header="Category Name" sortable headerClassName='bg-[#d2d4d6]'></Column>
@@ -50,7 +60,7 @@ const Category = () => {
         <Column
           body={(rowData) => (
             <div className='flex flex-row gap-2'>
-              <Link to={`/categories/edit/${rowData.category_id}`}>
+              <Link to={`/admin/categories/edit/${rowData.category_id}`}>
                 <button className="bg-green-500 text-white px-4 py-2 rounded">
                   Edit
                 </button>

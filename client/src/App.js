@@ -1,12 +1,17 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 
+import "react-toastify/dist/ReactToastify.css";
+
+import AdminRoute from "./components/routes/AdminRoute";
+
 import AdminLayout from "./layout/AdminLayout";
-import ProductAdmin from "./pages/admin/Products";
 import './App.css';
+
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import SignUpComplete from "./pages/AuthPages/SignUpComplete";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 
 import Category from "./pages/admin/Category/index";
 import AddCategory from "./pages/admin/Category/add";
@@ -24,8 +29,11 @@ import Promotion from "./pages/admin/Promotion/index";
 import AddPromotion from "./pages/admin/Promotion/add";
 import EditPromotion from "./pages/admin/Promotion/edit";
 
-import { useDispatch } from "react-redux"
+import Home from "./pages/Home";
+
 import { auth } from "./firebase";
+import { useDispatch } from "react-redux";
+import { currentUser } from "./api/auth"
 function App() {
   const dispatch = useDispatch();
 
@@ -33,13 +41,19 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const idTokenResult = await user.getIdTokenResult();
-        dispatch({
-          type: "LOGGED_IN_USER",
-          payload: {
-            email: user?.email,
-            token: idTokenResult
-          },
-        });
+        currentUser(idTokenResult.token)
+          .then((res) => {
+            dispatch({
+              type: "LOGGED_IN_USER",
+              payload: {
+                name: res.data.name,
+                email: res.data.email,
+                token: idTokenResult.token,
+                role: res.data.role,
+                _id: res.data._id,
+              },
+            });
+          }).catch((err) => console.log(err));
       }
     });
     // cleanup
@@ -50,30 +64,116 @@ function App() {
     <Router>
       <Routes>
         <Route element={<AdminLayout />}>
-          <Route index path="/" element={<ProductAdmin />} />
-          {/* categories */}
-          <Route path="/categories" element={<Category />} />
-          <Route path="/categories/add" element={<AddCategory />} />
-          <Route path="/categories/edit/:id" element={<EditCategory />} />
-          {/* subcategories */}
-          <Route path="/subcategories" element={<SubCategory />} />
-          <Route path="/subcategories/add" element={<AddSubCategory />} />
-          <Route path="/subcategories/edit/:id" element={<EditSubCategory />} />
-          {/* products */}
-          <Route path="/products" element={<Product />} />
-          <Route path="/products/add" element={<AddProduct />} />
-          <Route path="/products/edit/:id" element={<EditProduct />} />
+          {/* Categories */}
+          <Route
+            path="/admin/categories"
+            element={
+              <AdminRoute>
+                <Category />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/categories/add"
+            element={
+              <AdminRoute>
+                <AddCategory />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/categories/edit/:id"
+            element={
+              <AdminRoute>
+                <EditCategory />
+              </AdminRoute>
+            }
+          />
 
-          {/* promotions */}
-          <Route path="/promotions" element={<Promotion />} />
-          <Route path="/promotions/add" element={<AddPromotion />} />
-          <Route path="/promotions/edit/:id" element={<EditPromotion />} />
+          {/* Subcategories */}
+          <Route
+            path="/admin/subcategories"
+            element={
+              <AdminRoute>
+                <SubCategory />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/subcategories/add"
+            element={
+              <AdminRoute>
+                <AddSubCategory />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/subcategories/edit/:id"
+            element={
+              <AdminRoute>
+                <EditSubCategory />
+              </AdminRoute>
+            }
+          />
 
+          {/* Products */}
+          <Route
+            path="/admin/products"
+            element={
+              <AdminRoute>
+                <Product />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/products/add"
+            element={
+              <AdminRoute>
+                <AddProduct />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/products/edit/:id"
+            element={
+              <AdminRoute>
+                <EditProduct />
+              </AdminRoute>
+            }
+          />
+
+          {/* Promotions */}
+          <Route
+            path="/admin/promotions"
+            element={
+              <AdminRoute>
+                <Promotion />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/promotions/add"
+            element={
+              <AdminRoute>
+                <AddPromotion />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/promotions/edit/:id"
+            element={
+              <AdminRoute>
+                <EditPromotion />
+              </AdminRoute>
+            }
+          />
         </Route>
+
+        <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signup/complete" element={<SignUpComplete />} />
-
+        <Route path="/forgot/password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );

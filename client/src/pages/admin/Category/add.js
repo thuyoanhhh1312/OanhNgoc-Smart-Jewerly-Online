@@ -4,19 +4,21 @@ import Label from '../../../components/form/Label';
 import categoryApi from '../../../api/categoryApi';
 import Button from '../../../components/ui/button/Button';
 import { useNavigate } from 'react-router';
+import { useSelector } from "react-redux";
 const AddCategory = () => {
+    const { user } = useSelector((state) => ({ ...state }));
     const [categoryName, setCategoryName] = useState('');
     const [description, setDescription] = useState('');
     const navigate = useNavigate();
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await categoryApi.createCategory(categoryName, description);
+            await categoryApi.createCategory(categoryName, description, user.token);
             setCategoryName('');
             setDescription('');
-            navigate('/categories');
-        } catch (err){
+            navigate('/admin/categories');
+        } catch (err) {
             console.error(err);
         }
     }
@@ -29,13 +31,13 @@ const AddCategory = () => {
                         <div className="space-y-6">
                             <div>
                                 <Label>Category Name <span className="text-red">*</span></Label>
-                                <Input 
-                                type="text"
-                                name="category_name"
-                                id="category_name"
-                                placeholder="Category Name"
-                                value={categoryName}
-                                onChange={(e) => setCategoryName(e?.target?.value)}
+                                <Input
+                                    type="text"
+                                    name="category_name"
+                                    id="category_name"
+                                    placeholder="Category Name"
+                                    value={categoryName}
+                                    onChange={(e) => setCategoryName(e?.target?.value)}
                                 />
                             </div>
                             <div>

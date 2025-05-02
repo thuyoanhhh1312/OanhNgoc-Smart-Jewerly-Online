@@ -1,32 +1,25 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-import Checkbox from "../form/input/Checkbox";
-import authServices from "../../services/authServices";
 import { ToastContainer, toast } from 'react-toastify';
 import { auth } from "../../firebase";
 import { sendSignInLinkToEmail } from "firebase/auth";
+import { useSelector, useDispatch } from "react-redux";
+import { createOrUpdateUser } from "../../api/auth"
 
 export default function SignUpForm() {
+  let dispatch = useDispatch();
+  const { user } = useSelector((state) => ({ ...state }));
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  console.log("process.env.APP_REGISTER_REDIRECT_URL", process.env.REACT_APP_APP_REGISTER_REDIRECT_URL)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // try{
-    //   const data = await authServices.register(name, email, password);
-    //   localStorage.setItem('token', data.token);
-    //   navigate('/');
-    // }catch(err){
-    //   console.error(err);
-    // }
     const config = {
       url: process.env.REACT_APP_APP_REGISTER_REDIRECT_URL,
       handleCodeInApp: true
@@ -35,12 +28,14 @@ export default function SignUpForm() {
     toast.success(
       `Email is sent to ${email}. Click the link to complete your registration.`
     );
-    // save user email in local storage
     window.localStorage.setItem("emailForRegistration", email);
-    // clear state
     setEmail("");
-
   }
+
+  useEffect(() => {
+    if (user && user.token) navigate("/");
+  }, [user]);
+
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">

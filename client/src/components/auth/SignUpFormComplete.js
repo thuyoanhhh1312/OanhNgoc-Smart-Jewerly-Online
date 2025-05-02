@@ -4,15 +4,19 @@ import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import { ToastContainer, toast } from 'react-toastify';
-import { signInWithEmailLink, updatePassword } from "firebase/auth";
+import { signInWithEmailLink, updatePassword, updateProfile } from "firebase/auth";
 import { auth } from "../../firebase";
+import { useDispatch } from "react-redux"
+import { createOrUpdateUser } from "../../api/auth"
 
 export default function SignUpFormComplete({ history }) {
     const [showPassword, setShowPassword] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
-    console.log("email", window.localStorage.getItem("emailForRegistration"))
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+
+    let dispatch = useDispatch();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,9 +31,25 @@ export default function SignUpFormComplete({ history }) {
                 window.localStorage.removeItem("emailForRegistration");
                 let user = auth.currentUser
                 await updatePassword(user, password);
+                await updateProfile(user, {
+                    displayName: name,
+                });
                 const idTokenResult = await user.getIdTokenResult();
-                console.log("user", user, "idTokenResult", idTokenResult);
-                // history.push("/")
+                createOrUpdateUser(idTokenResult.token)
+                    .then((res) => {
+                        dispatch({
+                            type: "LOGGED_IN_USER",
+                            payload: {
+                                name: res.data.name,
+                                email: res.data.email,
+                                token: idTokenResult.token,
+                                role_id: res.data.role_id,
+                            },
+                        });
+                        // roleBasedRedirect(res);
+                    })
+                    .catch((err) => console.log(err));
+                navigate('/');
             }
         } catch (error) {
             //
