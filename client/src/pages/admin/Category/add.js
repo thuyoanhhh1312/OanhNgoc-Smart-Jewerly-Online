@@ -24,7 +24,7 @@ const AddCategory = () => {
     }
 
     return (
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 bg-white p-4 rounded-lg shadow-md">
             <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
                 <div>
                     <form onSubmit={handleSubmit} method="POST">

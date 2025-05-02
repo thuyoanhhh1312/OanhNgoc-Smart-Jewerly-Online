@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import SubCategoryAPI from "../../../api/subCategoryApi";
-import categoryApi from "../../../api/categoryApi"; // Để lấy danh sách Category
+import categoryApi from "../../../api/categoryApi";
 import Input from "../../../components/form/input/InputField";
 import Label from "../../../components/form/Label";
 import Button from "../../../components/ui/button/Button";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 const EditSubCategory = () => {
+  const { user } = useSelector((state) => ({ ...state }));
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -14,6 +17,7 @@ const EditSubCategory = () => {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,23 +41,41 @@ const EditSubCategory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-try {
-    if (!subcategoryName || !categoryId) {
-      alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
+
+    const newErrors = {};
+    if (!subcategoryName.trim()) newErrors.subcategoryName = "Subcategory name is required.";
+    if (!categoryId) newErrors.categoryId = "Please select a category.";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    await SubCategoryAPI.updateSubCategory(id, {
-      subcategory_name: subcategoryName,
-      description,
-      category_id: Number(categoryId),
-    });
-    alert('Cập nhật nhóm sản phẩm thành công!');
-    navigate('/subcategories');
-  } catch (error) {
-    console.error('Error updating subcategory:', error.response?.data || error.message);
-    alert('Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!');
-  }
+    setErrors({}); // Clear errors
+
+    try {
+      await SubCategoryAPI.updateSubCategory(id, {
+        subcategory_name: subcategoryName.trim(),
+        description: description.trim(),
+        category_id: Number(categoryId),
+      }, user?.token);
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Nhóm sản phẩm đã được cập nhật.',
+        confirmButtonText: 'OK'
+      });
+
+      navigate('/admin/subcategories');
+    } catch (error) {
+      console.error('Error updating subcategory:', error.response?.data || error.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!',
+      });
+    }
   };
 
   return (
@@ -71,7 +93,11 @@ try {
                 placeholder="SubCategory Name"
                 value={subcategoryName}
                 onChange={(e) => setSubcategoryName(e.target.value)}
+                className={errors.subcategoryName ? "border-red-500" : ""}
               />
+              {errors.subcategoryName && (
+                <p className="text-sm text-red-500 mt-1">{errors.subcategoryName}</p>
+              )}
             </div>
 
             {/* Description */}
@@ -95,7 +121,7 @@ try {
                 id="category_id"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${errors.categoryId ? "border-red-500" : ""}`}
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
@@ -104,6 +130,9 @@ try {
                   </option>
                 ))}
               </select>
+              {errors.categoryId && (
+                <p className="text-sm text-red-500 mt-1">{errors.categoryId}</p>
+              )}
             </div>
 
             {/* Submit Button */}

@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { DropdownItem } from "../../ui/dropdown/DropdownItem";
 import { Dropdown } from "../../ui/dropdown/Dropdown";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 
 export default function UserDropdown() {
+  const { user } = useSelector((state) => ({ ...state }));
+  console.log("user", user);
   const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
@@ -20,7 +22,7 @@ export default function UserDropdown() {
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">{user?.name ? user?.name : user?.email?.split("@")[0]}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           width="18"
