@@ -1,48 +1,61 @@
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import React, { useEffect, useState } from "react";
-import SubCategoryAPI from "../../../api/subCategoryApi"; // Đường dẫn đến file subCategoryApi.js
+import SubCategoryAPI from "../../../api/subCategoryApi";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 const SubCategory = () => {
-    const[subCategories, setSubCategories] = useState([]);
+  const { user } = useSelector((state) => ({ ...state }));
+  const [subCategories, setSubCategories] = useState([]);
 
-    useEffect(() => {
-        const fetchSubCategories = async () => {
-            const data = await SubCategoryAPI.getSubCategories();
-            setSubCategories(data);
-        };
-        fetchSubCategories();
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      try {
+        const data = await SubCategoryAPI.getSubCategories();
+        setSubCategories(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách:", error);
+        Swal.fire("Lỗi", "Không thể tải danh sách nhóm sản phẩm.", "error");
+      }
+    };
+    fetchSubCategories();
+  }, []);
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Bạn chắc chắn muốn xóa?",
+      text: "Thao tác này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await SubCategoryAPI.deleteSubCategory(id, user?.token);
+
+        setSubCategories(subCategories.filter((sub) => sub.subcategory_id !== id));
+
+        Swal.fire("Đã xóa!", "Danh mục đã được xóa thành công.", "success");
+      } catch (error) {
+        console.error("Lỗi khi xóa danh mục:", error);
+        Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa danh mục!", "error");
+      }
     }
-, []);
+  };
 
-// const handleDelete = async (id) => {
-//     setSubCategories(subCategories.filter((subCategory) => subCategory.subcategory_id !== id));
-// };
-
-const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
-        try {
-            await SubCategoryAPI.deleteSubCategory(id);
-            alert("Xóa danh mục thành công!");
-            // Xóa khỏi danh sách hiển thị
-            setSubCategories(subCategories.filter((subCategory) => subCategory.subcategory_id !== id));
-        } catch (error) {
-            console.error("Lỗi khi xóa danh mục:", error);
-            alert("Đã xảy ra lỗi khi xóa danh mục!");
-        }
-    }
-}
-
-return (
-    
+  return (
     <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
       {/* Tiêu đề */}
       <div className="flex flex-row justify-between items-center mb-4">
-        <h1 className="text-[32px] font-bold ">SubCategory List</h1>
+        <h1 className="text-[32px] font-bold">SubCategory List</h1>
         <div>
-          {/* Thêm nút điều hướng */}
-          <Link to="/subcategories/add">
+          <Link to="/admin/subcategories/add">
             <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New SubCategory</button>
           </Link>
         </div>
@@ -56,10 +69,13 @@ return (
         <Column
           body={(rowData) => (
             <div className="flex flex-row gap-2">
-              <Link to={`/subcategories/edit/${rowData.subcategory_id}`}>
+              <Link to={`/admin/subcategories/edit/${rowData.subcategory_id}`}>
                 <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
-              <button onClick={() => handleDelete(rowData.subcategory_id)} className="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={() => handleDelete(rowData.subcategory_id)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 Delete
               </button>
             </div>
@@ -71,4 +87,5 @@ return (
     </div>
   );
 };
- export default SubCategory;
+
+export default SubCategory;

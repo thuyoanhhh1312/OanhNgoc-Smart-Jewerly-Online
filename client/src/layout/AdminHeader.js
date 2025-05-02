@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
-import ThemeToggleButton from "../components/admin/common/ThemeToggleButton";
-import NotificationDropdown from "../components/admin/header/NotificationDropdown";
 import UserDropdown from "../components/admin/header/UserDropdown";
 
-const AdminHeader = ({ onClick, onToggle }) => {
+const AdminHeader = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 

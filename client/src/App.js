@@ -49,7 +49,7 @@ function App() {
                 name: res.data.name,
                 email: res.data.email,
                 token: idTokenResult.token,
-                role: res.data.role,
+                role_id: res.data.role_id,
                 _id: res.data._id,
               },
             });
