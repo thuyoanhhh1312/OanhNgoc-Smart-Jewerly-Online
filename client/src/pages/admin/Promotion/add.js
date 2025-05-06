@@ -1,11 +1,13 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import Input from "../../../components/form/input/InputField";
 import Label from "../../../components/form/Label";
 import Button from "../../../components/ui/button/Button";
 import promotionApi from "../../../api/promotionApi";
 import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 
 const AddPromotion = () => {
+    const { user } = useSelector((state) => ({ ...state }));
     const [promotionCode, setPromotionCode] = useState('');
     const [discount, setDiscount] = useState('');
     const [startDate, setStartDate] = useState('');
@@ -16,7 +18,7 @@ const AddPromotion = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await promotionApi.createPromotion(promotionCode, discount, startDate, endDate, description);
+            await promotionApi.createPromotion(promotionCode, discount, startDate, endDate, description, user.token);
             setPromotionCode('');
             setDiscount('');
             setStartDate('');
@@ -36,13 +38,13 @@ const AddPromotion = () => {
                         <div className="space-y-6">
                             <div>
                                 <Label>Promotion Code <span className="text-red">*</span></Label>
-                                <Input 
-                                type="text"
-                                name="promotion_code"
-                                id="promotion_code"
-                                placeholder="Promotion Code"
-                                value={promotionCode}
-                                onChange={(e) => setPromotionCode(e?.target?.value)}
+                                <Input
+                                    type="text"
+                                    name="promotion_code"
+                                    id="promotion_code"
+                                    placeholder="Promotion Code"
+                                    value={promotionCode}
+                                    onChange={(e) => setPromotionCode(e?.target?.value)}
                                 />
                             </div>
                             <div>

@@ -12,7 +12,7 @@ const getPromotions = async () => {
     }
 }
 
-const createPromotion = async (promotion_code, discount, start_date, end_date, description) => {
+const createPromotion = async (promotion_code, discount, start_date, end_date, description, authtoken) => {
     try {
         const response = await axios.post(`${API_URL}/promotions`, {
             promotion_code,
@@ -20,6 +20,10 @@ const createPromotion = async (promotion_code, discount, start_date, end_date, d
             start_date,
             end_date,
             description
+        }, {
+            headers: {
+                authtoken
+            }
         });
         return response.data;
     } catch (error) {
@@ -38,7 +42,7 @@ const getPromotionById = async (id) => {
     }
 }
 
-const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description) => {
+const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description, authtoken) => {
     try {
         const response = await axios.put(`${API_URL}/promotions/${id}`, {
             promotion_code,
@@ -46,6 +50,10 @@ const updatePromotion = async (id, promotion_code, discount, start_date, end_dat
             start_date,
             end_date,
             description
+        }, {
+            headers: {
+                authtoken
+            }
         });
         return response.data;
     } catch (error) {
@@ -54,9 +62,13 @@ const updatePromotion = async (id, promotion_code, discount, start_date, end_dat
     }
 }
 
-const deletePromotion = async (id) => {
+const deletePromotion = async (id, authtoken) => {
     try {
-        const response = await axios.delete(`${API_URL}/promotions/${id}`);
+        const response = await axios.delete(`${API_URL}/promotions/${id}`, {
+            headers: {
+                authtoken
+            }
+        });
         return response.data;
     } catch (error) {
         console.error("Error deleting promotion:", error);
