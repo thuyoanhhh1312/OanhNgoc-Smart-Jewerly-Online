@@ -1,9 +1,10 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+// controllers/authController.js
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.js'; // nhớ thêm đuôi .js khi dùng ES Module
 
 // Đăng ký người dùng
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -29,7 +30,7 @@ const registerUser = async (req, res) => {
 };
 
 // Đăng nhập người dùng
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -54,10 +55,10 @@ const loginUser = async (req, res) => {
   }
 };
 
-const createOrUpdateUser = async (req, res) => {
+// Tạo hoặc cập nhật người dùng
+export const createOrUpdateUser = async (req, res) => {
   const { name, email } = req.user;
   console.log("req.user", req.user);
-
 
   try {
     const user = await User.findOne({ where: { email } });
@@ -82,7 +83,8 @@ const createOrUpdateUser = async (req, res) => {
   }
 };
 
-const currentUser = async (req, res) => {
+// Lấy người dùng hiện tại
+export const currentUser = async (req, res) => {
   try {
     const user = await User.findOne({
       where: { email: req.user.email },
@@ -97,11 +99,4 @@ const currentUser = async (req, res) => {
     console.error("Error fetching current user:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
-  createOrUpdateUser,
-  currentUser
 };

@@ -1,8 +1,9 @@
 // routes/roleRoutes.js
-const express = require('express');
+import express from 'express';
+import { getAllRoles } from '../controllers/roleController.js';
+
 const router = express.Router();
-const roleController = require('../controllers/roleController');
 
-router.get('/get-all', roleController.getAllRoles);
+router.get('/get-all', getAllRoles);
 
-module.exports = router;
+export default router;

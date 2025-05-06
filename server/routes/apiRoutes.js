@@ -1,62 +1,63 @@
-const express = require('express');
+// routes/apiRoutes.js
+import express from 'express';
 const router = express.Router();
 
-//import middleware
-const { authCheck, adminCheck } = require("../middleware/auth");
+// Middleware
+import { authCheck, adminCheck } from '../middlewares/auth.js';
+import upload from '../middlewares/upload.js';
 
-// Import các controller
-const roleController = require('../controllers/roleController');
-const userController = require('../controllers/userController');
-const authController = require('../controllers/authController');
-const categoryController = require('../controllers/categoryController');
-const productController = require('../controllers/productController');
-const subCategoryController = require('../controllers/subCategoryController');
-const promotionController = require('../controllers/promotionController');
-// Route để lấy tất cả các role
+// Controllers
+import * as roleController from '../controllers/roleController.js';
+import * as userController from '../controllers/userController.js';
+import * as authController from '../controllers/authController.js';
+import * as categoryController from '../controllers/categoryController.js';
+import * as productController from '../controllers/productController.js';
+import * as subCategoryController from '../controllers/subCategoryController.js';
+import * as promotionController from '../controllers/promotionController.js';
+
+// Role routes
 router.get('/role', roleController.getAllRoles);
-
-// Route thêm role mới
 router.post('/role', roleController.createRole);
 
-// Route đăng ký người dùng
+// Auth routes
 router.post('/register', authController.registerUser);
 router.post('/create-or-update-user', authCheck, authController.createOrUpdateUser);
 router.post('/current-user', authCheck, authController.currentUser);
 router.post('/current-admin', authCheck, adminCheck, authController.currentUser);
-
-// Route đăng nhập người dùng
 router.post('/login', authController.loginUser);
 
-// Các route liên quan đến người dùng
-router.get('/users', userController.getAllUsers); // Lấy tất cả người dùng
-router.get('/users/:id', userController.getUserById); // Lấy người dùng theo ID
-router.put('/users/:id', userController.updateUser); // Cập nhật thông tin người dùng
-router.delete('/users/:id', userController.deleteUser); // Xóa người dùng
+// User routes
+router.get('/users', userController.getAllUsers);
+router.get('/users/:id', userController.getUserById);
+router.put('/users/:id', userController.updateUser);
+router.delete('/users/:id', userController.deleteUser);
 
-// Route để lấy tất cả các danh mục
+// Category routes
 router.get('/categories', categoryController.getAllCategories);
-router.get('/categories/:id', categoryController.getCategoryById); // Lấy danh mục theo ID
-router.post('/categories', authCheck, adminCheck, categoryController.createCategory); // Tạo danh mục mới  '
-router.put('/categories/:id', authCheck, adminCheck, categoryController.updateCategory); // Cập nhật danh mục
-router.delete('/categories/:id', authCheck, adminCheck, categoryController.deleteCategory); // Xóa danh mục
+router.get('/categories/:id', categoryController.getCategoryById);
+router.post('/categories', authCheck, adminCheck, categoryController.createCategory);
+router.put('/categories/:id', authCheck, adminCheck, categoryController.updateCategory);
+router.delete('/categories/:id', authCheck, adminCheck, categoryController.deleteCategory);
 
-// Các route liên quan đến sản phẩm
-router.get('/products', productController.getAllProducts); // Lấy tất cả sản phẩm
-router.get('/products/:id', productController.getProductById); // Lấy sản phẩm theo ID
-router.post('/products', productController.createProduct); // Tạo sản phẩm mới
-router.put('/products/:id', productController.updateProduct); // Cập nhật sản phẩm
-router.delete('/products/:id', productController.deleteProduct); // Xóa sản phẩm
-// Các route API khác có thể được thêm ở đây
-router.get('/subcategories', subCategoryController.getAllSubCategories); // Lấy tất cả danh mục con
-router.get('/subcategories/:id', subCategoryController.getSubCategoryById); // Lấy danh mục con theo ID
-router.post('/subcategories', subCategoryController.createSubCategory); // Tạo danh mục con mới
-router.put('/subcategories/:id', subCategoryController.updateSubCategory); // Cập nhật danh mục con
-router.delete('/subcategories/:id', subCategoryController.deleteSubCategory); // Xóa danh mục con
-// Các route liên quan đến khuyến mãi
-router.get('/promotions', promotionController.getAllPromotions); // Lấy tất cả khuyến mãi
-router.get('/promotions/:id', promotionController.getPromotionById); // Lấy khuyến mãi theo ID
-router.post('/promotions', promotionController.createPromotion); // Tạo khuyến mãi mới
-router.put('/promotions/:id', promotionController.updatePromotion); // Cập nhật khuyến mãi
-router.delete('/promotions/:id', promotionController.deletePromotion); // Xóa khuyến mãi
+// Product routes
+router.get('/products', productController.getAllProducts);
+router.get('/products/:id', productController.getProductById);
+router.post('/products', authCheck, adminCheck, upload.array('images', 5), productController.createProduct);
+router.put('/products/:id', authCheck, adminCheck, upload.array('images', 5), productController.updateProduct);
+router.delete('/products/:id', authCheck, adminCheck, productController.deleteProduct);
 
-module.exports = router;
+// SubCategory routes
+router.get('/subcategories', subCategoryController.getAllSubCategories);
+router.get('/subcategories/:id', subCategoryController.getSubCategoryById);
+router.post('/subcategories', authCheck, adminCheck, subCategoryController.createSubCategory);
+router.put('/subcategories/:id', authCheck, adminCheck, subCategoryController.updateSubCategory);
+router.delete('/subcategories/:id', authCheck, adminCheck, subCategoryController.deleteSubCategory);
+
+// Promotion routes
+router.get('/promotions', promotionController.getAllPromotions);
+router.get('/promotions/:id', promotionController.getPromotionById);
+router.post('/promotions', authCheck, adminCheck, promotionController.createPromotion);
+router.put('/promotions/:id', authCheck, adminCheck, promotionController.updatePromotion);
+router.delete('/promotions/:id', authCheck, adminCheck, promotionController.deletePromotion);
+
+export default router;

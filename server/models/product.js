@@ -1,50 +1,47 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');  // Kết nối với cơ sở dữ liệu
-const Category = require('./category'); // Import model Category
-const Subcategory = require('./subcategory'); // Import model Subcategory
+// models/product.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
+import Category from './category.js';
+import Subcategory from './subcategory.js';
 
 const Product = sequelize.define('Product', {
     product_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,  // Tự động tăng
+        autoIncrement: true,
     },
     product_name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,  // Tên sản phẩm phải là duy nhất
+        unique: true,
     },
     description: {
         type: DataTypes.TEXT,
-        allowNull: true,  // Mô tả là tùy chọn
+        allowNull: true,
     },
     price: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,  // Giá sản phẩm bắt buộc
+        allowNull: false,
     },
     quantity: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,  // Mặc định số lượng là 0
+        defaultValue: 0,
     },
-    // image_url: {
-    //     type: DataTypes.STRING,
-    //     allowNull: true,  // Đường dẫn hình ảnh là tùy chọn
-    // },
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian tạo mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
     updated_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian cập nhật mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'product',  // Tên bảng trong cơ sở dữ liệu
-    timestamps: false,  // Nếu không sử dụng cột createdAt và updatedAt
+    tableName: 'product',
+    timestamps: false,
 });
 
-// Thiết lập quan hệ giữa các bảng
+// Thiết lập quan hệ
 Product.belongsTo(Category, { foreignKey: 'category_id' });
 Product.belongsTo(Subcategory, { foreignKey: 'subcategory_id' });
 
-module.exports = Product;
+export default Product;

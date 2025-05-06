@@ -27,7 +27,7 @@ const navItems = [
   {
     icon: <GridIcon />,
     name: "Product",
-    path: "/products",
+    path: "/admin/products",
   },
   {
     icon: <CalenderIcon />,
