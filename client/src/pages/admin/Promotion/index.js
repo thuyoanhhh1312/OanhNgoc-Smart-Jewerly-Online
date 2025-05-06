@@ -1,10 +1,12 @@
 import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';      
+import { Column } from 'primereact/column';
 import React, { useEffect, useState } from "react";
 import PromotionAPI from "../../../api/promotionApi"; // Đường dẫn đến file promotionApi.js
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 
 const Promotion = () => {
+    const { user } = useSelector((state) => ({ ...state }));
     const [promotions, setPromotions] = useState([]);
 
     useEffect(() => {
@@ -18,7 +20,7 @@ const Promotion = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa khuyến mãi này không?")) {
             try {
-                await PromotionAPI.deletePromotion(id);
+                await PromotionAPI.deletePromotion(id, user.token);
                 alert("Xóa khuyến mãi thành công!");
                 // Xóa khỏi danh sách hiển thị
                 setPromotions(promotions.filter((promotion) => promotion.promotion_id !== id));
@@ -36,7 +38,7 @@ const Promotion = () => {
                 <h1 className='text-[32px] font-bold '>Promotion List</h1>
                 <div>
                     {/* Thêm nút điều hướng */}
-                    <Link to="/promotions/add">
+                    <Link to="/admin/promotions/add">
                         <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Promotion</button>
                     </Link>
                 </div>
@@ -52,7 +54,7 @@ const Promotion = () => {
                 <Column
                     body={(rowData) => (
                         <div className='flex flex-row gap-2'>
-                            <Link to={`/promotions/edit/${rowData.promotion_id}`}>
+                            <Link to={`/admin/promotions/edit/${rowData.promotion_id}`}>
                                 <button className="bg-green-500 text-white px-4 py-2 rounded">
                                     Edit
                                 </button>
@@ -64,7 +66,7 @@ const Promotion = () => {
                         </div>
                     )}
                     headerStyle={{ width: '8rem', textAlign: 'center' }}
-                    bodyStyle={{ textAlign: 'center' }} 
+                    bodyStyle={{ textAlign: 'center' }}
                     headerClassName='bg-[#d2d4d6]'
                 ></Column>
             </DataTable>

@@ -42,7 +42,7 @@ const navItems = [
   {
     icon: <CalenderIcon />,
     name: "Promotion",
-    path: "/promotions",
+    path: "/admin/promotions",
   },
   {
     icon: <UserCircleIcon />,

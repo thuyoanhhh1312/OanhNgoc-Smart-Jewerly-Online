@@ -1,11 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Input from "../../../components/form/input/InputField";
 import Label from "../../../components/form/Label";
 import Button from "../../../components/ui/button/Button";
 import promotionApi from "../../../api/promotionApi";
-import { useNavigate, useParams} from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { useSelector } from "react-redux";
 
 const EditPromotion = () => {
+    const { user } = useSelector((state) => ({ ...state }));
     const { id } = useParams();
     const [promotionCode, setPromotionCode] = useState('');
     const [discount, setDiscount] = useState('');
@@ -17,7 +19,7 @@ const EditPromotion = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await promotionApi.updatePromotion(id, promotionCode, discount, startDate, endDate, description);
+            await promotionApi.updatePromotion(id, promotionCode, discount, startDate, endDate, description, user.token);
             navigate('/promotions');
         } catch (err) {
             console.error(err);
@@ -48,13 +50,13 @@ const EditPromotion = () => {
                         <div className="space-y-6">
                             <div>
                                 <Label>Promotion Code <span className="text-red">*</span></Label>
-                                <Input 
-                                type="text"
-                                name="promotion_code"
-                                id="promotion_code"
-                                placeholder="Promotion Code"
-                                value={promotionCode}
-                                onChange={(e) => setPromotionCode(e?.target?.value)}
+                                <Input
+                                    type="text"
+                                    name="promotion_code"
+                                    id="promotion_code"
+                                    placeholder="Promotion Code"
+                                    value={promotionCode}
+                                    onChange={(e) => setPromotionCode(e?.target?.value)}
                                 />
                             </div>
                             <div>
@@ -87,7 +89,7 @@ const EditPromotion = () => {
                                     id="end_date"
                                     placeholder="End Date"
                                     value={endDate}
-                                    onChange={(e) => setEndDate(e?.target?.value)} 
+                                    onChange={(e) => setEndDate(e?.target?.value)}
                                 />
                             </div>
                             <div>
@@ -99,7 +101,7 @@ const EditPromotion = () => {
                                     placeholder="Description"
                                     value={description}
                                     onChange={(e) => setDescription(e?.target?.value)}
-                                />  
+                                />
                             </div>
                             <div className="flex items-center justify-between mt-4">
                                 <Button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">
