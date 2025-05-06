@@ -25,10 +25,13 @@ const EditProduct = () => {
       try {
         // 🛑 Quan trọng: Phải gọi getProductById
         const [product, categoriesData, subCategoriesData] = await Promise.all([
-          ProductAPI.getProductById(id),      // <-- phải gọi API lấy đúng ID sản phẩm
+          ProductAPI.getProductById(id),
           categoryApi.getCategories(),
           subCategoryApi.getSubCategories()
         ]);
+
+        console.log("product", product);
+        
   
         // 🟰 Gán dữ liệu sản phẩm vào form
         setProductName(product.product_name || '');

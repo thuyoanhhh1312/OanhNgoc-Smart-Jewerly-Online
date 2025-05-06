@@ -1,6 +1,7 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); 
-const Category = require('./category');
+// models/subcategory.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
+import Category from './category.js';
 
 const SubCategory = sequelize.define('SubCategory', {
     subcategory_id: {
@@ -38,7 +39,7 @@ const SubCategory = sequelize.define('SubCategory', {
     timestamps: false,
 });
 
-// ➡️ Thêm dòng này để Sequelize hiểu mối quan hệ:
+// Thiết lập mối quan hệ
 SubCategory.belongsTo(Category, { foreignKey: 'category_id' });
 
-module.exports = SubCategory;
+export default SubCategory;

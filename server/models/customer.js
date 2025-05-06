@@ -1,11 +1,12 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+// models/customer.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js'; // nhớ thêm .js khi dùng ESM
 
 const Customer = sequelize.define('Customer', {
-    customer_id:{
+    customer_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,  // Tự động tăng
+        autoIncrement: true,
     },
 
     name: {
@@ -16,7 +17,7 @@ const Customer = sequelize.define('Customer', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,  // Đảm bảo email là duy nhất
+        unique: true,
     },
 
     phone: {
@@ -32,15 +33,16 @@ const Customer = sequelize.define('Customer', {
 
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian tạo mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
 
     updated_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian cập nhật mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'customer',  // Tên bảng trong cơ sở dữ liệu
-    timestamps: false,  // Nếu không sử dụng cột createdAt và updatedAt
+    tableName: 'customer',
+    timestamps: false,
 });
-module.exports = Customer;
+
+export default Customer;

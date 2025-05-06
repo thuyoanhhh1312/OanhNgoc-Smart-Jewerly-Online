@@ -1,38 +1,42 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // Import kết nối Sequelize
+// models/user.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
 
-// Định nghĩa model User
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
+
   name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
   },
+
   role_id: {
     type: DataTypes.INTEGER,
-    defaultValue: 2, // Mặc định là role_id = 2
+    defaultValue: 2,
   },
+
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
+
   updated_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
 }, {
-  // Các tùy chọn thêm
-  timestamps: false,
   tableName: 'user',
+  timestamps: false,
 });
 
-module.exports = User;
+export default User;

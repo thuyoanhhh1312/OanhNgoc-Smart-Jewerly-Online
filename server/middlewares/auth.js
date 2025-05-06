@@ -1,11 +1,9 @@
-const admin = require("../firebase");
-const User = require("../models/user");
+import admin from '../firebase/index.js';
+import User from '../models/user.js';
 
-exports.authCheck = async (req, res, next) => {
+export const authCheck = async (req, res, next) => {
   try {
-    const firebaseUser = await admin
-      .auth()
-      .verifyIdToken(req.headers.authtoken);
+    const firebaseUser = await admin.auth().verifyIdToken(req.headers.authtoken);
     console.log("FIREBASE USER IN AUTHCHECK", firebaseUser);
     req.user = firebaseUser;
     next();
@@ -16,14 +14,13 @@ exports.authCheck = async (req, res, next) => {
   }
 };
 
-exports.adminCheck = async (req, res, next) => {
+export const adminCheck = async (req, res, next) => {
   try {
     const user = await User.findOne({ where: { email: req.user.email } });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Kiểm tra quyền admin
     if (user.role_id !== 1) {
       return res.status(403).json({ message: "Access denied. Admins only." });
     }

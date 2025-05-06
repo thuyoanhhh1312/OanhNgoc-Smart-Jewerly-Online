@@ -1,17 +1,18 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db');
+// models/promotion.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/db.js';
 
 const Promotion = sequelize.define('Promotion', {
     promotion_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,  // Tự động tăng
+        autoIncrement: true,
     },
 
     promotion_code: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,  // Đảm bảo mã khuyến mãi là duy nhất
+        unique: true,
     },
 
     discount: {
@@ -31,21 +32,21 @@ const Promotion = sequelize.define('Promotion', {
 
     description: {
         type: DataTypes.TEXT,
-        allowNull: true,  // Mô tả là tùy chọn
+        allowNull: true,
     },
 
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian tạo mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
 
     updated_at: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,  // Thời gian cập nhật mặc định là thời gian hiện tại
+        defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'promotion',  // Tên bảng trong cơ sở dữ liệu
-    timestamps: false,  // Nếu không sử dụng cột createdAt và updatedAt
+    tableName: 'promotion',
+    timestamps: false,
 });
 
-module.exports = Promotion;
+export default Promotion;

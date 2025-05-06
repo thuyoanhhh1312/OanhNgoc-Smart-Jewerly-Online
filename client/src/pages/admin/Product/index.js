@@ -1,48 +1,69 @@
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import React, { useEffect, useState } from "react";
-import ProductAPI from "../../../api/productApi"; // Đường dẫn đến file productApi.js
+import ProductAPI from "../../../api/productApi";
 import { Link } from "react-router";
+import Swal from "sweetalert2";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const data = await ProductAPI.getProducts();
-      setProducts(data);
+      try {
+        const data = await ProductAPI.getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách:", error);
+        Swal.fire("Lỗi", "Không thể tải danh sách sản phẩm.", "error");
+      }
     };
     fetchProducts();
   }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+    const result = await Swal.fire({
+      title: "Bạn chắc chắn muốn xóa?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy"
+    });
+
+    if (result.isConfirmed) {
       try {
         await ProductAPI.deleteProduct(id);
-        alert("Xóa sản phẩm thành công!");
-        // Xóa luôn sản phẩm đó ra khỏi danh sách hiển thị
         setProducts(products.filter((product) => product.product_id !== id));
+        Swal.fire("Đã xóa!", "Sản phẩm đã được xóa thành công.", "success");
       } catch (error) {
         console.error("Lỗi khi xóa sản phẩm:", error);
-        alert("Đã xảy ra lỗi khi xóa sản phẩm!");
+        Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa sản phẩm!", "error");
       }
     }
   };
-  
+
   return (
     <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
       {/* Tiêu đề */}
       <div className='flex flex-row justify-between items-center mb-4'>
         <h1 className='text-[32px] font-bold '>Product List</h1>
         <div>
-          {/* Thêm nút điều hướng */}
-          <Link to="/products/add">
+          <Link to="/admin/products/add">
             <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Product</button>
           </Link>
         </div>
       </div>
-      
-      <DataTable value={products} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
+
+      <DataTable
+        value={products}
+        paginator
+        rows={10}
+        showGridlines
+        paginatorTemplate="PrevPageLink PageLinks NextPageLink"
+      >
         <Column field="product_id" header="ID" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="product_name" header="Product Name" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="description" header="Description" sortable headerClassName='bg-[#d2d4d6]'></Column>
@@ -50,23 +71,24 @@ const Product = () => {
         <Column field="quantity" header="Quantity" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="Category.category_name" header="Category" sortable headerClassName='bg-[#d2d4d6]' />
         <Column field="SubCategory.subcategory_name" header="SubCategory" sortable headerClassName='bg-[#d2d4d6]' />
-        
+
         <Column
           body={(rowData) => (
             <div className='flex flex-row gap-2'>
-              <Link to={`/products/edit/${rowData.product_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">
-                  Edit
-                </button>
+              <Link to={`/admin/products/edit/${rowData.product_id}`}>
+                <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
-              <button onClick={() => handleDelete(rowData.product_id)} className="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={() => handleDelete(rowData.product_id)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 Delete
               </button>
             </div>
           )}
           header="Actions"
           headerClassName='bg-[#d2d4d6]'
-        ></Column>
+        />
       </DataTable>
     </div>
   );
