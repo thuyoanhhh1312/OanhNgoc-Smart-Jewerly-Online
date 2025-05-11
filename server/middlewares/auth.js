@@ -1,33 +1,42 @@
-import admin from '../firebase/index.js';
-import User from '../models/user.js';
+import jwt from 'jsonwebtoken';
+import { ERROR_CODES } from '../utils/errorCodes.js';
 
-export const authCheck = async (req, res, next) => {
-  try {
-    const firebaseUser = await admin.auth().verifyIdToken(req.headers.authtoken);
-    console.log("FIREBASE USER IN AUTHCHECK", firebaseUser);
-    req.user = firebaseUser;
-    next();
-  } catch (err) {
-    res.status(401).json({
-      err: "Invalid or expired token",
+export const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next({
+      statusCode: 401,
+      code: ERROR_CODES.TOKEN_INVALID,
+      message: 'Token không hợp lệ hoặc thiếu.'
     });
   }
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, payload) => {
+    if (err) {
+      return next({
+        statusCode: 403,
+        code: ERROR_CODES.TOKEN_EXPIRED,
+        message: 'Token đã hết hạn hoặc không hợp lệ.'
+      });
+    }
+
+    req.user = payload;
+    next();
+  });
 };
 
-export const adminCheck = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ where: { email: req.user.email } });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+export const isAdmin = (req, res, next) => {
+  const { user } = req;
 
-    if (user.role_id !== 1) {
-      return res.status(403).json({ message: "Access denied. Admins only." });
-    }
-
-    next();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+  if (!user || user.role_id !== 1) {
+    return next({
+      statusCode: 403,
+      code: ERROR_CODES.UNAUTHORIZED,
+      message: "Bạn không có quyền truy cập (yêu cầu admin).",
+    });
   }
+
+  next();
 };

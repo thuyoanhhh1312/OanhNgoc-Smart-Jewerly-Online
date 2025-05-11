@@ -20,6 +20,16 @@ const User = sequelize.define('User', {
     unique: true,
   },
 
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  refresh_token: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+
   role_id: {
     type: DataTypes.INTEGER,
     defaultValue: 2,

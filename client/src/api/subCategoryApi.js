@@ -21,7 +21,7 @@ const getSubCategoryById = async (id) => {
         throw error;
     }
 }
-const createSubCategory = async (subcategory_name, description, category_id, authtoken) => {
+const createSubCategory = async (subcategory_name, description, category_id, accessToken) => {
     try {
         const response = await axios.post(`${API_URL}/subcategories`, {
             subcategory_name,
@@ -29,7 +29,7 @@ const createSubCategory = async (subcategory_name, description, category_id, aut
             category_id,
         }, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;
@@ -40,11 +40,11 @@ const createSubCategory = async (subcategory_name, description, category_id, aut
 };
 
 
-const updateSubCategory = async (id, data, authtoken) => {
+const updateSubCategory = async (id, data, accessToken) => {
     try {
         const response = await axios.put(`${API_URL}/subcategories/${id}`, data, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;
@@ -54,11 +54,11 @@ const updateSubCategory = async (id, data, authtoken) => {
     }
 };
 
-const deleteSubCategory = async (id, authtoken) => {
+const deleteSubCategory = async (id, accessToken) => {
     try {
         const response = await axios.delete(`${API_URL}/subcategories/${id}`, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;
