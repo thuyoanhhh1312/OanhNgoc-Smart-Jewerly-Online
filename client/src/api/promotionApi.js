@@ -12,7 +12,7 @@ const getPromotions = async () => {
     }
 }
 
-const createPromotion = async (promotion_code, discount, start_date, end_date, description, authtoken) => {
+const createPromotion = async (promotion_code, discount, start_date, end_date, description, accessToken) => {
     try {
         const response = await axios.post(`${API_URL}/promotions`, {
             promotion_code,
@@ -22,7 +22,7 @@ const createPromotion = async (promotion_code, discount, start_date, end_date, d
             description
         }, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;
@@ -42,7 +42,7 @@ const getPromotionById = async (id) => {
     }
 }
 
-const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description, authtoken) => {
+const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description, accessToken) => {
     try {
         const response = await axios.put(`${API_URL}/promotions/${id}`, {
             promotion_code,
@@ -52,7 +52,7 @@ const updatePromotion = async (id, promotion_code, discount, start_date, end_dat
             description
         }, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;
@@ -62,11 +62,11 @@ const updatePromotion = async (id, promotion_code, discount, start_date, end_dat
     }
 }
 
-const deletePromotion = async (id, authtoken) => {
+const deletePromotion = async (id, accessToken) => {
     try {
         const response = await axios.delete(`${API_URL}/promotions/${id}`, {
             headers: {
-                authtoken
+                Authorization: `Bearer ${accessToken}`,
             }
         });
         return response.data;

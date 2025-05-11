@@ -13,7 +13,7 @@ const getProducts = async () => {
 };
 
 // Tạo một sản phẩm mới
-const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], authToken) => {
+const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], accessToken) => {
   try {
     const formData = new FormData();
     formData.append('product_name', productName);
@@ -30,7 +30,7 @@ const createProduct = async (productName, description, price, quantity, category
 
     const response = await axios.post(`${API_URL}/products`, formData, {
       headers: {
-        authToken,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'multipart/form-data',
       }
     });

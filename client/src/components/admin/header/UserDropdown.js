@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Dropdown } from "../../ui/dropdown/Dropdown";
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../../../api/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function UserDropdown() {
+  let dispatch = useDispatch();
   const { user } = useSelector((state) => ({ ...state }));
-  console.log("user", user);
+  const navigate = useNavigate();
+
   const [isOpen, setIsOpen] = useState(false);
 
   function toggleDropdown() {
@@ -15,6 +18,23 @@ export default function UserDropdown() {
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  const handleLogout = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("user"))?.token;
+      if (token) {
+        await logout(token);
+      }
+
+      dispatch({
+        type: "LOGOUT",
+      });
+      localStorage.removeItem("user");
+      navigate("/signin");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <div className="relative">
@@ -46,8 +66,8 @@ export default function UserDropdown() {
         onClose={closeDropdown}
         className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
-        <Link
-          to="/signin"
+        <button
+          onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
@@ -65,7 +85,7 @@ export default function UserDropdown() {
             />
           </svg>
           Sign out
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );

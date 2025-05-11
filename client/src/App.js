@@ -10,7 +10,6 @@ import './App.css';
 
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
-import SignUpComplete from "./pages/AuthPages/SignUpComplete";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 
 import Category from "./pages/admin/Category/index";
@@ -31,33 +30,23 @@ import EditPromotion from "./pages/admin/Promotion/edit";
 
 import Home from "./pages/Home";
 
-import { auth } from "./firebase";
 import { useDispatch } from "react-redux";
-import { currentUser } from "./api/auth"
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const idTokenResult = await user.getIdTokenResult();
-        currentUser(idTokenResult.token)
-          .then((res) => {
-            dispatch({
-              type: "LOGGED_IN_USER",
-              payload: {
-                name: res.data.name,
-                email: res.data.email,
-                token: idTokenResult.token,
-                role_id: res.data.role_id,
-                _id: res.data._id,
-              },
-            });
-          }).catch((err) => console.log(err));
+    const userFromStorage = localStorage.getItem("user");
+    if (userFromStorage) {
+      try {
+        const parsedUser = JSON.parse(userFromStorage);
+        dispatch({
+          type: "LOGGED_IN_USER",
+          payload: parsedUser,
+        });
+      } catch (err) {
+        console.error("Lỗi parse user:", err);
       }
-    });
-    // cleanup
-    return () => unsubscribe();
+    }
   }, [dispatch]);
 
   return (
@@ -172,7 +161,6 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/signup/complete" element={<SignUpComplete />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
       </Routes>
     </Router>

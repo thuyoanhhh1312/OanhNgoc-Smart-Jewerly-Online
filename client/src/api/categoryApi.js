@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 const getCategories = async () => {
   try {
     const response = await axios.get(`${API_URL}/categories`);
@@ -11,14 +12,14 @@ const getCategories = async () => {
   }
 };
 
-const createCategory = async (categoryName, description, authtoken) => {
+const createCategory = async (categoryName, description, accessToken) => {
   try {
     const response = await axios.post(`${API_URL}/categories`, {
       category_name: categoryName,
       description: description,
     }, {
       headers: {
-        authtoken: authtoken,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
     return response.data;
@@ -38,14 +39,14 @@ const getCategoryById = async (id) => {
   }
 }
 
-const updateCategory = async (id, categoryName, description, authtoken) => {
+const updateCategory = async (id, categoryName, description, accessToken) => {
   try {
     const response = await axios.put(`${API_URL}/categories/${id}`, {
       category_name: categoryName,
       description: description,
     }, {
       headers: {
-        authtoken
+        Authorization: `Bearer ${accessToken}`,
       }
     });
     return response.data;
@@ -56,17 +57,17 @@ const updateCategory = async (id, categoryName, description, authtoken) => {
 }
 
 // Xóa sản phẩm
-const deleteCategory = async (id, authtoken) => {
+const deleteCategory = async (id, accessToken) => {
   try {
     const response = await axios.delete(`${API_URL}/categories/${id}`, {
       headers: {
-        authtoken
+        Authorization: `Bearer ${accessToken}`,
       }
     });
     return response.data;
   } catch (error) {
     console.error("Error deleting category:", error);
-    throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    throw error;
   }
 };
 

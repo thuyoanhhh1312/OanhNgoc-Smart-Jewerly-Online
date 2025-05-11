@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import { ToastContainer, toast } from 'react-toastify';
-import { auth } from "../../firebase";
-import { sendSignInLinkToEmail } from "firebase/auth";
 import { useSelector, useDispatch } from "react-redux";
-import { createOrUpdateUser } from "../../api/auth"
+import { register } from "../../api/auth";
+import { EyeCloseIcon, EyeIcon } from "../../icons";
 
 export default function SignUpForm() {
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => ({ ...state }));
+
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,17 +19,31 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const config = {
-      url: process.env.REACT_APP_APP_REGISTER_REDIRECT_URL,
-      handleCodeInApp: true
+
+    if (!name || !email || !password) {
+      return toast.error("Vui lòng nhập đầy đủ thông tin.");
     }
-    await sendSignInLinkToEmail(auth, email, config);
-    toast.success(
-      `Email is sent to ${email}. Click the link to complete your registration.`
-    );
-    window.localStorage.setItem("emailForRegistration", email);
-    setEmail("");
-  }
+
+    try {
+      const res = await register({ name, email, password });
+
+      dispatch({
+        type: "LOGGED_IN_USER",
+        payload: {
+          ...res.data.user,
+          token: res.data.accessToken,
+        },
+      });
+
+      localStorage.setItem("user", JSON.stringify({ ...res.data.user, token: res.data.accessToken }));
+
+      toast.success("Đăng ký thành công!");
+      navigate("/");
+    } catch (err) {
+      const msg = err.response?.data?.message || "Đăng ký thất bại.";
+      toast.error(msg);
+    }
+  };
 
   useEffect(() => {
     if (user && user.token) navigate("/");
@@ -57,6 +70,39 @@ export default function SignUpForm() {
                 value={email}
                 onChange={(e) => setEmail(e?.target?.value)}
               />
+            </div>
+            <div>
+              <Label>Name<span className="text-error-500">*</span></Label>
+              <Input
+                type="text"
+                name="name"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e?.target?.value)}
+              />
+            </div>
+            <div>
+              <Label>Password <span className="text-error-500">*</span></Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e?.target?.value)}
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                >
+                  {showPassword ? (
+                    <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                  ) : (
+                    <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                  )}
+                </span>
+              </div>
             </div>
             <div>
               <button

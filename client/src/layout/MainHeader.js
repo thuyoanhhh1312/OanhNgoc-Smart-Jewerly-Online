@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Image } from "primereact/image";
-import { jwtDecode } from 'jwt-decode';
 import { Link } from "react-router";
-import Button from "../components/ui/button/Button";
 import { Dropdown } from "../components/ui/dropdown/Dropdown";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { logout } from "../api/auth";
 
 const MainHeader = () => {
     let dispatch = useDispatch();
     let { user } = useSelector((state) => ({ ...state }));
-    // const [user, setUser] = useState(null);
-    console.log("user", user);
 
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        signOut(auth).then(() => {
+    const handleLogout = async () => {
+        try {
+            const token = JSON.parse(localStorage.getItem("user"))?.token;
+            if (token) {
+                await logout(token);
+            }
+
             dispatch({
                 type: "LOGOUT",
-                payload: null,
             });
-            navigate("/")
-        }).catch((error) => {
-            // An error happened.
-        });
+            localStorage.removeItem("user");
+            navigate("/");
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
     };
 
     function toggleDropdown() {
@@ -37,20 +37,7 @@ const MainHeader = () => {
     function closeDropdown() {
         setIsOpen(false);
     }
-
-    // useEffect(() => {
-    //     const token = localStorage.getItem('token'); // Kiểm tra token trong localStorage
-    //     if (token) {
-    //         try {
-    //             // Giải mã token để lấy thông tin người dùng
-    //             const decodedToken = jwtDecode(token);
-    //             setUser(decodedToken); // Giả sử bạn lưu tên người dùng trong token
-    //         } catch (err) {
-    //             console.error("Token is invalid", err);
-    //         }
-    //     }
-    // }, []);
-
+    
     return (
         <div className="flex flex-row justify-between items-center p-4 shadow-sm">
             <div></div>

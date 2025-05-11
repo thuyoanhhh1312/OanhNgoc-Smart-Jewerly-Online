@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import apiRoutes from './routes/apiRoutes.js'; // Đảm bảo file này cũng dùng export default nếu là ES Module
+import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
@@ -16,6 +17,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use("/api", apiRoutes);
+
+// middleware xử lý lỗi toàn cục
+app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

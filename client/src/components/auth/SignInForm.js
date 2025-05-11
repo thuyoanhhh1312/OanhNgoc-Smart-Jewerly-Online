@@ -1,34 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Button from "../ui/button/Button";
-import { auth, googleAuthProvider } from "../../firebase";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { useDispatch } from "react-redux"
 import { ToastContainer, toast } from "react-toastify";
-import { useSelector } from "react-redux";
-import { createOrUpdateUser } from "../../api/auth"
-
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../../api/auth";
 
 export default function SignInForm() {
-  let dispatch = useDispatch();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
   const { user } = useSelector((state) => ({ ...state }));
 
-  const roleBasedRedirect = (res) => {
-    // Kiểm tra intented state từ location
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const roleBasedRedirect = (user) => {
     let intended = location.state;
+    console.log("user", user);
+
     if (intended) {
       navigate(intended.from);
     } else {
-      if (res.data.role_id === 1) {
+      if (user.role_id === 1) {
         navigate("/admin/categories");
       } else {
         navigate("/");
@@ -38,80 +36,52 @@ export default function SignInForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password)
-      const { user } = result;
-      const idTokenResult = await user.getIdTokenResult();
 
-      createOrUpdateUser(idTokenResult.token)
-        .then((res) => {
-          dispatch({
-            type: "LOGGED_IN_USER",
-            payload: {
-              name: res.data.name,
-              email: res.data.email,
-              token: idTokenResult.token,
-              role_id: res.data.role_id,
-            },
-          });
-          roleBasedRedirect(res);
-        })
-        .catch((err) => console.log(err));
-
-      navigate('/');
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message);
+    if (!email || !password) {
+      toast.error("Vui lòng nhập email và mật khẩu.");
+      return;
     }
-  }
 
-  const googleLogin = async () => {
-    signInWithPopup(auth, googleAuthProvider).then(async (result) => {
-      const { user } = result;
-      const idTokenResult = await user.getIdTokenResult();
-      createOrUpdateUser(idTokenResult.token)
-        .then((res) => {
-          dispatch({
-            type: "LOGGED_IN_USER",
-            payload: {
-              name: res.data.name,
-              email: res.data.email,
-              token: idTokenResult.token,
-              role_id: res.data.role_id,
-            },
-          });
-          // roleBasedRedirect(res);
-        })
-        .catch((err) => console.log(err));
-      navigate('/');
-    })
-      .catch(err => {
-        console.log(err)
-        toast.error(err.message);
-      })
-  }
+    try {
+      const res = await login({ email, password });
+      console.log("res", res);
+
+
+      const userData = {
+        ...res.data.user,
+        token: res.data.accessToken,
+      };
+
+      dispatch({ type: "LOGGED_IN_USER", payload: userData });
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      toast.success("Đăng nhập thành công!");
+      roleBasedRedirect(res.data.user);
+    } catch (err) {
+      const msg = err.response?.data?.message || "Đăng nhập thất bại.";
+      toast.error(msg);
+    }
+  };
 
   useEffect(() => {
-    if (user && user.token) navigate("/");
+    if (user && user.token) {
+      roleBasedRedirect(user);
+    }
   }, [user]);
-
 
   return (
     <div className="flex flex-col flex-1">
-
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <ToastContainer />
-
           <div className="mb-5 sm:mb-8">
-            <div className="mb-2 font-semibold text-gray-800 text-[32px] dark:text-white/90 sm:text-title-md flex  justify-center">
+            <div className="mb-2 font-semibold text-gray-800 text-[32px] dark:text-white/90 sm:text-title-md flex justify-center">
               Sign In
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 flex justify-center" >
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex justify-center">
               Enter your email and password to sign in!
             </p>
           </div>
-
 
           {/* Form đăng nhập */}
           <form onSubmit={handleSubmit} method="POST">
@@ -124,7 +94,7 @@ export default function SignInForm() {
                   id="email"
                   placeholder="info@gmail.com"
                   value={email}
-                  onChange={(e) => setEmail(e?.target?.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div>
@@ -136,8 +106,7 @@ export default function SignInForm() {
                     id="password"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e?.target?.value)}
-
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <span
                     onClick={() => setShowPassword(!showPassword)}
@@ -166,11 +135,6 @@ export default function SignInForm() {
               </div>
             </div>
           </form>
-          <div className="mt-3">
-            <Button onClick={googleLogin} className="w-full text-white bg-red-600" type="button" startIcon={<i className="pi pi-times" style={{ color: 'green' }}></i>}>
-              Sign up with Google
-            </Button>
-          </div>
 
           <div className="mt-5">
             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
@@ -182,7 +146,6 @@ export default function SignInForm() {
                 Sign Up
               </Link>
             </p>
-
           </div>
         </div>
       </div>
