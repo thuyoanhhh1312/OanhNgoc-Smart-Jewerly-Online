@@ -3,6 +3,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 import Category from './category.js';
 import Subcategory from './subcategory.js';
+import ProductImage from './productImage.js';
 
 const Product = sequelize.define('Product', {
     product_id: {
@@ -43,5 +44,6 @@ const Product = sequelize.define('Product', {
 // Thiết lập quan hệ
 Product.belongsTo(Category, { foreignKey: 'category_id' });
 Product.belongsTo(Subcategory, { foreignKey: 'subcategory_id' });
+Product.hasMany(ProductImage, { foreignKey: 'product_id' });
 
 export default Product;

@@ -15,6 +15,10 @@ export const getAllProducts = async (req, res) => {
           model: SubCategory,
           attributes: ['subcategory_name'],
         },
+        {
+          model: ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
       ],
     });
     res.status(200).json(products);
@@ -26,16 +30,37 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findByPk(id);
+    const product = await Product.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          attributes: ['category_name'],
+        },
+        {
+          model: Subcategory,
+          attributes: ['subcategory_name'],
+        },
+        {
+          model: ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
+      ],
+    });
+
     if (!product) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
     }
+
     res.status(200).json(product);
   } catch (error) {
     console.error('Lỗi khi lấy sản phẩm:', error);
-    res.status(500).json({ message: "Lỗi khi lấy sản phẩm", error: error.message });
+    res.status(500).json({
+      message: "Lỗi khi lấy sản phẩm",
+      error: error.message,
+    });
   }
 };
+
 
 export const createProduct = async (req, res) => {
   try {
