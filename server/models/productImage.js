@@ -12,10 +12,6 @@ const ProductImage = sequelize.define('ProductImage', {
     product_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: Product,
-            key: 'product_id',
-        },
     },
     image_url: {
         type: DataTypes.STRING,
@@ -43,6 +39,6 @@ const ProductImage = sequelize.define('ProductImage', {
 });
 
 // Thiết lập quan hệ với Product
-ProductImage.belongsTo(Product, { foreignKey: 'product_id' });
+// ProductImage.belongsTo(Product, { foreignKey: 'product_id' });
 
 export default ProductImage;

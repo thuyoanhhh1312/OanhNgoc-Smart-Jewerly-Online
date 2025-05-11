@@ -4,22 +4,13 @@ import React, { useEffect, useState } from "react";
 import ProductAPI from "../../../api/productApi";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
+import DOMPurify from "dompurify";
+import { Image } from 'primereact/image';
+
 
 const Product = () => {
   const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await ProductAPI.getProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách:", error);
-        Swal.fire("Lỗi", "Không thể tải danh sách sản phẩm.", "error");
-      }
-    };
-    fetchProducts();
-  }, []);
+  console.log("products", products);
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -45,6 +36,52 @@ const Product = () => {
     }
   };
 
+  const descriptionBodyTemplate = (rowData) => {
+    const description = rowData?.description;
+
+    return description ? (
+      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }} />
+    ) : (
+      <p></p>
+    );
+  };
+
+  const imageBodyTemplate = (rowData) => {
+    const images = rowData?.ProductImages || [];
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {images.length > 0 ? (
+          images.map((image, index) => (
+            <Image
+              key={index}
+              src={image.image_url}
+              alt={image.alt_text || `Image ${index + 1}`}
+              width="80"
+              height="60"
+              preview
+            />
+          ))
+        ) : (
+          <span>Empty Image</span>
+        )}
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await ProductAPI.getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách:", error);
+        Swal.fire("Lỗi", "Không thể tải danh sách sản phẩm.", "error");
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
       {/* Tiêu đề */}
@@ -64,14 +101,13 @@ const Product = () => {
         showGridlines
         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
       >
-        <Column field="product_id" header="ID" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="product_name" header="Product Name" sortable headerClassName='bg-[#d2d4d6]'></Column>
-        <Column field="description" header="Description" sortable headerClassName='bg-[#d2d4d6]'></Column>
+        <Column field="ProductImages" header="Images" body={imageBodyTemplate} sortable headerClassName='bg-[#d2d4d6]'></Column>
+        <Column field="description" header="Description" body={descriptionBodyTemplate} sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="price" header="Price" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="quantity" header="Quantity" sortable headerClassName='bg-[#d2d4d6]'></Column>
         <Column field="Category.category_name" header="Category" sortable headerClassName='bg-[#d2d4d6]' />
         <Column field="SubCategory.subcategory_name" header="SubCategory" sortable headerClassName='bg-[#d2d4d6]' />
-
         <Column
           body={(rowData) => (
             <div className='flex flex-row gap-2'>
