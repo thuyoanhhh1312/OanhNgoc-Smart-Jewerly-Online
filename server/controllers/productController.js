@@ -37,7 +37,7 @@ export const getProductById = async (req, res) => {
           attributes: ['category_name'],
         },
         {
-          model: Subcategory,
+          model: SubCategory,
           attributes: ['subcategory_name'],
         },
         {
