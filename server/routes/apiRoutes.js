@@ -1,5 +1,7 @@
 // routes/apiRoutes.js
 import express from 'express';
+import { getSimilarProducts } from '../controllers/productController.js';
+
 const router = express.Router();
 
 // Middleware
@@ -43,6 +45,7 @@ router.delete('/categories/:id', authenticateToken, isAdmin, categoryController.
 
 // Product routes
 router.get('/products', productController.getAllProducts);
+router.get('/products/similar', getSimilarProducts); // Lấy sản phẩm tương tự
 router.get('/products/:id', productController.getProductById);
 router.post('/products', authenticateToken, isAdmin, upload.array('images', 5), productController.createProduct);
 router.put('/products/:id', authenticateToken, isAdmin, upload.array('images', 5), productController.updateProduct);
@@ -61,5 +64,7 @@ router.get('/promotions/:id', promotionController.getPromotionById);
 router.post('/promotions', authenticateToken, isAdmin, promotionController.createPromotion);
 router.put('/promotions/:id', authenticateToken, isAdmin, promotionController.updatePromotion);
 router.delete('/promotions/:id', authenticateToken, isAdmin, promotionController.deletePromotion);
+
+
 
 export default router;
