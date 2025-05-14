@@ -47,7 +47,7 @@ const navItems = [
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
-    path: "/profile",
+    path: "/admin/user",
   },
 ];
 

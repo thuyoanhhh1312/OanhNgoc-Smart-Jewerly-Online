@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosInstance from './axiosInstance';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -28,7 +29,7 @@ const createProduct = async (productName, description, price, quantity, category
       formData.append('images', image);
     });
 
-    const response = await axios.post(`${API_URL}/products`, formData, {
+    const response = await axiosInstance.post(`${API_URL}/products`, formData, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'multipart/form-data',
@@ -57,7 +58,7 @@ const getProductById = async (id) => {
 // Cập nhật sản phẩm
 const updateProduct = async (id, productName, description, price, quantity, categoryId, subcategoryId, imageUrl) => {
   try {
-    const response = await axios.put(`${API_URL}/products/${id}`, {
+    const response = await axiosInstance.put(`${API_URL}/products/${id}`, {
       product_name: productName,
       description: description,
       price: price,
@@ -75,7 +76,7 @@ const updateProduct = async (id, productName, description, price, quantity, cate
 // Xóa sản phẩm
 const deleteProduct = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/products/${id}`);
+    const response = await axiosInstance.delete(`${API_URL}/products/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting product:", error);

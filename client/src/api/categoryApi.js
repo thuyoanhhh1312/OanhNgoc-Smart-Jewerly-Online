@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosInstance from './axiosInstance';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -14,7 +15,7 @@ const getCategories = async () => {
 
 const createCategory = async (categoryName, description, accessToken) => {
   try {
-    const response = await axios.post(`${API_URL}/categories`, {
+    const response = await axiosInstance.post(`${API_URL}/categories`, {
       category_name: categoryName,
       description: description,
     }, {
@@ -41,7 +42,7 @@ const getCategoryById = async (id) => {
 
 const updateCategory = async (id, categoryName, description, accessToken) => {
   try {
-    const response = await axios.put(`${API_URL}/categories/${id}`, {
+    const response = await axiosInstance.put(`${API_URL}/categories/${id}`, {
       category_name: categoryName,
       description: description,
     }, {
@@ -59,7 +60,7 @@ const updateCategory = async (id, categoryName, description, accessToken) => {
 // Xóa sản phẩm
 const deleteCategory = async (id, accessToken) => {
   try {
-    const response = await axios.delete(`${API_URL}/categories/${id}`, {
+    const response = await axiosInstance.delete(`${API_URL}/categories/${id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       }

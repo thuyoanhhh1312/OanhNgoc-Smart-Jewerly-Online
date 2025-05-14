@@ -1,6 +1,7 @@
 // models/user.js
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
+import Role from './role.js';
 
 const User = sequelize.define('User', {
   id: {
@@ -48,5 +49,7 @@ const User = sequelize.define('User', {
   tableName: 'user',
   timestamps: false,
 });
+
+User.belongsTo(Role, { foreignKey: 'role_id' });
 
 export default User;

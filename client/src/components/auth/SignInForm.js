@@ -50,6 +50,7 @@ export default function SignInForm() {
       const userData = {
         ...res.data.user,
         token: res.data.accessToken,
+        refreshToken: res.data.refreshToken
       };
 
       dispatch({ type: "LOGGED_IN_USER", payload: userData });

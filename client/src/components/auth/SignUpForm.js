@@ -32,6 +32,7 @@ export default function SignUpForm() {
         payload: {
           ...res.data.user,
           token: res.data.accessToken,
+          refreshToken: res.data.refreshToken
         },
       });
 

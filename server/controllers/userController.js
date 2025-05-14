@@ -1,10 +1,18 @@
 // controllers/userController.js
 import User from '../models/user.js';
+import Role from '../models/role.js';
 
 // Lấy tất cả người dùng
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      include: [
+        {
+          model: Role,
+          attributes: ['name'],
+        },
+      ]
+    });
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi lấy các người dùng', error: err.message });

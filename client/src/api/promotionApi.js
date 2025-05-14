@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosInstance from './axiosInstance';
 
 const API_URL = process.env.API_URL || "http://localhost:5000/api";
 
@@ -14,7 +15,7 @@ const getPromotions = async () => {
 
 const createPromotion = async (promotion_code, discount, start_date, end_date, description, accessToken) => {
     try {
-        const response = await axios.post(`${API_URL}/promotions`, {
+        const response = await axiosInstance.post(`${API_URL}/promotions`, {
             promotion_code,
             discount,
             start_date,
@@ -44,7 +45,7 @@ const getPromotionById = async (id) => {
 
 const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description, accessToken) => {
     try {
-        const response = await axios.put(`${API_URL}/promotions/${id}`, {
+        const response = await axiosInstance.put(`${API_URL}/promotions/${id}`, {
             promotion_code,
             discount,
             start_date,
@@ -64,7 +65,7 @@ const updatePromotion = async (id, promotion_code, discount, start_date, end_dat
 
 const deletePromotion = async (id, accessToken) => {
     try {
-        const response = await axios.delete(`${API_URL}/promotions/${id}`, {
+        const response = await axiosInstance.delete(`${API_URL}/promotions/${id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             }
