@@ -83,6 +83,21 @@ const deleteProduct = async (id) => {
     throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
   }
 };
+// lấy sản phẩm tương tự theo category_id
+
+// API call for similar products
+const getSimilarProducts = async (categoryId, subcategoryId) => {
+  try {
+    const response = await axios.get(`${API_URL}/products/similar`, {
+      params: { category_id: categoryId, subcategory_id: subcategoryId },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching similar products:", error);
+    throw error;
+  }
+};
+
 
 // Xuất các phương thức để sử dụng ở nơi khác
 export default {
@@ -91,4 +106,5 @@ export default {
   getProductById,
   updateProduct,
   deleteProduct,
+  getSimilarProducts
 };

@@ -3,35 +3,65 @@ import MainLayout from '../layout/MainLayout';
 import { useParams } from 'react-router-dom';
 import productApi from '../api/productApi';
 import DOMPurify from "dompurify";
-import axios from 'axios';
-import { ShippingIcon } from '../assets';
+import { ShippingIcon, Shopping247Icon, ThudoiIcon } from '../assets';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
+    const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);  // Quản lý hiển thị mô tả
+    const [isPolicyVisible, setIsPolicyVisible] = useState(false);  // Chính sách hậu mãi
+    const [isFAQVisible, setIsFAQVisible] = useState(false);  // Câu hỏi thường gặp
+    const [similarProducts, setSimilarProducts] = useState([]);  // Dữ liệu sản phẩm tương tự
+
+
+    const toggleDescription = () => {
+        setIsDescriptionVisible(!isDescriptionVisible);  // Đổi trạng thái mô tả sản phẩm
+        setIsPolicyVisible(false);  // Ẩn chính sách hậu mãi khi mô tả sản phẩm hiển thị
+        setIsFAQVisible(false);  // Ẩn câu hỏi thường gặp khi mô tả sản phẩm hiển thị
+    }
+
+    const togglePolicy = () => {
+        setIsPolicyVisible(!isPolicyVisible);  // Đổi trạng thái chính sách hậu mãi
+        setIsDescriptionVisible(false);  // Ẩn mô tả sản phẩm khi chính sách hiển thị
+        setIsFAQVisible(false);  // Ẩn câu hỏi thường gặp khi chính sách hiển thị
+    }
+
+    const toggleFAQ = () => {
+        setIsFAQVisible(!isFAQVisible);  // Đổi trạng thái câu hỏi thường gặp
+        setIsDescriptionVisible(false);  // Ẩn mô tả sản phẩm khi câu hỏi thường gặp hiển thị
+        setIsPolicyVisible(false);  // Ẩn chính sách hậu mãi khi câu hỏi thường gặp hiển thị
+    }
 
     const handleGetProduct = async () => {
         try {
             const res = await productApi.getProductById(id);
             setProduct(res);
-            console.log("Product details:", res);
+
+            // Gọi API để lấy sản phẩm tương tự, truyền đúng category_id và subcategory_id
+            const similarRes = await productApi.getSimilarProducts(res.category_id, res.subcategory_id);
+            setSimilarProducts(similarRes);
+            console.log("Chi tiết sản phẩm:", res);
         } catch (error) {
-            console.error("Error fetching product details:", error);
+            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
         }
-    }
+    };
+
+
+
+
 
     useEffect(() => {
         handleGetProduct();
     }, [id]);
 
-    if (!product) return <div>Loading...</div>;
+    if (!product) return <div>Đang tải...</div>;
 
     return (
         <MainLayout>
             <div className="product-detail-container py-10">
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        {/* Hình ảnh sản phẩm */}
+                        {/* Khu vực Hình ảnh sản phẩm */}
                         <div className="product-images">
                             <div className="mb-4">
                                 <img
@@ -40,7 +70,6 @@ const ProductDetail = () => {
                                     className="w-full rounded-lg shadow-md"
                                 />
                             </div>
-                            {/* Thêm các hình ảnh khác nếu có */}
                             <div className="flex gap-4">
                                 {product.ProductImages.map((image) => (
                                     <img
@@ -53,7 +82,7 @@ const ProductDetail = () => {
                             </div>
                         </div>
 
-                        {/* Thông tin sản phẩm */}
+                        {/* Khu vực Thông tin sản phẩm */}
                         <div className="product-info">
                             <h1 className="text-3xl font-semibold mb-4">{product.product_name}</h1>
 
@@ -65,21 +94,157 @@ const ProductDetail = () => {
                             <div className="quantity mb-4">
                                 <p>Số lượng còn lại: {product.quantity}</p>
                             </div>
-                            <div className="category-info mb-6">
-                                <p><strong>Danh mục:</strong> {product.Category.category_name}</p>
-                                <p><strong>Danh mục con:</strong> {product.SubCategory.subcategory_name}</p>
+
+
+                            {/* Ưu đãi
+                            <div className="mb-6">
+                                <div className="bg-yellow-200 p-4 rounded-md">
+                                    <p><strong>Ưu đãi:</strong> Giảm 200K khi thanh toán bằng VNPay.</p>
+                                    <p>Ưu đãi thêm 200K cho hóa đơn từ 2.5 triệu bằng thẻ tín dụng Muadee của HDBank.</p>
+                                </div>
+                            </div> */}
+                            {/* Các biểu tượng vận chuyển */}
+                            <div className="flex  mt-[10px]   items-center bg-[#f2f2f2] sm:px-[10px] px-[5px] py-[5px] rounded-md justify-between">
+                                <div className="flex gap-1 items-center sm:text-[13px] text-[9px] ">
+                                    <img alt="24/7 service" loading="lazy" width="25px" height="25px" decoding="async" data-nimg="1" className="w-4 h-4" src={ShippingIcon} />
+                                    <p className="text-[#202E65] font-bold">Miễn phí giao hàng​</p>
+                                </div>
+                                <div className="flex gap-1 items-center sm:text-[13px] text-[9px] ">
+                                    <img alt="24/7 service" loading="lazy" width="25px" height="25px" decoding="async" data-nimg="1" className="w-4 h-4" src={Shopping247Icon} />
+                                    <p className="text-[#202E65] font-bold">Phục vụ 24/7​</p>
+                                </div>
+                                <div className="flex gap-1 items-center sm:text-[13px] text-[9px] ">
+                                    <img alt="24/7 service" loading="lazy" width="25px" height="25px" decoding="async" data-nimg="1" className="w-4 h-4" src={ThudoiIcon} />
+                                    <p className="text-[#202E65] font-bold">Thu đổi 48h​</p>
+                                </div>
                             </div>
-                            <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
-                                Thêm vào giỏ hàng
-                            </button>
+                            {/* Các nút hành động */}
+                            <div className="flex items-center ">
+                                <button className="w-full   bg-[#ad2a36] flex flex-1 justify-center items-center flex-col font-bold text-white h-[40px] rounded-lg mt-[10px] ">
+                                    <span className="text-[16px]">Mua ngay</span>
+                                    <span className="text-[12px]">(Giao hàng miễn phí tận nhà hoặc nhận tại cửa hàng)</span>
+                                </button>
+
+                            </div>
+                            <div className="flex justify-center items-center gap-2 my-[10px]">
+                                <div className='flex items-center  space-x-4 flex-1'>
+                                    <button className='class="w-full   bg-[#fffff] border border-[#202E65]  flex flex-1 justify-center items-center flex-col font-bold text-white h-[40px] rounded-lg "'>
+                                        <span className=" text-[13px] text-[#202E65]">Thêm vào giỏ hàng</span>
+                                    </button>
+                                </div>
+                                <div className='flex gap-5 flex-1'>
+                                    <a href="#" className="flex-1 w-full md:w-6/12 xl:w-full bg-[#202e65] h-[40px] text-white font-bold rounded-lg flex flex-col items-center justify-center ">
+                                        <span className="text-[16px]">Gọi ngay (miễn phí)</span>
+                                        <span className="text-[12px]">((Nhận ngay ưu đãi))</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
+                        <div class>
+                            <div className="lg:block bg-white">
+                                <div className="bg-white sticky top-[49px] mb-[10px] z-10">
+                                    <div className="mx-auto max-w-[1100px] px-[10px] md:px-4 2xl:px-0">
+                                        <div className="flex justify-between items-center my-[10px]">
+                                            <h2
+                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                onClick={togglePolicy}
+                                            >
+                                                Chính sách hậu mãi
+                                            </h2>
+                                            <h2
+                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                onClick={toggleDescription}
+                                            >
+                                                Mô tả sản phẩm
+                                            </h2>
+                                            <h2
+                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                onClick={toggleFAQ}
+                                            >
+                                                Câu hỏi thường gặp
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Hiển thị mô tả sản phẩm */}
+                            {isDescriptionVisible && (
+                                <div className="mx-auto max-w-[1100px] px-[10px] md:px-4 2xl:px-0">
+                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product?.description) }} />
+                                </div>
+                            )}
+
+                            {/* Hiển thị chính sách hậu mãi */}
+                            {isPolicyVisible && (
+                                <div className="mx-auto max-w-[1100px] px-[10px] md:px-4 2xl:px-0">
+                                    <div className="policy-content">
+                                        {/* Nội dung chính sách hậu mãi */}
+                                        <p>Đây là nội dung chính sách hậu mãi...</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Hiển thị câu hỏi thường gặp */}
+                            {isFAQVisible && (
+                                <div className="mx-auto max-w-[1100px] px-[10px] md:px-4 2xl:px-0">
+                                    <div className="faq-content">
+                                        {/* Nội dung câu hỏi thường gặp */}
+                                        <p>Câu hỏi 1: ...</p>
+                                        <p>Câu hỏi 2: ...</p>
+                                    </div>
+                                </div>
+                            )}
+
+
+                        </div>
+
+
+
+
+
+                        {/* Khu vực Mô tả sản phẩm
                         <div className="mb-6">
                             <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product?.description) }} />
-                        </div>
-                        <div>
-                            <img src={ShippingIcon} alt="shipping-icon" />
+                        </div> */}
+
+
+
+                    </div>
+                    {/* Sản phẩm tương tự */}
+                    <div className="mx-auto max-w-[1400px] px-[10px] md:px-4 2xl:px-0 mt-8">
+                        <h2 className="text-2xl font-semibold mb-6">Sản phẩm tương tự</h2>
+                        <div className="slider-container max-w-full mx-auto flex gap-8 overflow-x-auto no-scrollbar">
+                            {similarProducts.length > 0 ? (
+                                similarProducts.map((item) => (
+                                    <div
+                                        key={item.product_id}
+                                        className="product-card bg-white shadow-lg rounded-lg overflow-hidden min-w-[280px] flex-shrink-0 hover:shadow-xl transition-shadow duration-300"
+                                        style={{ flexBasis: '280px' }}
+                                    >
+                                        <img
+                                            src={
+                                                item.ProductImages && item.ProductImages.length > 0
+                                                    ? item.ProductImages[0].image_url
+                                                    : "http://example.com/default-image.jpg"
+                                            }
+                                            alt={item.product_name}
+                                            className="w-full h-[220px] object-cover"
+                                        />
+                                        <div className="p-5">
+                                            <h3 className="text-lg font-semibold">{item.product_name}</h3>
+                                            <p className="text-xl font-bold text-[#ad2a36]">
+                                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="col-span-4 text-center">Không có sản phẩm tương tự</div>
+                            )}
                         </div>
                     </div>
+
                 </div>
             </div>
         </MainLayout>
