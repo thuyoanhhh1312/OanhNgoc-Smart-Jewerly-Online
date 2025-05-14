@@ -129,3 +129,42 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi xóa sản phẩm", error: error.message });
   }
 };
+
+export const getSimilarProducts = async (req, res) => {
+  const { category_id, subcategory_id } = req.query; // Nhận category_id và subcategory_id từ query params
+
+  try {
+    const products = await Product.findAll({
+      where: {
+        category_id,  // Lọc theo category_id
+        subcategory_id,  // Lọc theo subcategory_id
+      },
+      include: [
+        {
+          model: Category,
+          attributes: ['category_name'],
+        },
+        {
+          model: SubCategory,
+          attributes: ['subcategory_name'],
+        },
+        {
+          model: ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
+      ],
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm tương tự" });
+    }
+
+    res.status(200).json(products); // Trả về các sản phẩm tương tự
+  } catch (error) {
+    console.error('Lỗi khi lấy sản phẩm tương tự:', error);
+    res.status(500).json({
+      message: "Lỗi khi lấy sản phẩm tương tự",
+      error: error.message,
+    });
+  }
+};
