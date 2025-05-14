@@ -31,12 +31,14 @@ export const registerUser = async (req, res, next) => {
 
     const newUser = await User.create({ name, email, password: hashedPassword });
 
+    //token xác thực người dùng
     const accessToken = jwt.sign(
       { userId: newUser.id, email: newUser.email, role_id: newUser.role_id },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '15m' }
     );
 
+    //token dùng refresh
     const refreshToken = jwt.sign(
       { userId: newUser.id },
       process.env.JWT_REFRESH_SECRET_KEY,

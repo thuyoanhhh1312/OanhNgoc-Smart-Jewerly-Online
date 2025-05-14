@@ -28,6 +28,9 @@ import Promotion from "./pages/admin/Promotion/index";
 import AddPromotion from "./pages/admin/Promotion/add";
 import EditPromotion from "./pages/admin/Promotion/edit";
 
+import User from "./pages/admin/User";
+import EditUser from "./pages/admin/User/edit";
+
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 
@@ -54,6 +57,24 @@ function App() {
     <Router>
       <Routes>
         <Route element={<AdminLayout />}>
+          { /*User*/}
+          <Route
+            path="/admin/user"
+            element={
+              <AdminRoute>
+                <User />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/user/edit/:id"
+            element={
+              <AdminRoute>
+                <EditUser />
+              </AdminRoute>
+            }
+          />
+
           {/* Categories */}
           <Route
             path="/admin/categories"

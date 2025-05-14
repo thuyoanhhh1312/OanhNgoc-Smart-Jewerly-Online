@@ -25,13 +25,14 @@ router.post('/auth/login', authController.loginUser);
 router.post('/auth/refresh-token', authController.refreshToken);
 router.post('/auth/logout', authenticateToken, authController.logoutUser);
 router.get('/auth/current-admin', authenticateToken, isAdmin, authController.currentAdmin);
+router.post('/auth/refresh-token', authController.refreshToken);
 
 
 // User routes
 router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
-router.put('/users/:id', userController.updateUser);
-router.delete('/users/:id', userController.deleteUser);
+router.put('/users/:id', authenticateToken, isAdmin, userController.updateUser);
+router.delete('/users/:id', authenticateToken, isAdmin, userController.deleteUser);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);

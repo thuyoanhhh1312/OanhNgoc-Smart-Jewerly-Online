@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosInstance from './axiosInstance';
 
 const API = axios.create({
     baseURL: process.env.REACT_APP_API_URL,
@@ -21,7 +22,7 @@ export const refreshToken = async (refreshToken) => {
 
 // Đăng xuất
 export const logout = async (accessToken) => {
-    return await API.post(
+    return await axiosInstance.post(
         "/auth/logout",
         {},
         {
@@ -34,7 +35,7 @@ export const logout = async (accessToken) => {
 
 // Lấy user hiện tại
 export const getCurrentUser = async (accessToken) => {
-    return await API.get("/auth/current-user", {
+    return await axiosInstance.get("/auth/current-user", {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
@@ -42,7 +43,7 @@ export const getCurrentUser = async (accessToken) => {
 };
 
 export const currentAdmin = async (accessToken) => {
-    return await API.get("/auth/current-admin", {
+    return await axiosInstance.get("/auth/current-admin", {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
