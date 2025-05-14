@@ -45,7 +45,7 @@ const Home = () => {
         <MainLayout>
             {/* Banner Carousel */}
             <div className='mb-2'>
-                <Carousel infiniteLoop={true} autoPlay={true} renderThumbs={() => { }}>
+                <Carousel infiniteLoop={true} interval={1500} autoPlay={true} renderThumbs={() => { }}>
                     <div>
                         <img src={BannerTabSaleMay} alt='tab-sale' />
                     </div>
