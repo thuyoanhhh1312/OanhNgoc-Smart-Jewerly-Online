@@ -37,16 +37,19 @@ const MainHeader = () => {
     function closeDropdown() {
         setIsOpen(false);
     }
-    
+
     return (
         <div className="flex flex-row justify-between items-center p-4 shadow-sm">
             <div></div>
             <div className="flex justify-center">
-                <Image
-                    src="https://cdn.pnj.io/images/logo/pnj.com.vn.png"
-                    width="88px"
-                    height="38px"
-                />
+                <Link to="/" onClick={() => window.scrollTo(0, 0)}>
+                    <Image
+                        src="https://cdn.pnj.io/images/logo/pnj.com.vn.png"
+                        width="88px"
+                        height="38px"
+                        alt="Logo PNJ"
+                    />
+                </Link>
             </div>
             <div>
                 {/* Nếu người dùng đã đăng nhập thì hiển thị tên, nếu chưa thì hiển thị nút Sign In */}
