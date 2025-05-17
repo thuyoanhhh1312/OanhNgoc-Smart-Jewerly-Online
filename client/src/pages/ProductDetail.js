@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '../layout/MainLayout';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import productApi from '../api/productApi';
 import DOMPurify from "dompurify";
 import { ShippingIcon, Shopping247, ThuDoi } from '../assets';
+import ViewedProducts from "../components/ViewedProducts";
+
+
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -53,6 +56,28 @@ const ProductDetail = () => {
     useEffect(() => {
         handleGetProduct();
     }, [id]);
+    useEffect(() => {
+        if (!product) return;
+
+        const viewed = JSON.parse(localStorage.getItem("viewedProducts") || "[]");
+
+        // Loại bỏ sản phẩm trùng trong mảng cũ
+        const filtered = viewed.filter(p => p.product_id !== product.product_id);
+
+        // Thêm sản phẩm hiện tại vào đầu mảng
+        filtered.unshift({
+            product_id: product.product_id,
+            product_name: product.product_name,
+            price: product.price,
+            image_url: product.ProductImages?.[0]?.image_url || "",
+        });
+
+        // Giới hạn 10 sản phẩm
+        if (filtered.length > 10) filtered.pop();
+
+        localStorage.setItem("viewedProducts", JSON.stringify(filtered));
+    }, [product]);
+
 
     if (!product) return <div>Đang tải...</div>;
 
@@ -96,13 +121,7 @@ const ProductDetail = () => {
                             </div>
 
 
-                            {/* Ưu đãi
-                            <div className="mb-6">
-                                <div className="bg-yellow-200 p-4 rounded-md">
-                                    <p><strong>Ưu đãi:</strong> Giảm 200K khi thanh toán bằng VNPay.</p>
-                                    <p>Ưu đãi thêm 200K cho hóa đơn từ 2.5 triệu bằng thẻ tín dụng Muadee của HDBank.</p>
-                                </div>
-                            </div> */}
+
                             {/* Các biểu tượng vận chuyển */}
                             <div className="flex  mt-[10px]   items-center bg-[#f2f2f2] sm:px-[10px] px-[5px] py-[5px] rounded-md justify-between">
                                 <div className="flex gap-1 items-center sm:text-[13px] text-[9px] ">
@@ -146,24 +165,28 @@ const ProductDetail = () => {
                                     <div className="mx-auto max-w-[1100px] px-[10px] md:px-4 2xl:px-0">
                                         <div className="flex justify-between items-center my-[10px]">
                                             <h2
-                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                className={`sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer px-2 rounded-sm ${isPolicyVisible ? "bg-[#202e65] text-white border-b-2 border-[#ad2a36]" : ""
+                                                    }`}
                                                 onClick={togglePolicy}
                                             >
                                                 Chính sách hậu mãi
                                             </h2>
                                             <h2
-                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                className={`sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer px-2 rounded-sm ${isDescriptionVisible ? "bg-[#202e65] text-white border-b-2 border-[#ad2a36]" : ""
+                                                    }`}
                                                 onClick={toggleDescription}
                                             >
                                                 Mô tả sản phẩm
                                             </h2>
                                             <h2
-                                                className="sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer text-[#000000] px-2 rounded-sm"
+                                                className={`sm:text-[14px] text-[13px] text-center py-[10px] cursor-pointer px-2 rounded-sm ${isFAQVisible ? "bg-[#202e65] text-white border-b-2 border-[#ad2a36]" : ""
+                                                    }`}
                                                 onClick={toggleFAQ}
                                             >
                                                 Câu hỏi thường gặp
                                             </h2>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -217,7 +240,9 @@ const ProductDetail = () => {
                         <div className="slider-container max-w-full mx-auto flex gap-8 overflow-x-auto no-scrollbar">
                             {similarProducts.length > 0 ? (
                                 similarProducts.map((item) => (
-                                    <div
+                                    <Link
+                                        to={`/product-detail/${item.product_id}`}
+                                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                         key={item.product_id}
                                         className="product-card bg-white shadow-lg rounded-lg overflow-hidden min-w-[280px] flex-shrink-0 hover:shadow-xl transition-shadow duration-300"
                                         style={{ flexBasis: '280px' }}
@@ -237,14 +262,14 @@ const ProductDetail = () => {
                                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
                                             </p>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))
                             ) : (
                                 <div className="col-span-4 text-center">Không có sản phẩm tương tự</div>
                             )}
                         </div>
                     </div>
-
+                    <ViewedProducts />
                 </div>
             </div>
         </MainLayout>
