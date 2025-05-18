@@ -1,10 +1,8 @@
-import Category from '../models/category.js';
-import SubCategory from '../models/subcategory.js';
-import Product from '../models/product.js';
+import db from '../models/index.js';
 
 export const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll();
+    const categories = await db.Category.findAll();
     res.status(200).json(categories);
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi lấy danh sách danh mục", error: error.message });
@@ -14,7 +12,7 @@ export const getAllCategories = async (req, res) => {
 export const getCategoryById = async (req, res) => {
   const { id } = req.params;
   try {
-    const category = await Category.findByPk(id);
+    const category = await db.Category.findByPk(id);
     if (!category) {
       return res.status(404).json({ message: "Danh mục không tìm thấy" });
     }
@@ -29,7 +27,7 @@ export const createCategory = async (req, res) => {
   console.log(category_name, description);
 
   try {
-    const newCategory = await Category.create({
+    const newCategory = await db.Category.create({
       category_name,
       description
     });
@@ -43,7 +41,7 @@ export const updateCategory = async (req, res) => {
   const { id } = req.params;
   const { category_name, description } = req.body;
   try {
-    const category = await Category.findByPk(id);
+    const category = await db.Category.findByPk(id);
     if (!category) {
       return res.status(404).json({ message: "Danh mục không tìm thấy" });
     }
@@ -60,8 +58,8 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   const { id } = req.params;
   try {
-    const subCategoryCount = await SubCategory.count({ where: { category_id: id } });
-    const productCount = await Product.count({ where: { category_id: id } });
+    const subCategoryCount = await db.SubCategory.count({ where: { category_id: id } });
+    const productCount = await db.Product.count({ where: { category_id: id } });
 
     if (subCategoryCount > 0 || productCount > 0) {
       return res.status(400).json({
@@ -69,7 +67,7 @@ export const deleteCategory = async (req, res) => {
       });
     }
 
-    const category = await Category.findByPk(id);
+    const category = await db.Category.findByPk(id);
     if (!category) {
       return res.status(404).json({ message: "Không tìm thấy danh mục." });
     }

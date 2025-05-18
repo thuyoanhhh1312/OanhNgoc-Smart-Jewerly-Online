@@ -1,11 +1,10 @@
-import SubCategory from '../models/subcategory.js';
-import Category from '../models/category.js';
+import db from '../models/index.js';
 
 export const getAllSubCategories = async (req, res) => {
   try {
-    const subCategories = await SubCategory.findAll({
+    const subCategories = await db.SubCategory.findAll({
       include: {
-        model: Category,
+        model: db.Category,
         attributes: ['category_name'],
       },
     });
@@ -18,9 +17,9 @@ export const getAllSubCategories = async (req, res) => {
 export const getSubCategoryById = async (req, res) => {
   const { id } = req.params;
   try {
-    const subCategory = await SubCategory.findByPk(id, {
+    const subCategory = await db.SubCategory.findByPk(id, {
       include: {
-        model: Category,
+        model: db.Category,
         attributes: ['category_name'],
       },
     });
@@ -36,7 +35,7 @@ export const getSubCategoryById = async (req, res) => {
 export const createSubCategory = async (req, res) => {
   const { subcategory_name, description, category_id } = req.body;
   try {
-    const newSubCategory = await SubCategory.create({
+    const newSubCategory = await db.SubCategory.create({
       subcategory_name,
       description,
       category_id,
@@ -52,7 +51,7 @@ export const updateSubCategory = async (req, res) => {
   const { subcategory_name, description, category_id } = req.body;
 
   try {
-    const subcategory = await SubCategory.findByPk(id);
+    const subcategory = await db.SubCategory.findByPk(id);
 
     if (!subcategory) {
       return res.status(404).json({ message: 'Không tìm thấy nhóm sản phẩm.' });
@@ -74,7 +73,7 @@ export const updateSubCategory = async (req, res) => {
 export const deleteSubCategory = async (req, res) => {
   const { id } = req.params;
   try {
-    const subCategory = await SubCategory.findByPk(id);
+    const subCategory = await db.SubCategory.findByPk(id);
     if (!subCategory) {
       return res.status(404).json({ message: "Không tìm thấy danh mục con" });
     }
