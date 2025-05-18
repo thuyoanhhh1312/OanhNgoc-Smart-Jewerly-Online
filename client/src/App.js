@@ -33,6 +33,7 @@ import EditUser from "./pages/admin/User/edit";
 
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
 
 import { useDispatch } from "react-redux";
 function App() {
@@ -181,6 +182,7 @@ function App() {
         </Route>
 
         <Route path="/" element={<Home />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />

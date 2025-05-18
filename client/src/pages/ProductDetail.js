@@ -5,34 +5,36 @@ import productApi from '../api/productApi';
 import DOMPurify from "dompurify";
 import { ShippingIcon, Shopping247, ThuDoi } from '../assets';
 import ViewedProducts from "../components/ViewedProducts";
-
-
+import _ from "lodash";
+import { useDispatch } from 'react-redux';
 
 const ProductDetail = () => {
+    const dispatch = useDispatch();
+
     const { id } = useParams();
     const [product, setProduct] = useState(null);
-    const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);  // Quản lý hiển thị mô tả
-    const [isPolicyVisible, setIsPolicyVisible] = useState(false);  // Chính sách hậu mãi
-    const [isFAQVisible, setIsFAQVisible] = useState(false);  // Câu hỏi thường gặp
-    const [similarProducts, setSimilarProducts] = useState([]);  // Dữ liệu sản phẩm tương tự
+    const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);
+    const [isPolicyVisible, setIsPolicyVisible] = useState(false);
+    const [isFAQVisible, setIsFAQVisible] = useState(false);
+    const [similarProducts, setSimilarProducts] = useState([]);
 
 
     const toggleDescription = () => {
-        setIsDescriptionVisible(!isDescriptionVisible);  // Đổi trạng thái mô tả sản phẩm
-        setIsPolicyVisible(false);  // Ẩn chính sách hậu mãi khi mô tả sản phẩm hiển thị
-        setIsFAQVisible(false);  // Ẩn câu hỏi thường gặp khi mô tả sản phẩm hiển thị
+        setIsDescriptionVisible(!isDescriptionVisible);
+        setIsPolicyVisible(false);
+        setIsFAQVisible(false);
     }
 
     const togglePolicy = () => {
-        setIsPolicyVisible(!isPolicyVisible);  // Đổi trạng thái chính sách hậu mãi
-        setIsDescriptionVisible(false);  // Ẩn mô tả sản phẩm khi chính sách hiển thị
-        setIsFAQVisible(false);  // Ẩn câu hỏi thường gặp khi chính sách hiển thị
+        setIsPolicyVisible(!isPolicyVisible);
+        setIsDescriptionVisible(false);
+        setIsFAQVisible(false);
     }
 
     const toggleFAQ = () => {
-        setIsFAQVisible(!isFAQVisible);  // Đổi trạng thái câu hỏi thường gặp
-        setIsDescriptionVisible(false);  // Ẩn mô tả sản phẩm khi câu hỏi thường gặp hiển thị
-        setIsPolicyVisible(false);  // Ẩn chính sách hậu mãi khi câu hỏi thường gặp hiển thị
+        setIsFAQVisible(!isFAQVisible);
+        setIsDescriptionVisible(false);
+        setIsPolicyVisible(false);
     }
 
     const handleGetProduct = async () => {
@@ -40,7 +42,6 @@ const ProductDetail = () => {
             const res = await productApi.getProductById(id);
             setProduct(res);
 
-            // Gọi API để lấy sản phẩm tương tự, truyền đúng category_id và subcategory_id
             const similarRes = await productApi.getSimilarProducts(res.category_id, res.subcategory_id);
             setSimilarProducts(similarRes);
             console.log("Chi tiết sản phẩm:", res);
@@ -49,22 +50,37 @@ const ProductDetail = () => {
         }
     };
 
+    const handleAddToCart = () => {
+        let cart = [];
+        if (typeof window !== "undefined") {
+            if (localStorage.getItem("cart")) {
+                cart = JSON.parse(localStorage.getItem("cart"));
+            }
+            cart.push({
+                ...product,
+                count: 1,
+            });
+            let unique = _.uniqWith(cart, _.isEqual);
+            localStorage.setItem("cart", JSON.stringify(unique));
 
-
-
+            dispatch({
+                type: "ADD_TO_CART",
+                payload: unique,
+            });
+        }
+    }
 
     useEffect(() => {
         handleGetProduct();
     }, [id]);
+
     useEffect(() => {
         if (!product) return;
 
         const viewed = JSON.parse(localStorage.getItem("viewedProducts") || "[]");
 
-        // Loại bỏ sản phẩm trùng trong mảng cũ
         const filtered = viewed.filter(p => p.product_id !== product.product_id);
 
-        // Thêm sản phẩm hiện tại vào đầu mảng
         filtered.unshift({
             product_id: product.product_id,
             product_name: product.product_name,
@@ -120,8 +136,6 @@ const ProductDetail = () => {
                                 <p>Số lượng còn lại: {product.quantity}</p>
                             </div>
 
-
-
                             {/* Các biểu tượng vận chuyển */}
                             <div className="flex  mt-[10px]   items-center bg-[#f2f2f2] sm:px-[10px] px-[5px] py-[5px] rounded-md justify-between">
                                 <div className="flex gap-1 items-center sm:text-[13px] text-[9px] ">
@@ -137,17 +151,17 @@ const ProductDetail = () => {
                                     <p className="text-[#202E65] font-bold">Thu đổi 48h​</p>
                                 </div>
                             </div>
+
                             {/* Các nút hành động */}
                             <div className="flex items-center ">
                                 <button className="w-full   bg-[#ad2a36] flex flex-1 justify-center items-center flex-col font-bold text-white h-[40px] rounded-lg mt-[10px] ">
                                     <span className="text-[16px]">Mua ngay</span>
                                     <span className="text-[12px]">(Giao hàng miễn phí tận nhà hoặc nhận tại cửa hàng)</span>
                                 </button>
-
                             </div>
                             <div className="flex justify-center items-center gap-2 my-[10px]">
                                 <div className='flex items-center  space-x-4 flex-1'>
-                                    <button className='class="w-full   bg-[#fffff] border border-[#202E65]  flex flex-1 justify-center items-center flex-col font-bold text-white h-[40px] rounded-lg "'>
+                                    <button onClick={handleAddToCart} className='class="w-full   bg-[#fffff] border border-[#202E65]  flex flex-1 justify-center items-center flex-col font-bold text-white h-[40px] rounded-lg "'>
                                         <span className=" text-[13px] text-[#202E65]">Thêm vào giỏ hàng</span>
                                     </button>
                                 </div>
@@ -218,22 +232,14 @@ const ProductDetail = () => {
                                     </div>
                                 </div>
                             )}
-
-
                         </div>
-
-
-
-
 
                         {/* Khu vực Mô tả sản phẩm
                         <div className="mb-6">
                             <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product?.description) }} />
                         </div> */}
-
-
-
                     </div>
+
                     {/* Sản phẩm tương tự */}
                     <div className="mx-auto max-w-[1400px] px-[10px] md:px-4 2xl:px-0 mt-8">
                         <h2 className="text-2xl font-semibold mb-6">Sản phẩm tương tự</h2>
