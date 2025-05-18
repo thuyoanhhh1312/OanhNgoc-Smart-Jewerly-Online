@@ -10,7 +10,7 @@
 
 ## \*\* case trung tính
 
-curl --location 'http://localhost:5001/ sentiment' \--header 'Content-Type: application/json' \--data '{ "text": "Chất lượng bình thường."}'
+curl --location 'http://localhost:5001/sentiment' \--header 'Content-Type: application/json' \--data '{ "text": "Chất lượng bình thường."}'
 
 ## \*\* case Tiêu cực
 
