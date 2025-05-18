@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Image } from "primereact/image";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Dropdown } from "../components/ui/dropdown/Dropdown";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../api/auth";
+import { Menu, Badge } from "antd";
+import { ShoppingCartOutlined } from "@ant-design/icons"
 
 const MainHeader = () => {
     let dispatch = useDispatch();
-    let { user } = useSelector((state) => ({ ...state }));
+    let { user, cart } = useSelector((state) => ({ ...state }));
 
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
@@ -39,7 +41,7 @@ const MainHeader = () => {
     }
 
     return (
-        <div className="flex flex-row justify-between items-center p-4 shadow-sm">
+        <div className="flex flex-row justify-between items-center p-6 shadow-sm">
             <div></div>
             <div className="flex justify-center">
                 <Link to="/" onClick={() => window.scrollTo(0, 0)}>
@@ -51,7 +53,7 @@ const MainHeader = () => {
                     />
                 </Link>
             </div>
-            <div>
+            <div className="flex flex-row items-center justify-center">
                 {/* Nếu người dùng đã đăng nhập thì hiển thị tên, nếu chưa thì hiển thị nút Sign In */}
                 {user ? (
                     <div className="relative">
@@ -112,6 +114,14 @@ const MainHeader = () => {
                         Sign In
                     </Link>
                 )}
+                <div className="ml-2">
+                    <Link to="/cart">
+                        <Badge count={cart.length} offset={[9, 0]} size="small">
+                            <ShoppingCartOutlined style={{ fontSize: 24 }} />
+                        </Badge>
+                    </Link>
+                </div>
+
             </div>
         </div>
     );

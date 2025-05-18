@@ -28,6 +28,10 @@ const Product = sequelize.define('Product', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+    sold_quantity: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+    },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
