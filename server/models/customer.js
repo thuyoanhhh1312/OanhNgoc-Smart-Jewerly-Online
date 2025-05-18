@@ -1,12 +1,16 @@
-// models/customer.js
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.js'; // nhớ thêm .js khi dùng ESM
+import sequelize from '../config/db.js';
 
 const Customer = sequelize.define('Customer', {
     customer_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
+    },
+
+    user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
 
     name: {
@@ -24,6 +28,11 @@ const Customer = sequelize.define('Customer', {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
+    },
+
+    gender: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
     },
 
     address: {

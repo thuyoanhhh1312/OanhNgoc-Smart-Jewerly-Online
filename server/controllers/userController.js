@@ -1,14 +1,12 @@
-// controllers/userController.js
-import User from '../models/user.js';
-import Role from '../models/role.js';
+import db from '../models/index.js';
 
 // Lấy tất cả người dùng
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll({
+    const users = await db.User.findAll({
       include: [
         {
-          model: Role,
+          model: db.Role,
           attributes: ['name'],
         },
       ]
@@ -23,7 +21,7 @@ export const getAllUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findByPk(id);
+    const user = await db.User.findByPk(id);
     if (!user) {
       return res.status(404).json({ message: 'Người dùng không tìm thấy' });
     }
@@ -38,7 +36,7 @@ export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { name, email, role_id } = req.body;
   try {
-    const user = await User.findByPk(id);
+    const user = await db.User.findByPk(id);
     if (!user) {
       return res.status(404).json({ message: 'Người dùng không tìm thấy' });
     }
@@ -58,7 +56,7 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findByPk(id);
+    const user = await db.User.findByPk(id);
     if (!user) {
       return res.status(404).json({ message: 'Người dùng không tìm thấy' });
     }

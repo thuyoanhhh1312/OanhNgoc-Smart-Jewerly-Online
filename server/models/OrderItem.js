@@ -1,39 +1,50 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const ProductImage = sequelize.define('ProductImage', {
-    image_id: {
+const OrderItem = sequelize.define('OrderItem', {
+    order_item_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
+
+    order_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+
     product_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    image_url: {
-        type: DataTypes.STRING,
+
+    quantity: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    alt_text: {
-        type: DataTypes.STRING,
-        allowNull: true,
+
+    price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
     },
-    is_main: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
+
+    total_price: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
     },
+
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+
     updated_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
 }, {
-    tableName: 'product_image',
+    tableName: 'order_items',
     timestamps: false,
 });
 
-export default ProductImage;
+export default OrderItem;

@@ -1,7 +1,6 @@
-// controllers/authController.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
+import db from '../models/index.js';
 import { ERROR_CODES } from '../utils/errorCodes.js';
 
 // Đăng ký người dùng
@@ -17,7 +16,7 @@ export const registerUser = async (req, res, next) => {
   }
 
   try {
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await db.User.findOne({ where: { email } });
     if (existingUser) {
       return next({
         statusCode: 409,
@@ -29,7 +28,7 @@ export const registerUser = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    const newUser = await db.User.create({ name, email, password: hashedPassword });
 
     //token xác thực người dùng
     const accessToken = jwt.sign(
@@ -82,7 +81,7 @@ export const loginUser = async (req, res, next) => {
   }
 
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await db.User.findOne({ where: { email } });
     const isValid = user && await bcrypt.compare(password, user.password);
 
     if (!isValid) {
@@ -142,7 +141,7 @@ export const refreshToken = async (req, res, next) => {
 
   try {
     const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-    const user = await User.findOne({ where: { id: payload.userId } });
+    const user = await db.User.findOne({ where: { id: payload.userId } });
 
     if (!user || user.refresh_token !== refreshToken) {
       return next({
@@ -185,7 +184,7 @@ export const logoutUser = async (req, res, next) => {
   const { userId } = req.user;
 
   try {
-    const user = await User.findByPk(userId);
+    const user = await db.User.findByPk(userId);
     if (user) {
       user.refresh_token = null;
       await user.save();
@@ -202,11 +201,10 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-export const getCurrentUser = async (req, res, next) => {
-  const { userId } = req.user;
+export const currentUser = async (req, res, next) => {
+  const { user } = req;
 
   try {
-    const user = await User.findByPk(userId);
     if (!user) {
       return next({
         statusCode: 404,
@@ -215,11 +213,7 @@ export const getCurrentUser = async (req, res, next) => {
       });
     }
 
-    return res.status(200).json({
-      id: user.id,
-      name: user.name,
-      email: user.email
-    });
+    res.status(200).json({ ok: true });
   } catch (err) {
     return next({
       statusCode: 500,

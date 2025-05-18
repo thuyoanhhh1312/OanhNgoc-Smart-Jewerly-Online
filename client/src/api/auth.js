@@ -34,7 +34,7 @@ export const logout = async (accessToken) => {
 };
 
 // Lấy user hiện tại
-export const getCurrentUser = async (accessToken) => {
+export const currentUser = async (accessToken) => {
     return await axiosInstance.get("/auth/current-user", {
         headers: {
             Authorization: `Bearer ${accessToken}`,

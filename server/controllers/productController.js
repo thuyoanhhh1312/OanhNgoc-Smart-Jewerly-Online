@@ -1,22 +1,19 @@
-import Product from '../models/product.js';
-import Category from '../models/category.js';
-import SubCategory from '../models/subcategory.js';
-import ProductImage from '../models/productImage.js';
+import db from '../models/index.js';
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.findAll({
+    const products = await db.Product.findAll({
       include: [
         {
-          model: Category,
+          model: db.Category,
           attributes: ['category_name'],
         },
         {
-          model: SubCategory,
+          model: db.SubCategory,
           attributes: ['subcategory_name'],
         },
         {
-          model: ProductImage,
+          model: db.ProductImage,
           attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
         },
       ],
@@ -30,18 +27,18 @@ export const getAllProducts = async (req, res) => {
 export const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findByPk(id, {
+    const product = await db.Product.findByPk(id, {
       include: [
         {
-          model: Category,
+          model: db.Category,
           attributes: ['category_name'],
         },
         {
-          model: SubCategory,
+          model: db.SubCategory,
           attributes: ['subcategory_name'],
         },
         {
-          model: ProductImage,
+          model: db.ProductImage,
           attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
         },
       ],
@@ -67,7 +64,7 @@ export const createProduct = async (req, res) => {
     const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
     const imageFiles = req.files;
 
-    const newProduct = await Product.create({
+    const newProduct = await db.Product.create({
       product_name,
       description,
       price,
@@ -83,7 +80,7 @@ export const createProduct = async (req, res) => {
         alt_text: product_name,
         is_main: index === 0,
       }));
-      await ProductImage.bulkCreate(imagesToCreate);
+      await db.ProductImage.bulkCreate(imagesToCreate);
     }
 
     res.status(201).json(newProduct);
@@ -97,7 +94,7 @@ export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
   try {
-    const product = await Product.findByPk(id);
+    const product = await db.Product.findByPk(id);
     if (!product) {
       return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
     }
@@ -119,7 +116,7 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findByPk(id);
+    const product = await db.Product.findByPk(id);
     if (!product) {
       return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
     }

@@ -16,6 +16,7 @@ import * as categoryController from '../controllers/categoryController.js';
 import * as productController from '../controllers/productController.js';
 import * as subCategoryController from '../controllers/subCategoryController.js';
 import * as promotionController from '../controllers/promotionController.js';
+import * as customerController from '../controllers/customerController.js';
 
 // Role routes
 router.get('/role', roleController.getAllRoles);
@@ -27,6 +28,7 @@ router.post('/auth/login', authController.loginUser);
 router.post('/auth/refresh-token', authController.refreshToken);
 router.post('/auth/logout', authenticateToken, authController.logoutUser);
 router.get('/auth/current-admin', authenticateToken, isAdmin, authController.currentAdmin);
+router.get('/auth/current-user', authenticateToken, authController.currentUser);
 router.post('/auth/refresh-token', authController.refreshToken);
 
 
@@ -35,6 +37,9 @@ router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', authenticateToken, isAdmin, userController.updateUser);
 router.delete('/users/:id', authenticateToken, isAdmin, userController.deleteUser);
+
+//Customer routes
+router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);
