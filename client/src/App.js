@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import "react-toastify/dist/ReactToastify.css";
 
 import AdminRoute from "./components/routes/AdminRoute";
+import UserRoute from "./components/routes/UserRoute";
 
 import AdminLayout from "./layout/AdminLayout";
 import './App.css';
@@ -34,6 +35,7 @@ import EditUser from "./pages/admin/User/edit";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import UpdateProfile from "./pages/Customer/UpdateProfile";
 
 import { useDispatch } from "react-redux";
 function App() {
@@ -187,6 +189,15 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
+
+        <Route
+          path="/profile"
+          element={
+            <UserRoute>
+              <UpdateProfile />
+            </UserRoute>
+          }
+        />
       </Routes>
     </Router>
   );

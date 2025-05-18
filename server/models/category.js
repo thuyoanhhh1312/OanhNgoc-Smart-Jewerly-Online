@@ -1,6 +1,5 @@
-// models/category.js
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.js'; // nhớ thêm .js khi dùng ESM
+import sequelize from '../config/db.js';
 
 const Category = sequelize.define('Category', {
     category_id: {

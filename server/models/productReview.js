@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const ProductImage = sequelize.define('ProductImage', {
-    image_id: {
+const ProductReview = sequelize.define('ProductReview', {
+    review_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -11,17 +11,21 @@ const ProductImage = sequelize.define('ProductImage', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    image_url: {
-        type: DataTypes.STRING,
+    customer_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
-    alt_text: {
+    rating: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    },
+    sentiment: {
         type: DataTypes.STRING,
         allowNull: true,
-    },
-    is_main: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
     },
     created_at: {
         type: DataTypes.DATE,
@@ -30,10 +34,10 @@ const ProductImage = sequelize.define('ProductImage', {
     updated_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
-    },
+    }
 }, {
-    tableName: 'product_image',
+    tableName: 'product_review',
     timestamps: false,
 });
 
-export default ProductImage;
+export default ProductReview;
