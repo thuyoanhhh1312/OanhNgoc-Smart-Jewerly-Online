@@ -31,6 +31,7 @@ import AddPromotion from "./pages/admin/Promotion/add";
 import EditPromotion from "./pages/admin/Promotion/edit";
 
 import Order from "./pages/admin/Order/index";
+import EditOrder from "./pages/admin/Order/edit";
 
 import User from "./pages/admin/User";
 import EditUser from "./pages/admin/User/edit";
@@ -191,6 +192,14 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <Order />
+              </AdminOrStaffRoute>
+            }
+          />
+          <Route
+            path="/admin/order/edit/:id"
+            element={
+              <AdminOrStaffRoute>
+                <EditOrder />
               </AdminOrStaffRoute>
             }
           />
