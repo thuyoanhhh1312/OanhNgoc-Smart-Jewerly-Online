@@ -49,3 +49,11 @@ export const currentAdmin = async (accessToken) => {
         },
     });
 };
+
+export const currentAdminOrStaff = async (accessToken) => {
+    return await axiosInstance.get("/auth/current-admin-or-staff", {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+};

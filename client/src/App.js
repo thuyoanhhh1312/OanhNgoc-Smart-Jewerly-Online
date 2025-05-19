@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import AdminRoute from "./components/routes/AdminRoute";
 import UserRoute from "./components/routes/UserRoute";
+import AdminOrStaffRoute from "./components/routes/AdminOrStaffRoute";
 
 import AdminLayout from "./layout/AdminLayout";
 import './App.css';
@@ -64,17 +65,17 @@ function App() {
           <Route
             path="/admin/user"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <User />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/user/edit/:id"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <EditUser />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
 
@@ -82,25 +83,25 @@ function App() {
           <Route
             path="/admin/categories"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <Category />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/categories/add"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <AddCategory />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/categories/edit/:id"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <EditCategory />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
 
@@ -108,25 +109,25 @@ function App() {
           <Route
             path="/admin/subcategories"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <SubCategory />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/subcategories/add"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <AddSubCategory />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/subcategories/edit/:id"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <EditSubCategory />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
 
@@ -134,25 +135,25 @@ function App() {
           <Route
             path="/admin/products"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <Product />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/products/add"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <AddProduct />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/products/edit/:id"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <EditProduct />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
 
@@ -160,25 +161,25 @@ function App() {
           <Route
             path="/admin/promotions"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <Promotion />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/promotions/add"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <AddPromotion />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
           <Route
             path="/admin/promotions/edit/:id"
             element={
-              <AdminRoute>
+              <AdminOrStaffRoute>
                 <EditPromotion />
-              </AdminRoute>
+              </AdminOrStaffRoute>
             }
           />
         </Route>

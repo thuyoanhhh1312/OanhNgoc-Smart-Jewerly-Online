@@ -243,3 +243,23 @@ export const currentAdmin = async (req, res, next) => {
     });
   }
 };
+
+export const currentStaffOrAdmin = async (req, res, next) => {
+  try {
+    const { user } = req;
+    if (user.role_id !== 1 && user.role_id !== 3) {
+      return res.status(403).json({
+        code: ERROR_CODES.UNAUTHORIZED,
+        message: "Bạn không có quyền truy cập (Admin or Staff)",
+      });
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    next({
+      statusCode: 500,
+      code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+      message: "Không xác định được quyền truy cập.",
+    });
+  }
+};
