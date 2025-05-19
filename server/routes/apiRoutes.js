@@ -5,7 +5,7 @@ import { getSimilarProducts } from '../controllers/productController.js';
 const router = express.Router();
 
 // Middleware
-import { isAdmin, authenticateToken } from '../middlewares/auth.js';
+import { isAdmin, authenticateToken, isAdminOrStaff } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
 
 // Controllers
@@ -28,6 +28,7 @@ router.post('/auth/login', authController.loginUser);
 router.post('/auth/refresh-token', authController.refreshToken);
 router.post('/auth/logout', authenticateToken, authController.logoutUser);
 router.get('/auth/current-admin', authenticateToken, isAdmin, authController.currentAdmin);
+router.get('/auth/current-admin-or-staff', authenticateToken, isAdminOrStaff, authController.currentStaffOrAdmin);
 router.get('/auth/current-user', authenticateToken, authController.currentUser);
 router.post('/auth/refresh-token', authController.refreshToken);
 
@@ -35,8 +36,8 @@ router.post('/auth/refresh-token', authController.refreshToken);
 // User routes
 router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
-router.put('/users/:id', authenticateToken, isAdmin, userController.updateUser);
-router.delete('/users/:id', authenticateToken, isAdmin, userController.deleteUser);
+router.put('/users/:id', authenticateToken, isAdminOrStaff, userController.updateUser);
+router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.deleteUser);
 
 //Customer routes
 router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
@@ -44,31 +45,31 @@ router.post("/profile", authenticateToken, customerController.upsertCustomerProf
 // Category routes
 router.get('/categories', categoryController.getAllCategories);
 router.get('/categories/:id', categoryController.getCategoryById);
-router.post('/categories', authenticateToken, isAdmin, categoryController.createCategory);
-router.put('/categories/:id', authenticateToken, isAdmin, categoryController.updateCategory);
-router.delete('/categories/:id', authenticateToken, isAdmin, categoryController.deleteCategory);
+router.post('/categories', authenticateToken, isAdminOrStaff, categoryController.createCategory);
+router.put('/categories/:id', authenticateToken, isAdminOrStaff, categoryController.updateCategory);
+router.delete('/categories/:id', authenticateToken, isAdminOrStaff, categoryController.deleteCategory);
 
 // Product routes
 router.get('/products', productController.getAllProducts);
 router.get('/products/similar', getSimilarProducts); // Lấy sản phẩm tương tự
 router.get('/products/:id', productController.getProductById);
-router.post('/products', authenticateToken, isAdmin, upload.array('images', 5), productController.createProduct);
-router.put('/products/:id', authenticateToken, isAdmin, upload.array('images', 5), productController.updateProduct);
-router.delete('/products/:id', authenticateToken, isAdmin, productController.deleteProduct);
+router.post('/products', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.createProduct);
+router.put('/products/:id', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.updateProduct);
+router.delete('/products/:id', authenticateToken, isAdminOrStaff, productController.deleteProduct);
 
 // SubCategory routes
 router.get('/subcategories', subCategoryController.getAllSubCategories);
 router.get('/subcategories/:id', subCategoryController.getSubCategoryById);
-router.post('/subcategories', authenticateToken, isAdmin, subCategoryController.createSubCategory);
-router.put('/subcategories/:id', authenticateToken, isAdmin, subCategoryController.updateSubCategory);
-router.delete('/subcategories/:id', authenticateToken, isAdmin, subCategoryController.deleteSubCategory);
+router.post('/subcategories', authenticateToken, isAdminOrStaff, subCategoryController.createSubCategory);
+router.put('/subcategories/:id', authenticateToken, isAdminOrStaff, subCategoryController.updateSubCategory);
+router.delete('/subcategories/:id', authenticateToken, isAdminOrStaff, subCategoryController.deleteSubCategory);
 
 // Promotion routes
 router.get('/promotions', promotionController.getAllPromotions);
 router.get('/promotions/:id', promotionController.getPromotionById);
-router.post('/promotions', authenticateToken, isAdmin, promotionController.createPromotion);
-router.put('/promotions/:id', authenticateToken, isAdmin, promotionController.updatePromotion);
-router.delete('/promotions/:id', authenticateToken, isAdmin, promotionController.deletePromotion);
+router.post('/promotions', authenticateToken, isAdminOrStaff, promotionController.createPromotion);
+router.put('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.updatePromotion);
+router.delete('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.deletePromotion);
 
 
 

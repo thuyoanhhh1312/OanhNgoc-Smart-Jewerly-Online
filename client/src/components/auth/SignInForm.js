@@ -26,7 +26,7 @@ export default function SignInForm() {
     if (intended) {
       navigate(intended.from);
     } else {
-      if (user.role_id === 1) {
+      if (user.role_id === 1 || user.role_id === 3) {
         navigate("/admin/categories");
       } else {
         navigate("/");

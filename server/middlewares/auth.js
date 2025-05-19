@@ -40,3 +40,15 @@ export const isAdmin = (req, res, next) => {
 
   next();
 };
+
+export const isAdminOrStaff = (req, res, next) => {
+  const { user } = req;
+  if (!user || (user.role_id !== 1 && user.role_id !== 3)) {
+    return next({
+      statusCode: 403,
+      code: ERROR_CODES.UNAUTHORIZED,
+      message: "Bạn không có quyền truy cập (yêu cầu admin hoặc staff).",
+    });
+  }
+  next();
+};
