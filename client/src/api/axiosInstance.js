@@ -13,7 +13,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             const user = JSON.parse(localStorage.getItem("user"));
             console.log("userádsadsadsad", user);
 
