@@ -8,7 +8,7 @@ import UserRoute from "./components/routes/UserRoute";
 import AdminOrStaffRoute from "./components/routes/AdminOrStaffRoute";
 
 import AdminLayout from "./layout/AdminLayout";
-import './App.css';
+import "./App.css";
 
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
@@ -29,6 +29,8 @@ import EditSubCategory from "./pages/admin/SubCategory/edit";
 import Promotion from "./pages/admin/Promotion/index";
 import AddPromotion from "./pages/admin/Promotion/add";
 import EditPromotion from "./pages/admin/Promotion/edit";
+
+import Order from "./pages/admin/Order/index";
 
 import User from "./pages/admin/User";
 import EditUser from "./pages/admin/User/edit";
@@ -61,7 +63,7 @@ function App() {
     <Router>
       <Routes>
         <Route element={<AdminLayout />}>
-          { /*User*/}
+          {/*User*/}
           <Route
             path="/admin/user"
             element={
@@ -179,6 +181,16 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <EditPromotion />
+              </AdminOrStaffRoute>
+            }
+          />
+
+          {/* Orders */}
+          <Route
+            path="/admin/orders"
+            element={
+              <AdminOrStaffRoute>
+                <Order />
               </AdminOrStaffRoute>
             }
           />
