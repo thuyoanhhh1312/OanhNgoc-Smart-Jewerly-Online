@@ -36,12 +36,6 @@ const Promotion = () => {
             {/* Tiêu đề */}
             <div className='flex flex-row justify-between items-center mb-4'>
                 <h1 className='text-[32px] font-bold '>Promotion List</h1>
-                <div>
-                    {/* Thêm nút điều hướng */}
-                    <Link to="/admin/promotions/add">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Promotion</button>
-                    </Link>
-                </div>
             </div>
 
             <DataTable value={promotions} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">

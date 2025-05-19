@@ -17,7 +17,7 @@ import * as productController from '../controllers/productController.js';
 import * as subCategoryController from '../controllers/subCategoryController.js';
 import * as promotionController from '../controllers/promotionController.js';
 import * as customerController from '../controllers/customerController.js';
-
+import * as orderController from '../controllers/orderController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -71,6 +71,11 @@ router.post('/promotions', authenticateToken, isAdminOrStaff, promotionControlle
 router.put('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.updatePromotion);
 router.delete('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.deletePromotion);
 
-
+// Order routes
+router.get('/orders', authenticateToken, isAdmin, orderController.getAllOrders);
+router.get('/orders/:id', authenticateToken, isAdminOrStaff, orderController.getOrderById);
+router.put('/orders/:id', authenticateToken, isAdminOrStaff, orderController.updatedOrder);
+router.put('/update-staff/:id', authenticateToken, isAdmin, orderController.updatedStaff);
+router.get('/orders/user/:user_id', authenticateToken, isAdminOrStaff, orderController.getOrderByUserId);
 
 export default router;
