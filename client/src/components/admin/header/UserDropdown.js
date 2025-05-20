@@ -22,6 +22,7 @@ export default function UserDropdown() {
   const handleLogout = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.token;
+      console.log("token", token);
       if (token) {
         await logout(token);
       }
@@ -42,9 +43,13 @@ export default function UserDropdown() {
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
-        <span className="block mr-1 font-medium text-theme-sm">{user?.name ? user?.name : user?.email?.split("@")[0]}</span>
+        <span className="block mr-1 font-medium text-theme-sm">
+          {user?.name ? user?.name : user?.email?.split("@")[0]}
+        </span>
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           width="18"
           height="20"
           viewBox="0 0 18 20"

@@ -63,7 +63,7 @@ const EditSubCategory = () => {
       await Swal.fire({
         icon: 'success',
         title: 'Cập nhật thành công!',
-        text: 'Nhóm sản phẩm đã được cập nhật.',
+        text: 'Danh mục con đã được cập nhật.',
         confirmButtonText: 'OK'
       });
 
@@ -73,7 +73,7 @@ const EditSubCategory = () => {
       Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: 'Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!',
+        text: 'Đã xảy ra lỗi khi cập nhật danh mục con!',
       });
     }
   };
@@ -88,7 +88,7 @@ const EditSubCategory = () => {
               <Label>SubCategory Name <span className="text-red">*</span></Label>
               <Input
                 type="text"
-                name="subcategory_name"
+                name="Tên Danh Mục Con"
                 id="subcategory_name"
                 placeholder="SubCategory Name"
                 value={subcategoryName}
@@ -105,7 +105,7 @@ const EditSubCategory = () => {
               <Label>Description</Label>
               <Input
                 type="text"
-                name="description"
+                name="Mô Tả"
                 id="description"
                 placeholder="Description"
                 value={description}
@@ -117,7 +117,7 @@ const EditSubCategory = () => {
             <div>
               <Label>Category <span className="text-red">*</span></Label>
               <select
-                name="category_id"
+                name="Tên Danh Mục"
                 id="category_id"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}

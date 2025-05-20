@@ -65,6 +65,10 @@ export const getOrderById = async (req, res) => {
             },
           ],
         },
+        {
+          model: db.Promotion,
+          attributes: ["promotion_code"],
+        },
       ],
     });
     if (!order) {
@@ -89,11 +93,9 @@ export const updatedOrder = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
     if (status_id === 4 || status_id === 5) {
-      return res
-        .status(404)
-        .json({
-          message: "Không được phép chỉnh sửa đơn hàng đã giao hoặc đã hủy",
-        });
+      return res.status(404).json({
+        message: "Không được phép chỉnh sửa đơn hàng đã giao hoặc đã hủy",
+      });
     }
     order.status_id = status_id;
     await order.save();
@@ -164,4 +166,4 @@ export const getOrderByUserId = async (req, res) => {
       error: error.message,
     });
   }
-}
+};
