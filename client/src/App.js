@@ -196,7 +196,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/order/edit/:id"
+            path="/admin/orders/edit/:id"
             element={
               <AdminOrStaffRoute>
                 <EditOrder />

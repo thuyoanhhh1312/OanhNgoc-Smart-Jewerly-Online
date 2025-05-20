@@ -27,12 +27,10 @@ const SubCategory = () => {
     const result = await Swal.fire({
       title: "Bạn chắc chắn muốn xóa?",
       text: "Thao tác này không thể hoàn tác!",
-      icon: "warning",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy"
+      confirmButtonText: 'OK',
+      cancelButtonText: 'HỦY',
     });
 
     if (result.isConfirmed) {
@@ -46,7 +44,7 @@ const SubCategory = () => {
         console.error("Lỗi khi xóa danh mục:", error);
         Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa danh mục!", "error");
       }
-    }
+    } 
   };
 
   return (
@@ -63,9 +61,9 @@ const SubCategory = () => {
 
       <DataTable value={subCategories} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
         <Column field="subcategory_id" header="ID" sortable headerClassName="bg-[#d2d4d6]"></Column>
-        <Column field="subcategory_name" header="SubCategory Name" sortable headerClassName="bg-[#d2d4d6]"></Column>
-        <Column field="description" header="Description" sortable headerClassName="bg-[#d2d4d6]"></Column>
-        <Column field="Category.category_name" header="Category" sortable headerClassName="bg-[#d2d4d6]"></Column>
+        <Column field="subcategory_name" header="Tên Danh Mục Con" sortable headerClassName="bg-[#d2d4d6]"></Column>
+        <Column field="description" header="Mô Tả" sortable headerClassName="bg-[#d2d4d6]"></Column>
+        <Column field="Category.category_name" header="Danh Mục" sortable headerClassName="bg-[#d2d4d6]"></Column>
         <Column
           body={(rowData) => (
             <div className="flex flex-row gap-2">

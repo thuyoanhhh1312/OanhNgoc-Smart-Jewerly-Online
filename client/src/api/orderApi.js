@@ -1,11 +1,10 @@
-import axios from "axios";
 import axiosInstance from "./axiosInstance";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 const getAllOrders = async (accessToken) => {
   try {
-    const response = await axios.get(`${API_URL}/orders`, {
+    const response = await axiosInstance.get(`${API_URL}/orders`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -17,9 +16,13 @@ const getAllOrders = async (accessToken) => {
   }
 };
 
-const getOrderById = async (id) => {
+const getOrderById = async (id, accessToken) => {
   try {
-    const response = await axios.get(`${API_URL}/orders/${id}`);
+    const response = await axiosInstance.get(`${API_URL}/orders/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching order by ID:", error);
@@ -32,7 +35,7 @@ const updateOrder = async (id, status, accessToken) => {
     const response = await axiosInstance.put(
       `${API_URL}/orders/${id}`,
       {
-        status: status,
+        status_id: status,
       },
       {
         headers: {
@@ -50,9 +53,9 @@ const updateOrder = async (id, status, accessToken) => {
 const updateStaff = async (id, staff_id, accessToken) => {
   try {
     const response = await axiosInstance.put(
-      `${API_URL}/orders/${id}`,
+      `${API_URL}/update-staff/${id}`,
       {
-        staff_id: staff_id,
+        user_id: staff_id,
       },
       {
         headers: {
@@ -69,11 +72,14 @@ const updateStaff = async (id, staff_id, accessToken) => {
 
 const getOrderByUserId = async (userId, accessToken) => {
   try {
-    const response = await axios.get(`${API_URL}/orders/user/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const response = await axiosInstance.get(
+      `${API_URL}/orders/user/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching orders by user ID:", error);

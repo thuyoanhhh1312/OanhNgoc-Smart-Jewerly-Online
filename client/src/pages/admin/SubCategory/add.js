@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import Input from '../../../components/form/input/InputField';
-import Label from '../../../components/form/Label';
-import Button from '../../../components/ui/button/Button';
-import { useNavigate } from 'react-router';
-import subCategoryApi from '../../../api/subCategoryApi';
-import categoryApi from '../../../api/categoryApi';
+import React, { useState, useEffect } from "react";
+import Input from "../../../components/form/input/InputField";
+import Label from "../../../components/form/Label";
+import Button from "../../../components/ui/button/Button";
+import { useNavigate } from "react-router";
+import subCategoryApi from "../../../api/subCategoryApi";
+import categoryApi from "../../../api/categoryApi";
 import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 const AddSubCategory = () => {
   const { user } = useSelector((state) => ({ ...state }));
-  const [subCategoryName, setSubCategoryName] = useState('');
-  const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [subCategoryName, setSubCategoryName] = useState("");
+  const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
 
@@ -23,7 +24,7 @@ const AddSubCategory = () => {
         const data = await categoryApi.getCategories();
         setCategories(data);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
     fetchCategories();
@@ -33,7 +34,8 @@ const AddSubCategory = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!subCategoryName.trim()) newErrors.subCategoryName = "Subcategory name is required.";
+    if (!subCategoryName.trim())
+      newErrors.subCategoryName = "Subcategory name is required.";
     if (!description.trim()) newErrors.description = "Description is required.";
     if (!categoryId) newErrors.categoryId = "Please select a category.";
 
@@ -52,13 +54,24 @@ const AddSubCategory = () => {
         user?.token
       );
 
-      setSubCategoryName('');
-      setDescription('');
-      setCategoryId('');
-
-      navigate('/admin/subcategories');
+      setSubCategoryName("");
+      setDescription("");
+      setCategoryId("");
+      Swal.fire({
+        icon: "success",
+        title: "Thành công!",
+        text: "Danh mục con đã được thêm thành công.",
+        confirmButtonText: "OK",
+      });
+      navigate("/admin/subcategories");
     } catch (error) {
-      console.error('Error creating subcategory:', error);
+      console.error("Error creating subcategory:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Thất bại!",
+        text: "Có lỗi xảy ra khi thêm danh mục con.",
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -69,10 +82,12 @@ const AddSubCategory = () => {
           <div className="space-y-6">
             {/* Subcategory Name */}
             <div>
-              <Label>Subcategory Name <span className="text-red">*</span></Label>
+              <Label>
+                Subcategory Name <span className="text-red">*</span>
+              </Label>
               <Input
                 type="text"
-                name="subcategory_name"
+                name="Tên Danh Mục Con"
                 id="subcategory_name"
                 placeholder="Subcategory Name"
                 value={subCategoryName}
@@ -80,16 +95,20 @@ const AddSubCategory = () => {
                 className={errors.subCategoryName ? "border-red-500" : ""}
               />
               {errors.subCategoryName && (
-                <p className="text-sm text-red-500 mt-1">{errors.subCategoryName}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.subCategoryName}
+                </p>
               )}
             </div>
 
             {/* Description */}
             <div>
-              <Label>Description <span className="text-red">*</span></Label>
+              <Label>
+                Description <span className="text-red">*</span>
+              </Label>
               <Input
                 type="text"
-                name="description"
+                name="Mô Tả"
                 id="description"
                 placeholder="Description"
                 value={description}
@@ -97,23 +116,32 @@ const AddSubCategory = () => {
                 className={errors.description ? "border-red-500" : ""}
               />
               {errors.description && (
-                <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.description}
+                </p>
               )}
             </div>
 
             {/* Category */}
             <div>
-              <Label>Category <span className="text-red">*</span></Label>
+              <Label>
+                Category <span className="text-red">*</span>
+              </Label>
               <select
-                name="category_id"
+                name="Tên Danh Mục"
                 id="category_id"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className={`w-full p-2 border rounded ${errors.categoryId ? "border-red-500" : ""}`}
+                className={`w-full p-2 border rounded ${
+                  errors.categoryId ? "border-red-500" : ""
+                }`}
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
-                  <option key={category.category_id} value={category.category_id}>
+                  <option
+                    key={category.category_id}
+                    value={category.category_id}
+                  >
                     {category.category_name}
                   </option>
                 ))}
@@ -125,7 +153,9 @@ const AddSubCategory = () => {
 
             {/* Submit Button */}
             <div>
-              <Button type="submit" className="w-full">Add Subcategory</Button>
+              <Button type="submit" className="w-full">
+                Add Subcategory
+              </Button>
             </div>
           </div>
         </form>

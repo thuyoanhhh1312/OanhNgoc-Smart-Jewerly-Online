@@ -5,6 +5,7 @@ import OrderAPI from "../../../api/orderApi";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import { ToastContainer, toast } from 'react-toastify';
 
 const Order = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -13,7 +14,7 @@ const Order = () => {
   console.log("orders", orders);
 
   const customerBodyTemplate = (rowData) => {
-    const customerName = rowData.Customer.name;
+    const customerName = rowData.Customer?.name;
     return (
       <div>
         {customerName ? (
@@ -26,7 +27,7 @@ const Order = () => {
   };
 
   const userBodyTemplate = (rowData) => {
-    const userName = rowData.User.name;
+    const userName = rowData.User?.name;
     return (
       <div>
         {userName ? (
@@ -39,11 +40,24 @@ const Order = () => {
   };
 
   const statusBodyTemplate = (rowData) => {
-    const statusName = rowData.OrderStatus.status_name;
+    const statusName = rowData.OrderStatus?.status_name;
     return (
       <div>
         {statusName ? (
           <p className="text-gray-700">{statusName}</p>
+        ) : (
+          <p className="text-gray-700"></p>
+        )}
+      </div>
+    );
+  };
+
+  const promotionsBodyTemplate = (rowData) => {
+    const promotionCode = rowData.Promotion?.promotion_code;
+    return (
+      <div>
+        {promotionCode ? (
+          <p className="text-gray-700">{promotionCode}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -93,11 +107,14 @@ const Order = () => {
       const data = await OrderAPI.getAllOrders(user.token);
       setOrders(data);
     };
-    user.role_id === 1 ? fetchOrders() : fetchOrderByUserId();
-  }, []);
+    if (user) {
+      user.role_id === 1 ? fetchOrders() : fetchOrderByUserId();
+    }
+  }, [user]);
 
   return (
     <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
+      <ToastContainer />
       {/* Tiêu đề */}
       <div className="flex flex-row justify-between items-center mb-4">
         <h1 className="text-[32px] font-bold ">Promotion List</h1>
@@ -112,21 +129,21 @@ const Order = () => {
       >
         <Column
           field="order_id"
-          header="ID"
+          header="Mã Đơn Hàng"
           sortable
           headerClassName="bg-[#d2d4d6]"
         />
         <Column
           field="Customer"
-          header="Customer Name"
+          header="Tên Khách Hàng"
           sortable
           headerClassName="bg-[#d2d4d6]"
           body={customerBodyTemplate}
         />
-        {user.role_id === 1 && (
+        {user && user.role_id === 1 && (
           <Column
             field="User"
-            header="Users ID"
+            header="Tên Nhân Viên"
             sortable
             headerClassName="bg-[#d2d4d6]"
             body={userBodyTemplate}
@@ -134,42 +151,56 @@ const Order = () => {
         )}
 
         <Column
-          field="promotion_id"
-          header="Promotion ID"
+          field="Promotion"
+          header="Mã Khuyến Mãi"
           sortable
           headerClassName="bg-[#d2d4d6]"
+          body={promotionsBodyTemplate}
         />
         <Column
           field="OrderStatus"
-          header="Status"
+          header="Trạng Thái"
           sortable
           headerClassName="bg-[#d2d4d6]"
           body={statusBodyTemplate}
         />
         <Column
           field="total"
-          header="Total Amount"
+          header="Giá Trị Đơn Hàng"
           sortable
           headerClassName="bg-[#d2d4d6]"
           body={totalBodyTemplate}
         />
         <Column
           field="start_date"
-          header="Start Date"
+          header="Ngày Tạo"
           sortable
           headerClassName="bg-[#d2d4d6]"
           body={createdAtBodyTemplate}
         />
         <Column
-          body={(rowData) => (
-            <div className="flex flex-row gap-2">
-              <Link to={`/admin/order/edit/${rowData.order_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">
+          body={(rowData) => {
+            const status = rowData.OrderStatus?.status_name?.toLowerCase();
+
+            const handleClick = () => {
+              if (status === "đã hủy" || status === "đã giao") {
+                toast.error("Đơn hàng đã hoàn tất không thể chỉnh sửa!");
+              } else {
+                window.location.href = `/admin/orders/edit/${rowData.order_id}`;
+              }
+            };
+
+            return (
+              <div className="flex flex-row gap-2">
+                <button
+                  onClick={handleClick}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
                   Update
                 </button>
-              </Link>
-            </div>
-          )}
+              </div>
+            );
+          }}
           headerStyle={{ width: "8rem", textAlign: "center" }}
           bodyStyle={{ textAlign: "center" }}
           headerClassName="bg-[#d2d4d6]"
