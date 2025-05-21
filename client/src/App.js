@@ -46,6 +46,7 @@ import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
 import Search from "./pages/Search";
 import ProductCategoryPage from "./pages/ProductCategoryPage"
+import PromotionsPage from "./pages/PromotionsPage";
 
 
 import { useDispatch } from "react-redux";
@@ -239,6 +240,7 @@ function App() {
         <Route path="/forgot/password" element={<ForgotPassword />} />
         <Route path="/search" element={<Search />} />
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
+        <Route path="/promotions" element={<PromotionsPage />} />
 
         <Route
           path="/profile"
