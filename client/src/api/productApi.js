@@ -13,6 +13,16 @@ const getProducts = async () => {
   }
 };
 
+const getProductWithReviewSummary = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/products/with-review-summary`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
+}
+
 // Tạo một sản phẩm mới
 const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], accessToken) => {
   try {
@@ -149,5 +159,6 @@ export default {
   getSimilarProducts,
   getProductReviews,
   addProductReview,
-  getProductReviewSummary
+  getProductReviewSummary,
+  getProductWithReviewSummary
 };
