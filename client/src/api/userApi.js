@@ -3,9 +3,21 @@ import axiosInstance from './axiosInstance';
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-export const getUsers = async () => {
+// export const getUsers = async () => {
+//   try {
+//     const response = await axios.get(`${API_URL}/users`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching users:", error);
+//     throw error;
+//   }
+// };
+
+export const getUsers = async (keyword = "") => {
   try {
-    const response = await axios.get(`${API_URL}/users`);
+    const response = await axios.get(`${API_URL}/users`, {
+      params: { keyword },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -64,3 +76,16 @@ export const getUserById = async (id) => {
     throw error;
   }
 }
+export const createUser = async (userData, accessToken) => {
+  try {
+    const response = await axiosInstance.post('/users', userData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+};

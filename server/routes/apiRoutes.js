@@ -39,24 +39,18 @@ router.post('/auth/refresh-token', authController.refreshToken);
 // User routes
 router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
+// Thêm nhân viên (chỉ admin)
+router.post('/users', authenticateToken, isAdmin, userController.createUser);
+
+// Sửa nhân viên (admin hoặc staff có thể sửa, tùy bạn)
 router.put('/users/:id', authenticateToken, isAdminOrStaff, userController.updateUser);
 router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.deleteUser);
 
 // Customer routes
 router.get('/customers', customerController.getAllCustomers);
 router.get('/customers/:id', customerController.getCustomerById);
-router.post('/customers', authenticateToken, customerController.createCustomer);
-router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
 router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
 
-// //Customer routes
-// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
-// Customer routes
-router.get('/customers', customerController.getAllCustomers);
-router.get('/customers/:id', customerController.getCustomerById);
-router.post('/customers', authenticateToken, customerController.createCustomer);
-router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
-router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
 
 // //Customer routes
 // router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);

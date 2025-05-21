@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import AdminRoute from "./components/routes/AdminRoute";
 import UserRoute from "./components/routes/UserRoute";
+
 import AdminOrStaffRoute from "./components/routes/AdminOrStaffRoute";
 
 import AdminLayout from "./layout/AdminLayout";
@@ -34,11 +35,10 @@ import Order from "./pages/admin/Order/index";
 import EditOrder from "./pages/admin/Order/edit";
 
 import User from "./pages/admin/User";
+import AddUser from './pages/admin/User/AddUser';
 import EditUser from "./pages/admin/User/edit";
 
 import CustomerList from './pages/admin/Customer/index';
-import AddCustomer from './pages/admin/Customer/AddCustomer';
-import EditCustomer from './pages/admin/Customer/EditCustomer';
 
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
@@ -77,6 +77,17 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <User />
+              </AdminOrStaffRoute>
+            }
+          />
+
+
+
+          <Route
+            path="/admin/user/add"
+            element={
+              <AdminOrStaffRoute>
+                <AddUser />
               </AdminOrStaffRoute>
             }
           />
@@ -198,22 +209,6 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <CustomerList />
-              </AdminOrStaffRoute>
-            }
-          />
-          <Route
-            path="/admin/customers/add"
-            element={
-              <AdminOrStaffRoute>
-                <AddCustomer />
-              </AdminOrStaffRoute>
-            }
-          />
-          <Route
-            path="/admin/customers/edit/:id"
-            element={
-              <AdminOrStaffRoute>
-                <EditCustomer />
               </AdminOrStaffRoute>
             }
           />
