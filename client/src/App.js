@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import AdminRoute from "./components/routes/AdminRoute";
 import UserRoute from "./components/routes/UserRoute";
+
 import AdminOrStaffRoute from "./components/routes/AdminOrStaffRoute";
 
 import AdminLayout from "./layout/AdminLayout";
@@ -34,17 +35,17 @@ import Order from "./pages/admin/Order/index";
 import EditOrder from "./pages/admin/Order/edit";
 
 import User from "./pages/admin/User";
+import AddUser from './pages/admin/User/AddUser';
 import EditUser from "./pages/admin/User/edit";
 
 import CustomerList from './pages/admin/Customer/index';
-import AddCustomer from './pages/admin/Customer/AddCustomer';
-import EditCustomer from './pages/admin/Customer/EditCustomer';
 
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
 import Search from "./pages/Search";
+import ProductCategoryPage from "./pages/ProductCategoryPage"
 
 
 import { useDispatch } from "react-redux";
@@ -76,6 +77,17 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <User />
+              </AdminOrStaffRoute>
+            }
+          />
+
+
+
+          <Route
+            path="/admin/user/add"
+            element={
+              <AdminOrStaffRoute>
+                <AddUser />
               </AdminOrStaffRoute>
             }
           />
@@ -200,22 +212,6 @@ function App() {
               </AdminOrStaffRoute>
             }
           />
-          <Route
-            path="/admin/customers/add"
-            element={
-              <AdminOrStaffRoute>
-                <AddCustomer />
-              </AdminOrStaffRoute>
-            }
-          />
-          <Route
-            path="/admin/customers/edit/:id"
-            element={
-              <AdminOrStaffRoute>
-                <EditCustomer />
-              </AdminOrStaffRoute>
-            }
-          />
           {/* Orders */}
           <Route
             path="/admin/orders"
@@ -242,6 +238,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
 
         <Route
           path="/profile"

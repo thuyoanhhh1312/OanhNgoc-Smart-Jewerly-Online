@@ -15,6 +15,7 @@ const CustomerList = () => {
   const navigate = useNavigate();
   // Ref để giữ timeout debounce
   const debounceTimeout = useRef(null);
+  const token = JSON.parse(localStorage.getItem("user"))?.token;
 
   useEffect(() => {
     fetchCustomers();
@@ -28,6 +29,7 @@ const CustomerList = () => {
       alert("Lấy danh sách khách hàng lỗi");
     }
   };
+  
   // Hàm gọi khi input thay đổi
   const handleKeywordChange = (e) => {
     const value = e.target.value;
@@ -43,10 +45,11 @@ const CustomerList = () => {
       fetchCustomers(value);
     }, 500);
   };
+
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa khách hàng này?")) {
       try {
-        await deleteCustomer(id);
+        await deleteCustomer(id, token);
         alert("Xóa thành công");
         fetchCustomers(keyword);
       } catch {
@@ -62,9 +65,7 @@ const CustomerList = () => {
   // Template cho các cột nếu cần custom hiển thị, ví dụ cột hành động
   const actionBodyTemplate = (rowData) => (
     <div className="flex gap-2">
-      <Link to={`/admin/customers/edit/${rowData.customer_id}`}>
-        <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
-      </Link>
+
       <button
         onClick={() => handleDelete(rowData.customer_id)}
         className="bg-red-500 text-white px-4 py-2 rounded"
@@ -73,18 +74,16 @@ const CustomerList = () => {
       </button>
     </div>
   );
-
+  const nameBodyTemplate = (rowData) => (
+    <div title={rowData.name} className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+      {rowData.name}
+    </div>
+  );
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4 flex justify-between items-center">
-        <span>Customer List</span>
-        <button button
-          onClick={() => navigate("/admin/customers/add")}
-          className="bg-blue-500 text-white px-0 py-1 rounded"
-        >
-          Thêm khách hàng mới
-        </button>
-      </h1>
+      <div className='flex flex-row justify-between items-center mb-4'>
+        <h1 className='text-[32px] font-bold '>Customer List</h1>
+      </div>
 
       <div className="mb-4 flex gap-2">
         <input
@@ -106,11 +105,21 @@ const CustomerList = () => {
         emptyMessage="Không có dữ liệu khách hàng"
         responsiveLayout="scroll"
       >
-        <Column field="name" header="Họ tên" sortable headerClassName="bg-gray-200" />
+        <Column field="name" header="Họ tên" sortable headerClassName="bg-gray-200" body={nameBodyTemplate} />
         <Column field="email" header="Email" sortable headerClassName="bg-gray-200" />
         <Column field="phone" header="Điện thoại" sortable headerClassName="bg-gray-200" />
         <Column field="gender" header="Giới tính" sortable headerClassName="bg-gray-200" />
         <Column field="address" header="Địa chỉ" sortable headerClassName="bg-gray-200" />
+        <Column field="orderCount" header="Số lượng đơn hàng" sortable headerClassName="bg-gray-200" />
+        <Column field="totalOrderAmount" header="Tổng tiền đơn hàng" sortable headerClassName="bg-gray-200"
+        
+          body={(data) => data.totalOrderAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+        />
+        <Column field="positiveReviewCount" header="Đánh giá tích cực" sortable headerClassName='bg-gray-200' />
+<Column field="negativeReviewCount" header="Đánh giá tiêu cực" sortable headerClassName='bg-gray-200' />
+<Column field="fiveStarReviewCount" header="Đánh giá 5 sao" sortable headerClassName='bg-gray-200' />
+
+
         <Column body={actionBodyTemplate} header="Hành động" headerClassName="bg-gray-200" />
       </DataTable>
     </div>

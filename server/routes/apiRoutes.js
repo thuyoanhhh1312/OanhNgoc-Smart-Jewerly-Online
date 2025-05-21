@@ -39,24 +39,18 @@ router.post('/auth/refresh-token', authController.refreshToken);
 // User routes
 router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
+// Thêm nhân viên (chỉ admin)
+router.post('/users', authenticateToken, isAdmin, userController.createUser);
+
+// Sửa nhân viên (admin hoặc staff có thể sửa, tùy bạn)
 router.put('/users/:id', authenticateToken, isAdminOrStaff, userController.updateUser);
 router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.deleteUser);
 
 // Customer routes
 router.get('/customers', customerController.getAllCustomers);
 router.get('/customers/:id', customerController.getCustomerById);
-router.post('/customers', authenticateToken, customerController.createCustomer);
-router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
 router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
 
-// //Customer routes
-// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
-// Customer routes
-router.get('/customers', customerController.getAllCustomers);
-router.get('/customers/:id', customerController.getCustomerById);
-router.post('/customers', authenticateToken, customerController.createCustomer);
-router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
-router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
 
 // //Customer routes
 // router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
@@ -71,6 +65,7 @@ router.delete('/categories/:id', authenticateToken, isAdminOrStaff, categoryCont
 // Product routes
 router.get('/products', productController.getAllProducts);
 router.get('/products/with-review-summary', productController.getAllProductsWithRatingSummary);
+router.get('/product-by-category', productController.getProductsByCategoryWithRatingSummary);
 router.get('/products/similar', getSimilarProducts); // Lấy sản phẩm tương tự
 router.get('/products/:id', productController.getProductById);
 router.post('/products', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.createProduct);

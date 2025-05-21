@@ -1,15 +1,5 @@
 import db from '../models/index.js';
-import { Op } from 'sequelize';
-// // Lấy danh sách khách hàng
-// export const getAllCustomers = async (req, res) => {
-//   try {
-//     const customers = await db.Customer.findAll();
-//     res.status(200).json(customers);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Lỗi khi lấy danh sách khách hàng', error: err.message });
-//   }
-// };
-
+import { Op, fn, col, literal  } from 'sequelize';
 // Lấy khách hàng theo ID
 export const getCustomerById = async (req, res) => {
   const { id } = req.params;
@@ -19,55 +9,6 @@ export const getCustomerById = async (req, res) => {
     res.status(200).json(customer);
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi lấy khách hàng', error: err.message });
-  }
-};
-
-// // Tạo khách hàng mới
-// export const createCustomer = async (req, res) => {
-//   try {
-//     const newCustomer = await db.Customer.create(req.body);
-//     res.status(201).json(newCustomer);
-//   } catch (err) {
-//     res.status(400).json({ message: 'Lỗi khi tạo khách hàng', error: err.message });
-//   }
-// };
-export const createCustomer = async (req, res) => {
-  try {
-    console.log('Payload user:', req.user); // kiểm tra payload user trong token
-    const userId = req.user.id;  // lấy user_id từ payload token
-
-    const newCustomer = await db.Customer.create({
-      ...req.body,
-      user_id: userId, // gán user_id từ token cho customer
-    });
-
-    res.status(201).json(newCustomer);
-  } catch (err) {
-    res.status(400).json({ message: "Lỗi khi tạo khách hàng", error: err.message });
-  }
-};
-
-
-
-// Cập nhật khách hàng
-export const updateCustomer = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const customer = await db.Customer.findByPk(id);
-    if (!customer) return res.status(404).json({ message: 'Khách hàng không tìm thấy' });
-
-    // Cập nhật trường
-    const { name, email, phone, gender, address } = req.body;
-    customer.name = name ?? customer.name;
-    customer.email = email ?? customer.email;
-    customer.phone = phone ?? customer.phone;
-    customer.gender = gender ?? customer.gender;
-    customer.address = address ?? customer.address;
-
-    await customer.save();
-    res.status(200).json(customer);
-  } catch (err) {
-    res.status(400).json({ message: 'Lỗi khi cập nhật khách hàng', error: err.message });
   }
 };
 
@@ -85,12 +26,13 @@ export const deleteCustomer = async (req, res) => {
   }
 };
 
+// Lấy danh sách khách hàng kèm số lượng đơn hàng và tổng tiền đơn hàng
 export const getAllCustomers = async (req, res) => {
-  const { keyword } = req.query;  // lấy keyword từ query param
+  const { keyword } = req.query;
 
   try {
     let whereClause = {};
-    if (keyword) {
+    if (keyword && keyword.trim() !== '') {
       whereClause = {
         [Op.or]: [
           { name: { [Op.like]: `%${keyword}%` } },
@@ -102,9 +44,28 @@ export const getAllCustomers = async (req, res) => {
       };
     }
 
-    const customers = await db.Customer.findAll({ where: whereClause });
+    const customers = await db.Customer.findAll({
+      where: whereClause,
+      attributes: {
+        include: [
+          [fn('COUNT', col('Orders.order_id')), 'orderCount'],
+          [fn('COALESCE', fn('SUM', col('Orders.total')), 0), 'totalOrderAmount']
+        ]
+      },
+      include: [
+        {
+          model: db.Order,
+          attributes: [],
+          required: false, // lấy cả khách hàng chưa có đơn hàng
+        }
+      ],
+      group: ['Customer.customer_id'],
+      order: [['customer_id', 'ASC']],
+    });
+
     res.status(200).json(customers);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Lỗi khi lấy danh sách khách hàng', error: err.message });
   }
 };
