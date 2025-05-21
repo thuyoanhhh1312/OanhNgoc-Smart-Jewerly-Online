@@ -18,7 +18,6 @@ import * as subCategoryController from '../controllers/subCategoryController.js'
 import * as promotionController from '../controllers/promotionController.js';
 import * as orderController from '../controllers/orderController.js';
 import * as customerController from '../controllers/customerController.js';
-import * as orderController from '../controllers/orderController.js';
 import * as orderStatusController from '../controllers/orderStatusController.js';
 import * as productReviewController from '../controllers/productReviewController.js';
 // Role routes
