@@ -16,6 +16,7 @@ import * as categoryController from '../controllers/categoryController.js';
 import * as productController from '../controllers/productController.js';
 import * as subCategoryController from '../controllers/subCategoryController.js';
 import * as promotionController from '../controllers/promotionController.js';
+import * as orderController from '../controllers/orderController.js';
 import * as customerController from '../controllers/customerController.js';
 import * as orderController from '../controllers/orderController.js';
 import * as orderStatusController from '../controllers/orderStatusController.js';
@@ -41,8 +42,15 @@ router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', authenticateToken, isAdminOrStaff, userController.updateUser);
 router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.deleteUser);
 
-//Customer routes
-router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
+// Customer routes
+router.get('/customers', customerController.getAllCustomers);
+router.get('/customers/:id', customerController.getCustomerById);
+router.post('/customers', authenticateToken, customerController.createCustomer);
+router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
+router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
+
+// //Customer routes
+// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);

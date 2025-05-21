@@ -36,10 +36,15 @@ import EditOrder from "./pages/admin/Order/edit";
 import User from "./pages/admin/User";
 import EditUser from "./pages/admin/User/edit";
 
+import CustomerList from './pages/admin/Customer/index';
+import AddCustomer from './pages/admin/Customer/AddCustomer';
+import EditCustomer from './pages/admin/Customer/EditCustomer';
+
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
+
 
 import { useDispatch } from "react-redux";
 function App() {
@@ -185,7 +190,31 @@ function App() {
               </AdminOrStaffRoute>
             }
           />
-
+          {/* Customers */}
+          <Route
+    path="/admin/customers"
+    element={
+      <AdminOrStaffRoute>
+        <CustomerList />
+      </AdminOrStaffRoute>
+    }
+  />
+  <Route
+    path="/admin/customers/add"
+    element={
+      <AdminOrStaffRoute>
+        <AddCustomer />
+      </AdminOrStaffRoute>
+    }
+  />
+  <Route
+    path="/admin/customers/edit/:id"
+    element={
+      <AdminOrStaffRoute>
+        <EditCustomer />
+      </AdminOrStaffRoute>
+    }
+  />
           {/* Orders */}
           <Route
             path="/admin/orders"
