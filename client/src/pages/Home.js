@@ -16,7 +16,7 @@ const Home = () => {
 
   const getProducts = async () => {
     try {
-      const res = await ProductApi.getProducts();
+      const res = await ProductApi.getProductWithReviewSummary();
       setProducts(res);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -84,14 +84,13 @@ const Home = () => {
 
   return (
     <MainLayout>
-      {/* <Header /> */}
       {/* Banner Carousel */}
       <div className="mb-2">
         <Carousel
           infiniteLoop={true}
           interval={1500}
           autoPlay={true}
-          renderThumbs={() => {}}
+          renderThumbs={() => { }}
         >
           <div>
             <img src={BannerTabSaleMay} alt="tab-sale" />
@@ -101,14 +100,12 @@ const Home = () => {
           </div>
         </Carousel>
       </div>
-
       {/* Benefit Cards */}
       <div className="flex justify-between gap-1 max-w-[860px] sm:mx-auto my-[16px] px-[10px]">
         {benefitItems.map((item, index) => (
           <BenefitCard key={index} {...item} />
         ))}
       </div>
-
       <Suspense
         fallback={
           <div className="text-center text-gray-500 py-10">
