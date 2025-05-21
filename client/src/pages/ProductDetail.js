@@ -6,10 +6,17 @@ import DOMPurify from "dompurify";
 import { ShippingIcon, Shopping247, ThuDoi } from '../assets';
 import ViewedProducts from "../components/ViewedProducts";
 import _ from "lodash";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import ReviewModal from '../components/ReviewMoal';
+import { ToastContainer, toast } from 'react-toastify';
+import ReactStars from "react-rating-stars-component";
+import RatingSummary from '../components/RatingSummary';
+import dayjs from 'dayjs';
+import ReviewTabs from '../components/ReviewTabs';
 
 const ProductDetail = () => {
     const dispatch = useDispatch();
+    const { user } = useSelector((state) => ({ ...state }));
 
     const { id } = useParams();
     const [product, setProduct] = useState(null);
@@ -17,7 +24,10 @@ const ProductDetail = () => {
     const [isPolicyVisible, setIsPolicyVisible] = useState(false);
     const [isFAQVisible, setIsFAQVisible] = useState(false);
     const [similarProducts, setSimilarProducts] = useState([]);
-
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [reviewSummary, setReviewSummary] = useState(null);
+    console.log("reviewSummary", reviewSummary)
 
     const toggleDescription = () => {
         setIsDescriptionVisible(!isDescriptionVisible);
@@ -70,6 +80,36 @@ const ProductDetail = () => {
         }
     }
 
+    const handleSubmitReview = async (review) => {
+        try {
+            await productApi.addProductReview(product?.product_id, { customer_id: user.id, ...review }, user?.token);
+            toast.success("Đánh giá đã gửi thành công!");
+            setIsReviewModalOpen(false);
+            loadReviews();
+            getRatingSummary();
+        } catch (error) {
+            toast.error('Gửi đánh giá thất bại');
+        }
+    };
+
+    const loadReviews = async () => {
+        try {
+            const data = await productApi.getProductReviews(product?.product_id);
+            setReviews(data?.reviews);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const getRatingSummary = async () => {
+        try {
+            const res = await productApi.getProductReviewSummary(product?.product_id);;
+            setReviewSummary(res?.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     useEffect(() => {
         handleGetProduct();
     }, [id]);
@@ -94,12 +134,18 @@ const ProductDetail = () => {
         localStorage.setItem("viewedProducts", JSON.stringify(filtered));
     }, [product]);
 
+    useEffect(() => {
+        loadReviews();
+        getRatingSummary();
+    }, [product?.product_id]);
+
 
     if (!product) return <div>Đang tải...</div>;
 
     return (
         <MainLayout>
             <div className="product-detail-container py-10">
+                <ToastContainer />
                 <div className="container mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {/* Khu vực Hình ảnh sản phẩm */}
@@ -276,8 +322,40 @@ const ProductDetail = () => {
                         </div>
                     </div>
                     <ViewedProducts />
+                    <div className='mt-4'>
+                        {user && (
+                            <div>
+                                <button
+                                    onClick={() => setIsReviewModalOpen(true)}
+                                    className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                                >
+                                    Viết đánh giá của bạn
+                                </button>
+                            </div>
+                        )}
+                        {/*Hiển thị rating summary*/}
+                        {reviewSummary && (
+                            <RatingSummary
+                                avgRating={reviewSummary.avgRating}
+                                totalReviews={reviewSummary.totalReviews}
+                                ratingDistribution={reviewSummary.ratingDistribution}
+                                positiveCount={reviewSummary.sentimentCount?.POS}
+                            />
+                        )}
+                        {/* Hiển thị đánh giá */}
+                        {reviews && reviews.length > 0 && (
+                            <ReviewTabs reviews={reviews} />
+                        )}
+                    </div>
                 </div>
             </div>
+            {isReviewModalOpen &&
+                <ReviewModal
+                    isOpen={isReviewModalOpen}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    onSubmit={handleSubmitReview}
+                />
+            }
         </MainLayout>
     );
 }
