@@ -218,3 +218,62 @@ export const getSimilarProducts = async (req, res) => {
     });
   }
 };
+
+export const getProductsByCategoryWithRatingSummary = async (req, res) => {
+  try {
+    const { category_name } = req.query;
+
+    if (!category_name) {
+      return res.status(400).json({ message: "Thiếu tham số category_name" });
+    }
+
+    const products = await db.Product.findAll({
+      attributes: [
+        'product_id',
+        'product_name',
+        'description',
+        'price',
+        'quantity',
+        'sold_quantity',
+        'created_at',
+        'updated_at',
+        [Sequelize.fn('COUNT', Sequelize.col('ProductReviews.review_id')), 'totalReviews'],
+        [Sequelize.fn('IFNULL', Sequelize.fn('AVG', Sequelize.col('ProductReviews.rating')), 0), 'avgRating'],
+        [
+          Sequelize.fn(
+            'SUM',
+            Sequelize.literal(`CASE WHEN ProductReviews.sentiment = 'POS' THEN 1 ELSE 0 END`)
+          ),
+          'positiveCount',
+        ],
+      ],
+      include: [
+        {
+          model: db.ProductReview,
+          attributes: [],
+          required: false,
+        },
+        {
+          model: db.Category,
+          attributes: ['category_name'],
+          where: { category_name },  // Lọc theo category_name ở đây
+        },
+        {
+          model: db.SubCategory,
+          attributes: ['subcategory_name'],
+        },
+        {
+          model: db.ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
+      ],
+      group: ['Product.product_id', 'Category.category_id', 'SubCategory.subcategory_id', 'ProductImages.image_id'],
+      order: [[Sequelize.literal('positiveCount'), 'DESC'], ['product_name', 'ASC']],
+    });
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm theo category", error: error.message });
+  }
+};

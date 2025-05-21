@@ -185,11 +185,11 @@ const searchProduct = async ({
   }
 };
 
-const getProductsByCategory = async (categorySlugOrName) => {
+const getProductsByCategory = async (categoryName) => {
   try {
-    const response = await axios.get(`${API_URL}/products`, {
+    const response = await axios.get(`${API_URL}/product-by-category`, {
       params: {
-        category_slug: categorySlugOrName, // hoặc category_name: categorySlugOrName
+        category_name: categoryName,
       },
     });
     return response.data;

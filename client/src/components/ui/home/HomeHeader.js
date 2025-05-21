@@ -32,17 +32,8 @@ const Header = () => {
     }
   };
 
-  // Chuẩn hóa category name thành slug url-friendly
-  const slugify = (text) =>
-    text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "-");
-
   const handleCategoryClick = (categoryName) => {
-    const slug = slugify(categoryName);
-    navigate(`/${slug}/`);
+    navigate(`/product-by-category/${encodeURIComponent(categoryName)}`);
   };
 
   const handleMaterialClick = (material) => {
