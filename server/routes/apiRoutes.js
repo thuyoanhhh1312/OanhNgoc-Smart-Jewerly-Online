@@ -20,6 +20,7 @@ import * as orderController from '../controllers/orderController.js';
 import * as customerController from '../controllers/customerController.js';
 import * as orderStatusController from '../controllers/orderStatusController.js';
 import * as productReviewController from '../controllers/productReviewController.js';
+import * as searchController from '../controllers/searchController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -41,6 +42,15 @@ router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', authenticateToken, isAdminOrStaff, userController.updateUser);
 router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.deleteUser);
 
+// Customer routes
+router.get('/customers', customerController.getAllCustomers);
+router.get('/customers/:id', customerController.getCustomerById);
+router.post('/customers', authenticateToken, customerController.createCustomer);
+router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
+router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
+
+// //Customer routes
+// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
 // Customer routes
 router.get('/customers', customerController.getAllCustomers);
 router.get('/customers/:id', customerController.getCustomerById);
@@ -95,5 +105,8 @@ router.get('/order-status', orderStatusController.getAllOrderStatuses);
 router.get('/products/:id/reviews', productReviewController.getReviewsByProductId);
 router.get('/products/:id/reviews/summary', productReviewController.getReviewSummary);
 router.post('/products/:id/reviews', authenticateToken, productReviewController.createReview);
+
+// Search routes
+router.get("/search", searchController.searchProducts);
 
 export default router;

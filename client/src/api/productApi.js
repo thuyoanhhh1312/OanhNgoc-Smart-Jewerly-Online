@@ -148,6 +148,43 @@ const getProductReviewSummary = async (productId) => {
   }
 };
 
+const searchProduct = async ({
+  keyword = "",
+  categoryId = null,
+  subcategoryId = null,
+  priceMin = null,
+  priceMax = null,
+  ratingMin = null,
+  limit = 20,
+  page = 1,
+  sortField = "product_name",
+  sortOrder = "ASC",
+}) => {
+  try {
+    const params = {};
+
+    if (keyword) params.keyword = keyword;
+    if (categoryId) params.category = categoryId;
+    if (subcategoryId) params.subcategory = subcategoryId;
+    if (priceMin !== null) params.price_min = priceMin;
+    if (priceMax !== null) params.price_max = priceMax;
+    if (ratingMin !== null) params.rating_min = ratingMin;
+    if (limit) params.limit = limit;
+    if (page) params.page = page;
+    if (sortField) params.sort_field = sortField;
+    if (sortOrder) params.sort_order = sortOrder;
+
+    const response = await axios.get(`${API_URL}/search`, {
+      params,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error searching products:", error);
+    throw error;
+  }
+};
+
 // Xuất các phương thức để sử dụng ở nơi khác
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -160,5 +197,6 @@ export default {
   getProductReviews,
   addProductReview,
   getProductReviewSummary,
+  searchProduct,
   getProductWithReviewSummary
 };
