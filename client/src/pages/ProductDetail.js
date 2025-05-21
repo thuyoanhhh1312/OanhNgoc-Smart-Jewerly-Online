@@ -61,24 +61,26 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        let cart = [];
-        if (typeof window !== "undefined") {
-            if (localStorage.getItem("cart")) {
-                cart = JSON.parse(localStorage.getItem("cart"));
-            }
-            cart.push({
-                ...product,
-                count: 1,
-            });
-            let unique = _.uniqWith(cart, _.isEqual);
-            localStorage.setItem("cart", JSON.stringify(unique));
+        if (typeof window === "undefined") return;
 
-            dispatch({
-                type: "ADD_TO_CART",
-                payload: unique,
-            });
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        const existIndex = cart.findIndex(item => item.product_id === product.product_id);
+
+        if (existIndex >= 0) {
+            cart[existIndex].count = (cart[existIndex].count || 1) + 1;
+        } else {
+            cart.push({ ...product, count: 1 });
         }
-    }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        dispatch({
+            type: "ADD_TO_CART",
+            payload: { ...product, count: 1 },
+        });
+    };
+
 
     const handleSubmitReview = async (review) => {
         try {

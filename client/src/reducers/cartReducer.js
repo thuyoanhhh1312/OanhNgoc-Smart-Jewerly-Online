@@ -10,28 +10,30 @@ if (typeof window !== "undefined") {
 
 export const cartReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "ADD_TO_CART":
+    case "ADD_TO_CART": {
       const itemToAdd = action.payload;
-      const existItem = state.find(
-        (item) => item.product_id === itemToAdd.product_id
-      );
+      const existItem = state.find(item => item.product_id === itemToAdd.product_id);
 
       if (existItem) {
-        return state.map((item) =>
+        return state.map(item =>
           item.product_id === itemToAdd.product_id
-            ? { ...item, quantity: item.quantity + itemToAdd.quantity }
+            ? { ...item, count: (item.count || 0) + (itemToAdd.count || 1) }
             : item
         );
       } else {
-        return [...state, itemToAdd];
+        return [...state, { ...itemToAdd, count: itemToAdd.count || 1 }];
       }
+    }
 
     case "UPDATE_QUANTITY":
-      return state.map((item) =>
+      return state.map(item =>
         item.product_id === action.payload.product_id
           ? { ...item, count: action.payload.count }
           : item
       );
+
+    case "UPDATE_CART":
+      return action.payload;
 
     default:
       return state;
