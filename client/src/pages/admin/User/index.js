@@ -47,7 +47,7 @@ const User = () => {
             </div>
 
             <DataTable value={users} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
-                <Column field="name" header="Name" sortable headerClassName='bg-[#d2d4d6]'></Column>
+                <Column field="name" header="Tên" sortable headerClassName='bg-[#d2d4d6]'></Column>
                 <Column field="email" header="Email" sortable headerClassName='bg-[#d2d4d6]'></Column>
                 <Column field='Role' header="Role" sortable headerClassName='bg-[#d2d4d6]' body={roleBodyTemplate}></Column>
                 <Column

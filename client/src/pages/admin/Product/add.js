@@ -207,7 +207,7 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <Button type="submit" className="w-full">Thêm sản phẩm</Button>
+              <Button type="submit" onClick={handleSubmit} className="w-full">Thêm sản phẩm</Button>
             </div>
           </div>
         </form>

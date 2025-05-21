@@ -5,6 +5,7 @@ import Button from "../../../components/ui/button/Button";
 import promotionApi from "../../../api/promotionApi";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 const AddPromotion = () => {
     const { user } = useSelector((state) => ({ ...state }));
@@ -15,6 +16,7 @@ const AddPromotion = () => {
     const [description, setDescription] = useState('');
     const navigate = useNavigate();
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -24,9 +26,23 @@ const AddPromotion = () => {
             setStartDate('');
             setEndDate('');
             setDescription('');
-            navigate('/promotions');
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thêm thành công!',
+                text: 'Mã giảm giá đã được thêm thành công.',
+                confirmButtonText: 'OK',
+            });
+            
+            navigate('/admin/promotions');
         } catch (err) {
             console.error(err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thêm thất bại!',
+                text: 'Có lỗi xảy ra khi thêm mã giảm giá.',
+                confirmButtonText: 'OK',
+            });
         }
     }
 
