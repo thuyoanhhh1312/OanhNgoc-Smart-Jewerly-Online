@@ -44,6 +44,7 @@ import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
+import Search from "./pages/Search";
 
 
 import { useDispatch } from "react-redux";
@@ -240,6 +241,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
+        <Route path="/search" element={<Search />} />
 
         <Route
           path="/profile"
