@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import categoryApi from "../../../api/categoryApi"; // sửa đúng đường dẫn api
+import categoryApi from "../../../api/categoryApi";
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
@@ -36,9 +36,8 @@ const Header = () => {
     navigate(`/product-by-category/${encodeURIComponent(categoryName)}`);
   };
 
-  const handleMaterialClick = (material) => {
-    const slug = material.toLowerCase();
-    navigate(`/material/${slug}`);
+  const handlePromotionClick = () => {
+    navigate("/promotions");
   };
 
   return (
@@ -50,9 +49,7 @@ const Header = () => {
             <a className="inline-flex items-center text-[18px] font-normal relative group-hover:text-[#c48c46] text-[#000]">
               Trang Sức
             </a>
-
-            <div className="megaMenu w-[400px] shadow-header bg-[#fff] absolute ltr:-left-[50%] rtl:-right-20 ltr:xl:left-[0%] rtl:xl:right-[50%] opacity-0 invisible group-hover:opacity-100 group-hover:visible p-6 flex justify-between max-h-[400px] overflow-y-auto">
-              {/* Cột Chủng loại */}
+            <div className="megaMenu w-[150px] shadow-header bg-[#fff] absolute ltr:-left-[50%] rtl:-right-20 ltr:xl:left-[0%] rtl:xl:right-[50%] opacity-0 invisible group-hover:opacity-100 group-hover:visible p-6 flex justify-between max-h-[400px] overflow-y-auto">
               <div>
                 <h3 className="font-bold mb-3">Chủng loại</h3>
                 {loadingCategories ? (
@@ -74,29 +71,11 @@ const Header = () => {
                   </ul>
                 )}
               </div>
-
-              {/* Cột Chất liệu tĩnh */}
-              <div>
-                <h3 className="font-bold mb-3">Chất liệu</h3>
-                <ul>
-                  {["Vàng", "Bạc"].map((mat, i) => (
-                    <li
-                      key={i}
-                      className="mb-2 cursor-pointer"
-                      onClick={() => handleMaterialClick(mat)}
-                    >
-                      <span className="text-[#000000] text-[14px] hover:text-yellow-500 block">
-                        {mat}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </div>
 
           {/* Menu Khuyến Mãi */}
-          <div className="menuItem cursor-pointer py-2">
+          <div className="menuItem cursor-pointer py-2" onClick={handlePromotionClick}>
             <a className="inline-flex items-center text-[18px] font-normal relative text-[#ac2b36]">
               Khuyến Mãi
             </a>
