@@ -185,6 +185,21 @@ const searchProduct = async ({
   }
 };
 
+const getProductsByCategory = async (categorySlugOrName) => {
+  try {
+    const response = await axios.get(`${API_URL}/products`, {
+      params: {
+        category_slug: categorySlugOrName, // hoặc category_name: categorySlugOrName
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    throw error;
+  }
+};
+
+
 // Xuất các phương thức để sử dụng ở nơi khác
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -198,5 +213,6 @@ export default {
   addProductReview,
   getProductReviewSummary,
   searchProduct,
-  getProductWithReviewSummary
+  getProductWithReviewSummary,
+  getProductsByCategory
 };
