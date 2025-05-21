@@ -50,6 +50,15 @@ router.delete('/customers/:id', authenticateToken, customerController.deleteCust
 
 // //Customer routes
 // router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
+// Customer routes
+router.get('/customers', customerController.getAllCustomers);
+router.get('/customers/:id', customerController.getCustomerById);
+router.post('/customers', authenticateToken, customerController.createCustomer);
+router.put('/customers/:id', authenticateToken, customerController.updateCustomer);
+router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
+
+// //Customer routes
+// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);
