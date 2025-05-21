@@ -238,7 +238,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/:categorySlug/" element={<ProductCategoryPage />} />
+        <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
 
         <Route
           path="/profile"

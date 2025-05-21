@@ -65,6 +65,7 @@ router.delete('/categories/:id', authenticateToken, isAdminOrStaff, categoryCont
 // Product routes
 router.get('/products', productController.getAllProducts);
 router.get('/products/with-review-summary', productController.getAllProductsWithRatingSummary);
+router.get('/product-by-category', productController.getProductsByCategoryWithRatingSummary);
 router.get('/products/similar', getSimilarProducts); // Lấy sản phẩm tương tự
 router.get('/products/:id', productController.getProductById);
 router.post('/products', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.createProduct);
