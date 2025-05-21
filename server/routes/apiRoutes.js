@@ -18,8 +18,8 @@ import * as subCategoryController from '../controllers/subCategoryController.js'
 import * as promotionController from '../controllers/promotionController.js';
 import * as orderController from '../controllers/orderController.js';
 import * as customerController from '../controllers/customerController.js';
-import * as orderController from '../controllers/orderController.js';
 import * as orderStatusController from '../controllers/orderStatusController.js';
+import * as productReviewController from '../controllers/productReviewController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -98,5 +98,10 @@ router.get('/orders/user/:user_id', authenticateToken, isAdminOrStaff, orderCont
 
 // Order Status routes
 router.get('/order-status', orderStatusController.getAllOrderStatuses);
+
+// Product Review
+router.get('/products/:id/reviews', productReviewController.getReviewsByProductId);
+router.get('/products/:id/reviews/summary', productReviewController.getReviewSummary);
+router.post('/products/:id/reviews', authenticateToken, productReviewController.createReview);
 
 export default router;

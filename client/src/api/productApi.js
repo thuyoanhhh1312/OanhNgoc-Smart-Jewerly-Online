@@ -98,13 +98,56 @@ const getSimilarProducts = async (categoryId, subcategoryId) => {
   }
 };
 
+//Lấy danh sách đánh giá sản phẩm
+const getProductReviews = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/products/${id}/reviews`, id);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product review:", error);
+    throw error;
+  }
+}
+
+// Thêm đánh giá mới cho sản phẩm
+const addProductReview = async (productId, reviewData, accessToken) => {
+  try {
+    const response = await axiosInstance.post(`${API_URL}/products/${productId}/reviews`, {
+      customer_id: reviewData?.customer_id,
+      rating: reviewData?.rating,
+      content: reviewData?.content
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product review:", error);
+    throw error;
+  }
+}
+
+const getProductReviewSummary = async (productId) => {
+  try {
+    const response = await axios.get(`${API_URL}/products/${productId}/reviews/summary`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product review summary:", error);
+    throw error;
+  }
+};
 
 // Xuất các phương thức để sử dụng ở nơi khác
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   getProducts,
   createProduct,
   getProductById,
   updateProduct,
   deleteProduct,
-  getSimilarProducts
+  getSimilarProducts,
+  getProductReviews,
+  addProductReview,
+  getProductReviewSummary
 };
