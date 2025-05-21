@@ -192,29 +192,29 @@ function App() {
           />
           {/* Customers */}
           <Route
-    path="/admin/customers"
-    element={
-      <AdminOrStaffRoute>
-        <CustomerList />
-      </AdminOrStaffRoute>
-    }
-  />
-  <Route
-    path="/admin/customers/add"
-    element={
-      <AdminOrStaffRoute>
-        <AddCustomer />
-      </AdminOrStaffRoute>
-    }
-  />
-  <Route
-    path="/admin/customers/edit/:id"
-    element={
-      <AdminOrStaffRoute>
-        <EditCustomer />
-      </AdminOrStaffRoute>
-    }
-  />
+            path="/admin/customers"
+            element={
+              <AdminOrStaffRoute>
+                <CustomerList />
+              </AdminOrStaffRoute>
+            }
+          />
+          <Route
+            path="/admin/customers/add"
+            element={
+              <AdminOrStaffRoute>
+                <AddCustomer />
+              </AdminOrStaffRoute>
+            }
+          />
+          <Route
+            path="/admin/customers/edit/:id"
+            element={
+              <AdminOrStaffRoute>
+                <EditCustomer />
+              </AdminOrStaffRoute>
+            }
+          />
           {/* Orders */}
           <Route
             path="/admin/orders"
