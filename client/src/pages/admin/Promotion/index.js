@@ -23,10 +23,10 @@ const Promotion = () => {
     const result = await Swal.fire({
       title: "Bạn chắc chắn muốn xóa?",
       text: "Thao tác này không thể hoàn tác!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'OK',
-      cancelButtonText: 'HỦY',
+      confirmButtonText: "OK",
+      cancelButtonText: "HỦY",
     });
 
     if (result.isConfirmed) {
@@ -44,12 +44,27 @@ const Promotion = () => {
   };
 
   const createdDateBodyTemplate = (rowData) => {
-    const createdAt = rowData.created_at;
+    const start_date = rowData.start_date;
     return (
       <div>
-        {createdAt ? (
+        {start_date ? (
           <p className="text-gray-700">
-            {dayjs(createdAt).format("DD/MM/YYYY HH:mm:ss")}
+            {dayjs(start_date).format("DD/MM/YYYY HH:mm:ss")}
+          </p>
+        ) : (
+          <p className="text-gray-700"></p>
+        )}
+      </div>
+    );
+  };
+
+  const endDateBodyTemplate = (rowData) => {
+    const endDate = rowData.end_date;
+    return (
+      <div>
+        {endDate ? (
+          <p className="text-gray-700">
+            {dayjs(endDate).format("DD/MM/YYYY HH:mm:ss")}
           </p>
         ) : (
           <p className="text-gray-700"></p>
@@ -118,7 +133,7 @@ const Promotion = () => {
           header="Ngày kết thúc"
           sortable
           headerClassName="bg-[#d2d4d6]"
-          body={createdDateBodyTemplate}
+          body={endDateBodyTemplate}
         ></Column>
         <Column
           body={(rowData) => (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import promotionApi from "../api/promotionApi"; // import api khuyến mãi của bạn
 import MainLayout from "../layout/MainLayout";
-
+import dayjs from "dayjs";
 const PromotionsPage = () => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,8 +21,48 @@ const PromotionsPage = () => {
     fetchPromotions();
   }, []);
 
-  if (loading) return <MainLayout><div>Đang tải khuyến mãi...</div></MainLayout>;
-  if (error) return <MainLayout><div className="text-red-600">{error}</div></MainLayout>;
+  const startDateBodyTemplate = (rowData) => {
+    const start_date = rowData.start_date;
+    return (
+      <div>
+        {start_date ? (
+          <p className="text-gray-700">
+            {dayjs(start_date).format("DD/MM/YYYY ")}
+          </p>
+        ) : (
+          <p className="text-gray-700"></p>
+        )}
+      </div>
+    );
+  };
+
+  const endDateBodyTemplate = (rowData) => {
+    const endDate = rowData.end_date;
+    return (
+      <div>
+        {endDate ? (
+          <p className="text-gray-700">
+            {dayjs(endDate).format("DD/MM/YYYY ")}
+          </p>
+        ) : (
+          <p className="text-gray-700"></p>
+        )}
+      </div>
+    );
+  };
+
+  if (loading)
+    return (
+      <MainLayout>
+        <div>Đang tải khuyến mãi...</div>
+      </MainLayout>
+    );
+  if (error)
+    return (
+      <MainLayout>
+        <div className="text-red-600">{error}</div>
+      </MainLayout>
+    );
 
   return (
     <MainLayout>
@@ -42,8 +82,12 @@ const PromotionsPage = () => {
               <tr key={promo.id || promo.promotion_id}>
                 <td className="border px-4 py-2">{promo.promotion_code}</td>
                 <td className="border px-4 py-2">{promo.discount}%</td>
-                <td className="border px-4 py-2">{new Date(promo.start_date).toLocaleDateString()}</td>
-                <td className="border px-4 py-2">{new Date(promo.end_date).toLocaleDateString()}</td>
+                <td className="border px-4 py-2">
+                  {startDateBodyTemplate(promo)}
+                </td>
+                <td className="border px-4 py-2">
+                  {endDateBodyTemplate(promo)}
+                </td>
               </tr>
             ))}
           </tbody>
