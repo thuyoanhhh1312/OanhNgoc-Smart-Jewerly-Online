@@ -46,6 +46,7 @@ import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
 import Search from "./pages/Search";
 import ProductCategoryPage from "./pages/ProductCategoryPage"
+import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
 
 
@@ -71,6 +72,8 @@ function App() {
   return (
     <Router>
       <Routes>
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/checkout" element={<Checkout />} />
         <Route element={<AdminLayout />}>
           {/*User*/}
           <Route
