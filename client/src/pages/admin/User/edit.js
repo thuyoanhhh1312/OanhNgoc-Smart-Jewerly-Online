@@ -88,11 +88,13 @@ const EditUser = () => {
           onChange={(e) => setSelectedRoleId(e.target.value)}
         >
           <option value="">-- Chọn role --</option>
-          {roles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {role.name}
-            </option>
-          ))}
+          {roles
+            .filter((role) => role.name === "admin" || role.name === "staff")
+            .map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.name}
+              </option>
+            ))}
         </select>
       </div>
 

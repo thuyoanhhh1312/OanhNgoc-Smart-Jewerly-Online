@@ -1,123 +1,370 @@
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+// import { DataTable } from "primereact/datatable";
+// import { Column } from "primereact/column";
+// import React, { useEffect, useState, useRef } from "react";
+// import { getUsers, getRoles } from "../../../api/userApi";
+// import { useNavigate } from "react-router";
+// import { useSelector } from "react-redux";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// const User = () => {
+//   const { user } = useSelector((state) => ({ ...state }));
+//   const [users, setUser] = useState([]);
+//   const [keyword, setKeyword] = useState("");
+//   const [roles, setRoles] = useState([]);
+//   const [roleFilter, setRoleFilter] = useState(""); // Role lọc (role id)
+
+//   const navigate = useNavigate();
+//   const debounceTimeout = useRef(null);
+
+//   const roleBodyTemplate = (rowData) => {
+//     const role = rowData?.Role ? rowData?.Role : null;
+//     return <>{role ? <div>{role?.name}</div> : <p></p>}</>;
+//   };
+
+//   useEffect(() => {
+//     const fetchRoles = async () => {
+//       try {
+//         const roleData = await getRoles();
+//         setRoles(roleData);
+//       } catch (error) {
+//         toast.error("Lấy danh sách role lỗi");
+//       }
+//     };
+
+//     const fetchUsersInit = async () => {
+//       try {
+//         const data = await getUsers();
+//         setUser(data);
+//       } catch (error) {
+//         toast.error("Lấy danh sách người dùng lỗi");
+//       }
+//     };
+
+//     fetchRoles();
+//     fetchUsersInit();
+//   }, []);
+
+//   // Chỉnh fetchUsers để nhận cả keyword và roleFilter
+//   const fetchUsers = async (searchKeyword = "", roleId = "") => {
+//     try {
+//       // Giả sử getUsers nhận param { keyword, roleId }
+//       const data = await getUsers(searchKeyword, roleId);
+//       setUser(data);
+//     } catch (error) {
+//       toast.error("Lấy danh sách người dùng lỗi");
+//     }
+//   };
+
+//   // Khi thay đổi từ input tìm kiếm
+//   const handleKeywordChange = (e) => {
+//     const value = e.target.value;
+//     setKeyword(value);
+
+//     if (debounceTimeout.current) {
+//       clearTimeout(debounceTimeout.current);
+//     }
+
+//     debounceTimeout.current = setTimeout(() => {
+//       fetchUsers(value, roleFilter);
+//     }, 500);
+//   };
+
+//   const handleRoleFilterChange = (e) => {
+//     const value = e.target.value; // thường là string
+//     setRoleFilter(value);
+//     fetchUsers(keyword, value); // gọi luôn với keyword hiện tại và role mới
+//   };
+
+//   const handleAddUserClick = () => {
+//     if (user?.role_id !== 1) {
+//       toast.error("Bạn không có quyền truy cập chức năng của admin");
+//       return;
+//     }
+//     navigate("/admin/user/add");
+//   };
+
+//   return (
+//     <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
+//       <ToastContainer />
+//       {/* Tiêu đề */}
+//       <div className="flex flex-row justify-between items-center mb-4">
+//         <h1 className="text-[32px] font-bold ">User List</h1>
+//         <div>
+//           <button
+//             className="bg-blue-500 text-white px-4 py-2 rounded"
+//             onClick={handleAddUserClick}
+//           >
+//             Add New User
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Search input */}
+//       <div className="mb-4 flex gap-2">
+//         <input
+//           type="text"
+//           placeholder="Tìm kiếm theo tên, email, số điện thoại..."
+//           className="border border-gray-300 rounded p-2 flex-1"
+//           value={keyword}
+//           onChange={handleKeywordChange}
+//         />
+//         {/* Dropdown lọc role */}
+//         <select
+//           className="border border-gray-300 rounded p-2"
+//           value={roleFilter}
+//           onChange={handleRoleFilterChange}
+//         >
+//           <option value="">-- Lọc theo Role --</option>
+//           {roles
+//             .filter((role) => role.name === "admin" || role.name === "staff")
+//             .map((role) => (
+//               <option key={role.id} value={role.id}>
+//                 {role.name}
+//               </option>
+//             ))}
+//         </select>
+//       </div>
+
+//       <DataTable
+//         value={users}
+//         paginator
+//         rows={10}
+//         showGridlines
+//         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
+//       >
+//         <Column
+//           field="name"
+//           header="Tên"
+//           sortable
+//           headerClassName="bg-[#d2d4d6]"
+//         />
+//         <Column
+//           field="email"
+//           header="Email"
+//           sortable
+//           headerClassName="bg-[#d2d4d6]"
+//         />
+//         <Column
+//           field="Role"
+//           header="Role"
+//           sortable
+//           headerClassName="bg-[#d2d4d6]"
+//           body={roleBodyTemplate}
+//         />
+//         <Column
+//           body={(rowData) => {
+//             const handleEditClick = () => {
+//               if (user?.role_id !== 1) {
+//                 toast.error("Bạn không có quyền truy cập chức năng của admin");
+//                 return;
+//               }
+//               navigate(`/admin/user/edit/${rowData.id}`);
+//             };
+
+//             return (
+//               <div className="flex flex-row gap-2">
+//                 <button
+//                   onClick={handleEditClick}
+//                   className="bg-green-500 text-white px-4 py-2 rounded"
+//                 >
+//                   Edit
+//                 </button>
+//               </div>
+//             );
+//           }}
+//           header="Actions"
+//           headerClassName="bg-[#d2d4d6]"
+//         />
+//       </DataTable>
+//     </div>
+//   );
+// };
+
+// export default User;
+
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import React, { useEffect, useState, useRef } from "react";
-import { getUsers, getRoles, updateUser } from "../../../api/userApi";
-import { Link, useNavigate } from "react-router";
+import { getUsers, getRoles } from "../../../api/userApi";
+import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const User = () => {
-    const { user } = useSelector((state) => ({ ...state }));
-    //const user = useSelector((state) => state.userReducer); // Lấy user từ redux
-    const [users, setUser] = useState([]);
-    const [keyword, setKeyword] = useState("");
+  const { user } = useSelector((state) => ({ ...state }));
+  const [users, setUser] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [roleFilter, setRoleFilter] = useState("");
 
-    const [roles, setRoles] = useState([]);
-    const navigate = useNavigate();
-    // Ref để giữ timeout debounce
-    const debounceTimeout = useRef(null);
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+  const navigate = useNavigate();
+  const debounceTimeout = useRef(null);
 
+  const roleBodyTemplate = (rowData) => {
+    const role = rowData?.Role ? rowData?.Role : null;
+    return <>{role ? <div>{role?.name}</div> : <p></p>}</>;
+  };
 
-    const roleBodyTemplate = (rowData) => {
-        const role = rowData?.Role ? rowData?.Role : null;
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const roleData = await getRoles();
+        setRoles(roleData);
+      } catch {
+        toast.error("Lấy danh sách role lỗi");
+      }
+    };
 
-        return (
-            <>
-                {
-                    role ? (<div>{role?.name}</div>) : (<p></p>)
-                }
-            </>
-        )
+    const fetchUsersInit = async () => {
+      try {
+        const data = await getUsers();
+        setUser(data);
+      } catch {
+        toast.error("Lấy danh sách người dùng lỗi");
+      }
+    };
+
+    fetchRoles();
+    fetchUsersInit();
+  }, []);
+
+  // Gọi API lấy user theo keyword và roleFilter (role_id)
+  const fetchUsers = async (searchKeyword = "", roleId = "") => {
+    try {
+      const data = await getUsers(searchKeyword, roleId);
+      setUser(data);
+    } catch {
+      toast.error("Lấy danh sách người dùng lỗi");
+    }
+  };
+
+  // Xử lý debounce tìm kiếm
+  const handleKeywordChange = (e) => {
+    const value = e.target.value;
+    setKeyword(value);
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
     }
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const data = await getUsers();
-            setUser(data);
-        };
-        const fetchRoles = async () => {
-            const roleData = await getRoles();
-            setRoles(roleData);
-        };
+    debounceTimeout.current = setTimeout(() => {
+      fetchUsers(value, roleFilter);
+    }, 500);
+  };
 
-        fetchRoles();
-        fetchUsers();
-    }, []);
-    const fetchUsers = async (searchKeyword = "") => {
-        try {
-            const data = await getUsers(searchKeyword);
-            setUser(data);
-        } catch (error) {
-            alert("Lấy danh sách người dùng lỗi");
-        }
-    };
+  // Xử lý chọn lọc Role
+  const handleRoleFilterChange = (e) => {
+    const value = e.target.value;
+    setRoleFilter(value);
+    fetchUsers(keyword, value);
+  };
 
-    // Hàm gọi khi input thay đổi
-    const handleKeywordChange = (e) => {
-        const value = e.target.value;
-        setKeyword(value);
+  // Xử lý nút thêm user, chỉ admin mới được
+  const handleAddUserClick = () => {
+    if (user?.role_id !== 1) {
+      toast.error("Bạn không có quyền truy cập chức năng của admin");
+      return;
+    }
+    navigate("/admin/user/add");
+  };
 
-        // Clear timeout nếu người dùng gõ tiếp
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-
-        // Đặt timeout gọi API sau 500ms kể từ lần gõ cuối
-        debounceTimeout.current = setTimeout(() => {
-            fetchUsers(value);
-        }, 500);
-    };
-
-    const handleAddUserClick = () => {
-        if (user?.role_id !== 1) {
-            alert("Bạn không có quyền truy cập chức năng của admin");
-            return;
-        }
-        navigate("/admin/user/add");
-    };
-    return (
-        <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
-            {/* Tiêu đề */}
-            <div className='flex flex-row justify-between items-center mb-4'>
-                <h1 className='text-[32px] font-bold '>User List</h1>
-                <div>
-                    <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                        onClick={handleAddUserClick}
-                    >
-                        Add New User
-                    </button>
-                </div>
-            </div>
-            <div className="mb-4 flex gap-2">
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm theo tên, email, số điện thoại..."
-                    className="border border-gray-300 rounded p-2 flex-1"
-                    value={keyword}
-                    onChange={handleKeywordChange}
-                />
-            </div>
-
-            <DataTable value={users} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
-                <Column field="name" header="Tên" sortable headerClassName='bg-[#d2d4d6]'></Column>
-                <Column field="email" header="Email" sortable headerClassName='bg-[#d2d4d6]'></Column>
-                <Column field='Role' header="Role" sortable headerClassName='bg-[#d2d4d6]' body={roleBodyTemplate}></Column>
-                <Column
-                    body={(rowData) => (
-                        <div className="flex flex-row gap-2">
-                            <Link to={`/admin/user/edit/${rowData.id}`}>
-                                <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
-                            </Link>
-
-                        </div>
-                    )}
-                    header="Actions"
-                    headerClassName="bg-[#d2d4d6]"
-                ></Column>
-            </DataTable>
+  return (
+    <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
+      <ToastContainer />
+      {/* Tiêu đề */}
+      <div className="flex flex-row justify-between items-center mb-4">
+        <h1 className="text-[32px] font-bold ">User List</h1>
+        <div>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={handleAddUserClick}
+          >
+            Add New User
+          </button>
         </div>
-    );
+      </div>
+
+      {/* Thanh tìm kiếm và lọc Role */}
+      <div className="mb-4 flex gap-2">
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo tên, email, số điện thoại..."
+          className="border border-gray-300 rounded p-2 flex-1"
+          value={keyword}
+          onChange={handleKeywordChange}
+        />
+        <select
+          className="border border-gray-300 rounded p-2"
+          value={roleFilter}
+          onChange={handleRoleFilterChange}
+        >
+          <option value="">-- Lọc theo Role --</option>
+          {roles
+            .filter((role) => role.name === "admin" || role.name === "staff")
+            .map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.name}
+              </option>
+            ))}
+        </select>
+      </div>
+
+      {/* Bảng danh sách user */}
+      <DataTable
+        value={users}
+        paginator
+        rows={10}
+        showGridlines
+        paginatorTemplate="PrevPageLink PageLinks NextPageLink"
+      >
+        <Column
+          field="name"
+          header="Tên"
+          sortable
+          headerClassName="bg-[#d2d4d6]"
+        />
+        <Column
+          field="email"
+          header="Email"
+          sortable
+          headerClassName="bg-[#d2d4d6]"
+        />
+        <Column
+          field="Role"
+          header="Role"
+          sortable
+          headerClassName="bg-[#d2d4d6]"
+          body={roleBodyTemplate}
+        />
+        <Column
+          body={(rowData) => {
+            const handleEditClick = () => {
+              if (user?.role_id !== 1) {
+                toast.error("Bạn không có quyền truy cập chức năng của admin");
+                return;
+              }
+              navigate(`/admin/user/edit/${rowData.id}`);
+            };
+
+            return (
+              <div className="flex flex-row gap-2">
+                <button
+                  onClick={handleEditClick}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Edit
+                </button>
+              </div>
+            );
+          }}
+          header="Actions"
+          headerClassName="bg-[#d2d4d6]"
+        />
+      </DataTable>
+    </div>
+  );
 };
 
 export default User;
