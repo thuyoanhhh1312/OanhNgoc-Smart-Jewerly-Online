@@ -1,9 +1,22 @@
 import db from '../models/index.js';
-import { Sequelize } from 'sequelize';
+import { Op, fn, col, literal, Sequelize } from 'sequelize';
+
 
 export const getAllProducts = async (req, res) => {
+  const { keyword } = req.query;
   try {
+    let whereClause = {};
+    if (keyword && keyword.trim() !== '') {
+      whereClause = {
+        [Op.or]: [
+          { product_name: { [Op.like]: `%${keyword}%` } },
+          { description: { [Op.like]: `%${keyword}%` } },
+        ],
+      };
+    }
+
     const products = await db.Product.findAll({
+      where: whereClause,
       include: [
         {
           model: db.Category,
@@ -26,8 +39,20 @@ export const getAllProducts = async (req, res) => {
 };
 
 export const getAllProductsWithRatingSummary = async (req, res) => {
+  const { keyword } = req.query;
   try {
+    let whereClause = {};
+    if (keyword && keyword.trim() !== '') {
+      whereClause = {
+        [Op.or]: [
+          { product_name: { [Op.like]: `%${keyword}%` } },
+          { description: { [Op.like]: `%${keyword}%` } },
+        ],
+      };
+    }
+
     const products = await db.Product.findAll({
+      where: whereClause,
       attributes: [
         'product_id',
         'product_name',
@@ -37,12 +62,12 @@ export const getAllProductsWithRatingSummary = async (req, res) => {
         'sold_quantity',
         'created_at',
         'updated_at',
-        [Sequelize.fn('COUNT', Sequelize.col('ProductReviews.review_id')), 'totalReviews'],
-        [Sequelize.fn('IFNULL', Sequelize.fn('AVG', Sequelize.col('ProductReviews.rating')), 0), 'avgRating'],
+        [fn('COUNT', col('ProductReviews.review_id')), 'totalReviews'],
+        [fn('IFNULL', fn('AVG', col('ProductReviews.rating')), 0), 'avgRating'],
         [
-          Sequelize.fn(
+          fn(
             'SUM',
-            Sequelize.literal(`CASE WHEN ProductReviews.sentiment = 'POS' THEN 1 ELSE 0 END`)
+            literal(`CASE WHEN ProductReviews.sentiment = 'POS' THEN 1 ELSE 0 END`)
           ),
           'positiveCount',
         ],
@@ -67,7 +92,7 @@ export const getAllProductsWithRatingSummary = async (req, res) => {
         },
       ],
       group: ['Product.product_id', 'Category.category_id', 'SubCategory.subcategory_id', 'ProductImages.image_id'],
-      order: [[Sequelize.literal('positiveCount'), 'DESC'], ['product_name', 'ASC']],
+      order: [[literal('positiveCount'), 'DESC'], ['product_name', 'ASC']],
     });
 
     res.status(200).json(products);
@@ -76,6 +101,10 @@ export const getAllProductsWithRatingSummary = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm", error: error.message });
   }
 };
+
+// Các hàm còn lại không đổi, ví dụ như getProductById, createProduct, updateProduct, deleteProduct...
+
+
 
 export const getProductById = async (req, res) => {
   const { id } = req.params;
@@ -290,5 +319,98 @@ export const getProductsByCategoryWithRatingSummary = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Lỗi khi lấy danh sách sản phẩm theo category", error: error.message });
+  }
+};
+
+export const getCategoryesWithSubCategory = async (req, res) => {
+  try {
+    const categories = await db.Category.findAll({
+      include: [
+        {
+          model: db.SubCategory,
+          attributes: ['subcategory_id', 'subcategory_name'],
+        },
+      ],
+    });
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi lấy danh mục", error: error.message });
+  }
+};
+export const filterProducts = async (req, res) => {
+  try {
+    const {
+      keyword,
+      category_id,        // có thể chuỗi "1,2,3"
+      subcategory_id,     // có thể chuỗi "11,22"
+      is_active,          // true/false/null
+      dateType,           // created_at hoặc updated_at
+      startDate,          // ISO string
+      endDate,            // ISO string
+    } = req.query;
+
+    const whereClause = {};
+
+    if (keyword && keyword.trim() !== '') {
+      whereClause[Op.or] = [
+        { product_name: { [Op.like]: `%${keyword}%` } },
+        { description: { [Op.like]: `%${keyword}%` } },
+      ];
+    }
+
+    if (category_id) {
+      // Nếu nhiều id truyền dạng chuỗi '1,2,3' thì convert thành array
+      const catIds = category_id.split(',').map((id) => Number(id.trim()));
+      whereClause.category_id = { [Op.in]: catIds };
+    }
+
+    if (subcategory_id) {
+      const subIds = subcategory_id.split(',').map((id) => Number(id.trim()));
+      whereClause.subcategory_id = { [Op.in]: subIds };
+    }
+
+    if (typeof is_active !== 'undefined' && is_active !== null && is_active !== '') {
+      // is_active truyền string "true" hoặc "false"
+      whereClause.is_active = is_active === 'true';
+    }
+
+    if (dateType && (dateType === 'created_at' || dateType === 'updated_at')) {
+      if (startDate && endDate) {
+        whereClause[dateType] = {
+          [Op.between]: [new Date(startDate), new Date(endDate)],
+        };
+      } else if (startDate) {
+        whereClause[dateType] = {
+          [Op.gte]: new Date(startDate),
+        };
+      } else if (endDate) {
+        whereClause[dateType] = {
+          [Op.lte]: new Date(endDate),
+        };
+      }
+    }
+
+    const products = await db.Product.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: db.Category,
+          attributes: ['category_name'],
+        },
+        {
+          model: db.SubCategory,
+          attributes: ['subcategory_name'],
+        },
+        {
+          model: db.ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
+      ],
+    });
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Lỗi khi lọc sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi khi lọc sản phẩm", error: error.message });
   }
 };

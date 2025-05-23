@@ -1,14 +1,26 @@
-import axios from "axios";
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-const getProducts = async () => {
+const filterProducts = async (params) => {
   try {
-    const response = await axios.get(`${API_URL}/products`);
+    const response = await axios.get(`${API_URL}/products/filter`, { params });
     return response.data;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error filtering products:', error);
+    throw error;
+  }
+};
+const getProducts = async (keyword = '') => {
+  try {
+    const response = await axios.get(`${API_URL}/products`, {
+      params: { keyword },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
     throw error;
   }
 };
@@ -18,13 +30,23 @@ const getProductWithReviewSummary = async () => {
     const response = await axios.get(`${API_URL}/products/with-review-summary`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error fetching products:', error);
     throw error;
   }
-}
+};
 
 // Tạo một sản phẩm mới
-const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], accessToken, isActive = false) => {
+const createProduct = async (
+  productName,
+  description,
+  price,
+  quantity,
+  categoryId,
+  subcategoryId,
+  images = [],
+  accessToken,
+  isActive = false,
+) => {
   try {
     const formData = new FormData();
     formData.append('product_name', productName);
@@ -44,16 +66,15 @@ const createProduct = async (productName, description, price, quantity, category
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'multipart/form-data',
-      }
+      },
     });
 
     return response.data;
   } catch (error) {
-    console.error("Error creating product:", error);
+    console.error('Error creating product:', error);
     throw error;
   }
 };
-
 
 // Lấy sản phẩm theo ID
 const getProductById = async (id) => {
@@ -61,13 +82,23 @@ const getProductById = async (id) => {
     const response = await axios.get(`${API_URL}/products/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
-    throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    console.error('Error fetching product by ID:', error);
+    throw error; // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
   }
 };
 
 // Cập nhật sản phẩm
-const updateProduct = async (id, productName, description, price, quantity, categoryId, subcategoryId, imageUrl, isActive) => {
+const updateProduct = async (
+  id,
+  productName,
+  description,
+  price,
+  quantity,
+  categoryId,
+  subcategoryId,
+  imageUrl,
+  isActive,
+) => {
   try {
     const response = await axiosInstance.put(`${API_URL}/products/${id}`, {
       product_name: productName,
@@ -76,12 +107,12 @@ const updateProduct = async (id, productName, description, price, quantity, cate
       quantity: quantity,
       category_id: categoryId,
       subcategory_id: subcategoryId,
-      is_active: isActive
+      is_active: isActive,
     });
     return response.data;
   } catch (error) {
-    console.error("Error updating product:", error);
-    throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    console.error('Error updating product:', error);
+    throw error; // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
   }
 };
 
@@ -91,8 +122,8 @@ const deleteProduct = async (id) => {
     const response = await axiosInstance.delete(`${API_URL}/products/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting product:", error);
-    throw error;  // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    console.error('Error deleting product:', error);
+    throw error; // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
   }
 };
 // lấy sản phẩm tương tự theo category_id
@@ -105,7 +136,7 @@ const getSimilarProducts = async (categoryId, subcategoryId) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching similar products:", error);
+    console.error('Error fetching similar products:', error);
     throw error;
   }
 };
@@ -116,42 +147,46 @@ const getProductReviews = async (id) => {
     const response = await axios.get(`${API_URL}/products/${id}/reviews`, id);
     return response.data;
   } catch (error) {
-    console.error("Error fetching product review:", error);
+    console.error('Error fetching product review:', error);
     throw error;
   }
-}
+};
 
 // Thêm đánh giá mới cho sản phẩm
 const addProductReview = async (productId, reviewData, accessToken) => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/products/${productId}/reviews`, {
-      customer_id: reviewData?.customer_id,
-      rating: reviewData?.rating,
-      content: reviewData?.content
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      }
-    });
+    const response = await axiosInstance.post(
+      `${API_URL}/products/${productId}/reviews`,
+      {
+        customer_id: reviewData?.customer_id,
+        rating: reviewData?.rating,
+        content: reviewData?.content,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
     return response.data;
   } catch (error) {
-    console.error("Error fetching product review:", error);
+    console.error('Error fetching product review:', error);
     throw error;
   }
-}
+};
 
 const getProductReviewSummary = async (productId) => {
   try {
     const response = await axios.get(`${API_URL}/products/${productId}/reviews/summary`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching product review summary:", error);
+    console.error('Error fetching product review summary:', error);
     throw error;
   }
 };
 
 const searchProduct = async ({
-  keyword = "",
+  keyword = '',
   categoryId = null,
   subcategoryId = null,
   priceMin = null,
@@ -159,8 +194,8 @@ const searchProduct = async ({
   ratingMin = null,
   limit = 20,
   page = 1,
-  sortField = "product_name",
-  sortOrder = "ASC",
+  sortField = 'product_name',
+  sortOrder = 'ASC',
 }) => {
   try {
     const params = {};
@@ -182,7 +217,7 @@ const searchProduct = async ({
 
     return response.data;
   } catch (error) {
-    console.error("Error searching products:", error);
+    console.error('Error searching products:', error);
     throw error;
   }
 };
@@ -196,11 +231,19 @@ const getProductsByCategory = async (categoryName) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching products by category:", error);
+    console.error('Error fetching products by category:', error);
     throw error;
   }
 };
-
+const getCategoriesWithSubCategories = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get-category-subcategory`); // API trả về danh sách category kèm theo SubCategories
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi lấy danh mục:', error);
+    throw error;
+  }
+};
 
 // Xuất các phương thức để sử dụng ở nơi khác
 // eslint-disable-next-line import/no-anonymous-default-export
@@ -216,5 +259,7 @@ export default {
   getProductReviewSummary,
   searchProduct,
   getProductWithReviewSummary,
-  getProductsByCategory
+  getProductsByCategory,
+  filterProducts,
+  getCategoriesWithSubCategories,
 };
