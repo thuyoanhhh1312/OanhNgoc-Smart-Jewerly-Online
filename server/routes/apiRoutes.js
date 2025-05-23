@@ -21,6 +21,7 @@ import * as customerController from '../controllers/customerController.js';
 import * as orderStatusController from '../controllers/orderStatusController.js';
 import * as productReviewController from '../controllers/productReviewController.js';
 import * as searchController from '../controllers/searchController.js';
+import * as dashboardController from '../controllers/dashboardController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -105,5 +106,9 @@ router.post('/products/:id/reviews', authenticateToken, productReviewController.
 
 // Search routes
 router.get("/search", searchController.searchProducts);
+
+//Dashboard routes
+router.get('/dashboard/revenue', authenticateToken, isAdmin, dashboardController.getRevenueByPeriod);
+router.get('/dashboard/orders/count', authenticateToken, isAdmin, dashboardController.getOrderCountByPeriod);
 
 export default router;

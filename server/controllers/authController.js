@@ -34,7 +34,7 @@ export const registerUser = async (req, res, next) => {
     const accessToken = jwt.sign(
       { userId: newUser.id, email: newUser.email, role_id: newUser.role_id },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     //token dùng refresh
@@ -95,7 +95,7 @@ export const loginUser = async (req, res, next) => {
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email, role_id: user.role_id },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     const refreshToken = jwt.sign(
@@ -154,7 +154,7 @@ export const refreshToken = async (req, res, next) => {
     const newAccessToken = jwt.sign(
       { userId: user.id, email: user.email, role_id: user.role_id },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: '15m' }
+      { expiresIn: '24h' }
     );
 
     const newRefreshToken = jwt.sign(

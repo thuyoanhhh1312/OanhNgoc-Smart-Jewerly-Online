@@ -1,10 +1,26 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import ProductCard from "../components/ui/product/productCard";
-import { Dialog, Transition, Listbox, DialogPanel, DialogTitle, TransitionChild, Label, ListboxOptions, ListboxButton, ListboxOption } from "@headlessui/react";
-import { XMarkIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline"
+
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Fade,
+  Backdrop,
+  Box,
+  Typography,
+} from "@mui/material";
+
 import ReactStars from "react-rating-stars-component";
+
 import categoryApi from "../api/categoryApi";
 import subcategoryApi from "../api/subCategoryApi";
 import productApi from "../api/productApi";
@@ -284,510 +300,58 @@ const Search = () => {
     <MainLayout>
       <div className="bg-white">
         {/* Mobile filter modal */}
-        <Transition.Root show={mobileFiltersOpen} as={Fragment}>
-          <Dialog
-            as="div"
-            className="relative z-40 lg:hidden"
-            onClose={setMobileFiltersOpen}
-          >
-            <TransitionChild
-              as={Fragment}
-              enter="transition-opacity ease-linear duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="transition-opacity ease-linear duration-300"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </TransitionChild>
-
-            <div className="fixed inset-0 flex z-40">
-              <TransitionChild
-                as={Fragment}
-                enter="transition ease-in-out duration-300 transform"
-                enterFrom="translate-x-full"
-                enterTo="translate-x-0"
-                leave="transition ease-in-out duration-300 transform"
-                leaveFrom="translate-x-0"
-                leaveTo="translate-x-full"
-              >
-                <DialogPanel className="relative ml-auto max-w-xs w-full h-full bg-white shadow-xl py-4 pb-6 flex flex-col overflow-y-auto">
-                  <div className="px-4 flex items-center justify-between">
-                    <h2 className="text-lg font-medium text-gray-900">
-                      Bộ lọc
-                    </h2>
-                    <button
-                      type="button"
-                      className="-mr-2 w-10 h-10 bg-white p-2 rounded-md flex items-center justify-center text-gray-400"
-                      onClick={() => setMobileFiltersOpen(false)}
-                    >
-                      <span className="sr-only">Đóng bộ lọc</span>
-                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  <form className="mt-4 space-y-6 px-4">
-                    {/* Category */}
-                    <div>
-                      <Listbox
-                        value={tempFilters.category}
-                        onChange={(val) => updateTempFilter("category", val)}
-                      >
-                        {({ open }) => (
-                          <>
-                            <Label className="block text-sm font-medium text-gray-700 mb-1">
-                              Chủng loại
-                            </Label>
-                            <div className="relative">
-                              <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <span className="block truncate">
-                                  {tempFilters.category
-                                    ? categories.find(
-                                      (c) =>
-                                        c.category_id === tempFilters.category
-                                    )?.category_name
-                                    : "Tất cả"}
-                                </span>
-                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                  <ChevronUpDownIcon
-                                    className="h-5 w-5 text-gray-400"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              </ListboxButton>
-
-                              <Transition
-                                show={open}
-                                as={Fragment}
-                                leave="transition ease-in duration-100"
-                                leaveFrom="opacity-100"
-                                leaveTo="opacity-0"
-                              >
-                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                  <ListboxOption
-                                    key="all"
-                                    value={null}
-                                    className={({ active }) =>
-                                      classNames(
-                                        active
-                                          ? "bg-indigo-600 text-white"
-                                          : "text-gray-900",
-                                        "relative cursor-default select-none py-2 pl-3 pr-9"
-                                      )
-                                    }
-                                  >
-                                    <span className="block truncate">
-                                      Tất cả
-                                    </span>
-                                  </ListboxOption>
-                                  {categories.map((cat) => (
-                                    <ListboxOption
-                                      key={cat.category_id}
-                                      value={cat.category_id}
-                                      className={({ active }) =>
-                                        classNames(
-                                          active
-                                            ? "bg-indigo-600 text-white"
-                                            : "text-gray-900",
-                                          "relative cursor-default select-none py-2 pl-3 pr-9"
-                                        )
-                                      }
-                                    >
-                                      {({ selected }) => (
-                                        <span
-                                          className={classNames(
-                                            selected
-                                              ? "font-semibold"
-                                              : "font-normal",
-                                            "block truncate"
-                                          )}
-                                        >
-                                          {cat.category_name}
-                                        </span>
-                                      )}
-                                    </ListboxOption>
-                                  ))}
-                                </ListboxOptions >
-                              </Transition>
-                            </div>
-                          </>
-                        )}
-                      </Listbox>
-                    </div>
-
-                    {/* Subcategory */}
-                    <div>
-                      <Listbox
-                        value={tempFilters.subcategory}
-                        onChange={(val) => updateTempFilter("subcategory", val)}
-                        disabled={!tempFilters.category}
-                      >
-                        {({ open }) => (
-                          <>
-                            <Label className="block text-sm font-medium text-gray-700 mb-1">
-                              Chủng loại con
-                            </Label>
-                            <div className="relative">
-                              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50">
-                                <span className="block truncate">
-                                  {tempFilters.subcategory
-                                    ? filteredSubcategories.find(
-                                      (c) =>
-                                        c.subcategory_id ===
-                                        tempFilters.subcategory
-                                    )?.subcategory_name
-                                    : "Tất cả"}
-                                </span>
-                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                  <ChevronUpDownIcon
-                                    className="h-5 w-5 text-gray-400"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              </Listbox.Button>
-
-                              <Transition
-                                show={open}
-                                as={Fragment}
-                                leave="transition ease-in duration-100"
-                                leaveFrom="opacity-100"
-                                leaveTo="opacity-0"
-                              >
-                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                  <ListboxOption
-                                    key="all"
-                                    value={null}
-                                    className={({ active }) =>
-                                      classNames(
-                                        active
-                                          ? "bg-indigo-600 text-white"
-                                          : "text-gray-900",
-                                        "relative cursor-default select-none py-2 pl-3 pr-9"
-                                      )
-                                    }
-                                  >
-                                    <span className="block truncate">
-                                      Tất cả
-                                    </span>
-                                  </ListboxOption>
-                                  {filteredSubcategories.map((subcat) => (
-                                    <ListboxOption
-                                      key={subcat.subcategory_id}
-                                      value={subcat.subcategory_id}
-                                      className={({ active }) =>
-                                        classNames(
-                                          active
-                                            ? "bg-indigo-600 text-white"
-                                            : "text-gray-900",
-                                          "relative cursor-default select-none py-2 pl-3 pr-9"
-                                        )
-                                      }
-                                    >
-                                      {({ selected }) => (
-                                        <span
-                                          className={classNames(
-                                            selected
-                                              ? "font-semibold"
-                                              : "font-normal",
-                                            "block truncate"
-                                          )}
-                                        >
-                                          {subcat.subcategory_name}
-                                        </span>
-                                      )}
-                                    </ListboxOption>
-                                  ))}
-                                </ListboxOptions>
-                              </Transition>
-                            </div>
-                          </>
-                        )}
-                      </Listbox>
-                    </div>
-
-                    {/* Rating */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Đánh giá tối thiểu
-                      </label>
-                      <ReactStars
-                        count={5}
-                        size={30}
-                        activeColor="#2563eb"
-                        value={tempFilters.rating}
-                        isHalf={false}
-                        onChange={(newRating) =>
-                          updateTempFilter("rating", newRating)
-                        }
-                      />
-                    </div>
-
-                    {/* Sort */}
-                    <div>
-                      <Listbox
-                        value={tempFilters.sort}
-                        onChange={(val) => updateTempFilter("sort", val)}
-                      >
-                        {({ open }) => (
-                          <>
-                            <Label className="block text-sm font-medium text-gray-700 mb-1">
-                              Sắp xếp
-                            </Label>
-                            <div className="relative">
-                              <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <span className="block truncate">
-                                  {tempFilters.sort.name}
-                                </span>
-                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                  <ChevronUpDownIcon
-                                    className="h-5 w-5 text-gray-400"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              </ListboxButton>
-
-                              <Transition
-                                show={open}
-                                as={Fragment}
-                                leave="transition ease-in duration-100"
-                                leaveFrom="opacity-100"
-                                leaveTo="opacity-0"
-                              >
-                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                  {sortOptions.map((opt) => (
-                                    <ListboxOption
-                                      key={opt.value}
-                                      value={opt}
-                                      className={({ active }) =>
-                                        classNames(
-                                          active
-                                            ? "bg-indigo-600 text-white"
-                                            : "text-gray-900",
-                                          "relative cursor-default select-none py-2 pl-3 pr-9"
-                                        )
-                                      }
-                                    >
-                                      {({ selected }) => (
-                                        <span
-                                          className={classNames(
-                                            selected
-                                              ? "font-semibold"
-                                              : "font-normal",
-                                            "block truncate"
-                                          )}
-                                        >
-                                          {opt.name}
-                                        </span>
-                                      )}
-                                    </ListboxOption>
-                                  ))}
-                                </ListboxOptions>
-                              </Transition>
-                            </div>
-                          </>
-                        )}
-                      </Listbox>
-                    </div>
-
-                    {/* Apply Button */}
-                    <div className="mt-6 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          applyFilters();
-                          setMobileFiltersOpen(false);
-                        }}
-                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
-                      >
-                        Áp dụng
-                      </button>
-                    </div>
-                  </form>
-                </DialogPanel>
-              </TransitionChild>
-            </div>
-          </Dialog>
-        </Transition.Root>
-
-        {/* Desktop filter */}
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
-          <aside className="hidden lg:block w-72 shrink-0">
-            <h2 className="font-bold text-lg mb-4">Bộ lọc</h2>
-
+        <Dialog
+          open={mobileFiltersOpen}
+          onClose={() => setMobileFiltersOpen(false)}
+          fullScreen
+          TransitionComponent={Fade}
+          BackdropComponent={Backdrop}
+          BackdropProps={{ timeout: 500 }}
+        >
+          <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            Bộ lọc
+            <Button onClick={() => setMobileFiltersOpen(false)}>Đóng</Button>
+          </DialogTitle>
+          <DialogContent dividers>
             {/* Category */}
-            <div className="mb-6">
-              <Listbox
-                value={tempFilters.category}
-                onChange={(val) => updateTempFilter("category", val)}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Chủng loại</InputLabel>
+              <Select
+                value={tempFilters.category ?? ""}
+                label="Chủng loại"
+                onChange={(e) => updateTempFilter("category", e.target.value || null)}
               >
-                {({ open }) => (
-                  <>
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
-                      Chủng loại
-                    </Label>
-                    <div className="relative">
-                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <span className="block truncate">
-                          {tempFilters.category
-                            ? categories.find(
-                              (c) => c.category_id === tempFilters.category
-                            )?.category_name
-                            : "Tất cả"}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-gray-400"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </ListboxButton>
-
-                      <Transition
-                        show={open}
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          <ListboxOption
-                            key="all"
-                            value={null}
-                            className={({ active }) =>
-                              classNames(
-                                active
-                                  ? "bg-indigo-600 text-white"
-                                  : "text-gray-900",
-                                "relative cursor-default select-none py-2 pl-3 pr-9"
-                              )
-                            }
-                          >
-                            <span className="block truncate">Tất cả</span>
-                          </ListboxOption>
-                          {categories.map((cat) => (
-                            <ListboxOption
-                              key={cat.category_id}
-                              value={cat.category_id}
-                              className={({ active }) =>
-                                classNames(
-                                  active
-                                    ? "bg-indigo-600 text-white"
-                                    : "text-gray-900",
-                                  "relative cursor-default select-none py-2 pl-3 pr-9"
-                                )
-                              }
-                            >
-                              {({ selected }) => (
-                                <span
-                                  className={classNames(
-                                    selected ? "font-semibold" : "font-normal",
-                                    "block truncate"
-                                  )}
-                                >
-                                  {cat.category_name}
-                                </span>
-                              )}
-                            </ListboxOption>
-                          ))}
-                        </ListboxOptions>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
-            </div>
+                <MenuItem value="">Tất cả</MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             {/* Subcategory */}
-            <div className="mb-6">
-              <Listbox
-                value={tempFilters.subcategory}
-                onChange={(val) => updateTempFilter("subcategory", val)}
-                disabled={!tempFilters.category}
+            <FormControl fullWidth margin="normal" disabled={!tempFilters.category}>
+              <InputLabel>Chủng loại con</InputLabel>
+              <Select
+                value={tempFilters.subcategory ?? ""}
+                label="Chủng loại con"
+                onChange={(e) => updateTempFilter("subcategory", e.target.value || null)}
               >
-                {({ open }) => (
-                  <>
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
-                      Chủng loại con
-                    </Label>
-                    <div className="relative">
-                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50">
-                        <span className="block truncate">
-                          {tempFilters.subcategory
-                            ? filteredSubcategories.find(
-                              (c) =>
-                                c.subcategory_id === tempFilters.subcategory
-                            )?.subcategory_name
-                            : "Tất cả"}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-gray-400"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </ListboxButton>
-
-                      <Transition
-                        show={open}
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          <ListboxOption
-                            key="all"
-                            value={null}
-                            className={({ active }) =>
-                              classNames(
-                                active
-                                  ? "bg-indigo-600 text-white"
-                                  : "text-gray-900",
-                                "relative cursor-default select-none py-2 pl-3 pr-9"
-                              )
-                            }
-                          >
-                            <span className="block truncate">Tất cả</span>
-                          </ListboxOption>
-                          {filteredSubcategories.map((subcat) => (
-                            <ListboxOption
-                              key={subcat.subcategory_id}
-                              value={subcat.subcategory_id}
-                              className={({ active }) =>
-                                classNames(
-                                  active
-                                    ? "bg-indigo-600 text-white"
-                                    : "text-gray-900",
-                                  "relative cursor-default select-none py-2 pl-3 pr-9"
-                                )
-                              }
-                            >
-                              {({ selected }) => (
-                                <span
-                                  className={classNames(
-                                    selected ? "font-semibold" : "font-normal",
-                                    "block truncate"
-                                  )}
-                                >
-                                  {subcat.subcategory_name}
-                                </span>
-                              )}
-                            </ListboxOption>
-                          ))}
-                        </ListboxOptions>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
-            </div>
+                <MenuItem value="">Tất cả</MenuItem>
+                {filteredSubcategories.map((subcat) => (
+                  <MenuItem key={subcat.subcategory_id} value={subcat.subcategory_id}>
+                    {subcat.subcategory_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             {/* Rating */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <Box sx={{ my: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
                 Đánh giá tối thiểu
-              </label>
+              </Typography>
               <ReactStars
                 count={5}
                 size={30}
@@ -796,82 +360,120 @@ const Search = () => {
                 isHalf={false}
                 onChange={(newRating) => updateTempFilter("rating", newRating)}
               />
-            </div>
+            </Box>
 
             {/* Sort */}
-            <div>
-              <Listbox
-                value={tempFilters.sort}
-                onChange={(val) => updateTempFilter("sort", val)}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Sắp xếp</InputLabel>
+              <Select
+                value={tempFilters.sort.value}
+                label="Sắp xếp"
+                onChange={(e) => {
+                  const selectedSort = sortOptions.find((so) => so.value === e.target.value);
+                  updateTempFilter("sort", selectedSort || sortOptions[0]);
+                }}
               >
-                {({ open }) => (
-                  <>
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sắp xếp
-                    </Label>
-                    <div className="relative">
-                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <span className="block truncate">
-                          {tempFilters.sort.name}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-gray-400"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </ListboxButton>
+                {sortOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-                      <Transition
-                        show={open}
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                      >
-                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {sortOptions.map((opt) => (
-                            <ListboxOption
-                              key={opt.value}
-                              value={opt}
-                              className={({ active }) =>
-                                classNames(
-                                  active
-                                    ? "bg-indigo-600 text-white"
-                                    : "text-gray-900",
-                                  "relative cursor-default select-none py-2 pl-3 pr-9"
-                                )
-                              }
-                            >
-                              {({ selected }) => (
-                                <span
-                                  className={classNames(
-                                    selected ? "font-semibold" : "font-normal",
-                                    "block truncate"
-                                  )}
-                                >
-                                  {opt.name}
-                                </span>
-                              )}
-                            </ListboxOption>
-                          ))}
-                        </ListboxOptions>
-                      </Transition>
-                    </div>
-                  </>
-                )}
-              </Listbox>
-            </div>
+            {/* Apply button */}
+            <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
+              <Button variant="contained" onClick={() => {
+                applyFilters();
+                setMobileFiltersOpen(false);
+              }}>
+                Áp dụng
+              </Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+
+        {/* Desktop filter */}
+        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
+          <aside className="hidden lg:block w-72 shrink-0">
+            <Typography variant="h6" gutterBottom>
+              Bộ lọc
+            </Typography>
+
+            {/* Category */}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Chủng loại</InputLabel>
+              <Select
+                value={tempFilters.category ?? ""}
+                label="Chủng loại"
+                onChange={(e) => updateTempFilter("category", e.target.value || null)}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {categories.map((cat) => (
+                  <MenuItem key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Subcategory */}
+            <FormControl fullWidth margin="normal" disabled={!tempFilters.category}>
+              <InputLabel>Chủng loại con</InputLabel>
+              <Select
+                value={tempFilters.subcategory ?? ""}
+                label="Chủng loại con"
+                onChange={(e) => updateTempFilter("subcategory", e.target.value || null)}
+              >
+                <MenuItem value="">Tất cả</MenuItem>
+                {filteredSubcategories.map((subcat) => (
+                  <MenuItem key={subcat.subcategory_id} value={subcat.subcategory_id}>
+                    {subcat.subcategory_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Rating */}
+            <Box sx={{ my: 2 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Đánh giá tối thiểu
+              </Typography>
+              <ReactStars
+                count={5}
+                size={30}
+                activeColor="#2563eb"
+                value={tempFilters.rating}
+                isHalf={false}
+                onChange={(newRating) => updateTempFilter("rating", newRating)}
+              />
+            </Box>
+
+            {/* Sort */}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Sắp xếp</InputLabel>
+              <Select
+                value={tempFilters.sort.value}
+                label="Sắp xếp"
+                onChange={(e) => {
+                  const selectedSort = sortOptions.find((so) => so.value === e.target.value);
+                  updateTempFilter("sort", selectedSort || sortOptions[0]);
+                }}
+              >
+                {sortOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             {/* Apply button desktop */}
-            <div className="mt-6">
-              <button
-                onClick={applyFilters}
-                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
-              >
+            <Box sx={{ mt: 3 }}>
+              <Button variant="contained" fullWidth onClick={applyFilters}>
                 Áp dụng
-              </button>
-            </div>
+              </Button>
+            </Box>
           </aside>
 
           {/* Product List and Pagination */}
@@ -902,7 +504,8 @@ const Search = () => {
                   )}
                 </div>
 
-                <Pagination currentPage={filters.page}
+                <Pagination
+                  currentPage={filters.page}
                   totalPages={Math.ceil(totalProducts / filters.limit)}
                   onPageChange={onPageChange}
                 />
