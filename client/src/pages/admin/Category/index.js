@@ -1,9 +1,9 @@
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import React, { useEffect, useState } from "react";
-import CategoryAPI from "../../../api/categoryApi";
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from 'react';
+import CategoryAPI from '../../../api/categoryApi';
+import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 
 const Category = () => {
@@ -17,7 +17,6 @@ const Category = () => {
     };
     fetchCategories();
   }, []);
-
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -34,17 +33,17 @@ const Category = () => {
         // Xóa khỏi danh sách hiển thị
         setCategories(categories.filter((category) => category.category_id !== id));
       } catch (error) {
-        console.error("Lỗi khi xóa danh mục:", error);
+        console.error('Lỗi khi xóa danh mục:', error);
         Swal.fire('Lỗi', 'Đã xảy ra lỗi khi xóa danh mục!', 'error');
       }
     }
   };
 
   return (
-    <div className='bg-[#FFFFFF] p-4 rounded-lg shadow-md'>
+    <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
       {/* Tiêu đề */}
-      <div className='flex flex-row justify-between items-center mb-4'>
-        <h1 className='text-[32px] font-bold '>Category List</h1>
+      <div className="flex flex-row justify-between items-center mb-4">
+        <h1 className="text-[32px] font-bold ">Category List</h1>
         <div>
           {/* Thêm nút điều hướng */}
           <Link to="/admin/categories/add">
@@ -53,25 +52,37 @@ const Category = () => {
         </div>
       </div>
 
-      <DataTable value={categories} paginator rows={10} showGridlines paginatorTemplate="PrevPageLink PageLinks NextPageLink">
-        <Column field="category_id" header="ID" sortable headerClassName='bg-[#d2d4d6]'></Column>
-        <Column field="category_name" header="Tên Danh Mục" sortable headerClassName='bg-[#d2d4d6]'></Column>
-        <Column field="description" header="Mô Tả" sortable headerClassName='bg-[#d2d4d6]'></Column>
+      <DataTable
+        value={categories}
+        paginator
+        rows={10}
+        showGridlines
+        paginatorTemplate="PrevPageLink PageLinks NextPageLink"
+      >
+        <Column field="category_id" header="ID" sortable headerClassName="bg-[#d2d4d6]"></Column>
+        <Column
+          field="category_name"
+          header="Tên Danh Mục"
+          sortable
+          headerClassName="bg-[#d2d4d6]"
+        ></Column>
+        <Column field="description" header="Mô Tả" sortable headerClassName="bg-[#d2d4d6]"></Column>
         <Column
           body={(rowData) => (
-            <div className='flex flex-row gap-2'>
+            <div className="flex flex-row gap-2">
               <Link to={`/admin/categories/edit/${rowData.category_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">
-                  Edit
-                </button>
+                <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
-              <button onClick={() => handleDelete(rowData.category_id)} className="bg-red-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={() => handleDelete(rowData.category_id)}
+                className="bg-red-500 text-white px-4 py-2 rounded"
+              >
                 Delete
               </button>
             </div>
           )}
           header="Actions"
-          headerClassName='bg-[#d2d4d6]'
+          headerClassName="bg-[#d2d4d6]"
         ></Column>
       </DataTable>
     </div>

@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import promotionApi from "../../../api/promotionApi";
-import { useNavigate, useParams } from "react-router";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import promotionApi from '../../../api/promotionApi';
+import { useNavigate, useParams } from 'react-router';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 const EditPromotion = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const { id } = useParams();
-  const [promotionCode, setPromotionCode] = useState("");
-  const [discount, setDiscount] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [description, setDescription] = useState("");
+  const [promotionCode, setPromotionCode] = useState('');
+  const [discount, setDiscount] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [description, setDescription] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -27,17 +27,17 @@ const EditPromotion = () => {
         startDate,
         endDate,
         description,
-        user.token
+        user.token,
       );
 
       await Swal.fire({
-        icon: "success",
-        title: "Cập nhật thành công!",
-        text: "Mã giảm giá đã được cập nhật.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Mã giảm giá đã được cập nhật.',
+        confirmButtonText: 'OK',
       });
 
-      navigate("/admin/promotions");
+      navigate('/admin/promotions');
     } catch (err) {
       console.error(err);
     }
@@ -49,8 +49,8 @@ const EditPromotion = () => {
         const data = await promotionApi.getPromotionById(id);
         setPromotionCode(data.promotion_code);
         setDiscount(data.discount);
-        setStartDate(data.start_date.split("T")[0]);
-        setEndDate(data.end_date.split("T")[0]);
+        setStartDate(data.start_date.split('T')[0]);
+        setEndDate(data.end_date.split('T')[0]);
         setDescription(data.description);
       } catch (err) {
         console.error(err);
@@ -131,10 +131,7 @@ const EditPromotion = () => {
                 />
               </div>
               <div className="flex items-center justify-between mt-4">
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-500 text-white px-4 py-2 rounded"
-                >
+                <Button type="submit" className="w-full bg-blue-500 text-white px-4 py-2 rounded">
                   Update Promotion
                 </Button>
               </div>

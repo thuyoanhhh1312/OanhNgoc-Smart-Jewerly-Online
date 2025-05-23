@@ -1,11 +1,11 @@
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import React, { useEffect, useState } from "react";
-import PromotionAPI from "../../../api/promotionApi"; // Đường dẫn đến file promotionApi.js
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
-import dayjs from "dayjs";
-import Swal from "sweetalert2";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import React, { useEffect, useState } from 'react';
+import PromotionAPI from '../../../api/promotionApi'; // Đường dẫn đến file promotionApi.js
+import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
+import dayjs from 'dayjs';
+import Swal from 'sweetalert2';
 
 const Promotion = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -21,12 +21,12 @@ const Promotion = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Bạn chắc chắn muốn xóa?",
-      text: "Thao tác này không thể hoàn tác!",
-      icon: "warning",
+      title: 'Bạn chắc chắn muốn xóa?',
+      text: 'Thao tác này không thể hoàn tác!',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "OK",
-      cancelButtonText: "HỦY",
+      confirmButtonText: 'OK',
+      cancelButtonText: 'HỦY',
     });
 
     if (result.isConfirmed) {
@@ -35,10 +35,10 @@ const Promotion = () => {
 
         setPromotions(promotions.filter((pro) => pro.promotion_id !== id));
 
-        Swal.fire("Đã xóa!", "Danh mục đã được xóa thành công.", "success");
+        Swal.fire('Đã xóa!', 'Danh mục đã được xóa thành công.', 'success');
       } catch (error) {
-        console.error("Lỗi khi xóa danh mục:", error);
-        Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa danh mục!", "error");
+        console.error('Lỗi khi xóa danh mục:', error);
+        Swal.fire('Lỗi', 'Đã xảy ra lỗi khi xóa danh mục!', 'error');
       }
     }
   };
@@ -48,9 +48,7 @@ const Promotion = () => {
     return (
       <div>
         {start_date ? (
-          <p className="text-gray-700">
-            {dayjs(start_date).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
+          <p className="text-gray-700">{dayjs(start_date).format('DD/MM/YYYY HH:mm:ss')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -63,9 +61,7 @@ const Promotion = () => {
     return (
       <div>
         {endDate ? (
-          <p className="text-gray-700">
-            {dayjs(endDate).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
+          <p className="text-gray-700">{dayjs(endDate).format('DD/MM/YYYY HH:mm:ss')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -96,24 +92,14 @@ const Promotion = () => {
         showGridlines
         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
       >
-        <Column
-          field="promotion_id"
-          header="ID"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        ></Column>
+        <Column field="promotion_id" header="ID" sortable headerClassName="bg-[#d2d4d6]"></Column>
         <Column
           field="promotion_code"
           header="Mã khuyến mãi"
           sortable
           headerClassName="bg-[#d2d4d6]"
         ></Column>
-        <Column
-          field="description"
-          header="Mô tả"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        ></Column>
+        <Column field="description" header="Mô tả" sortable headerClassName="bg-[#d2d4d6]"></Column>
         <Column
           field="discount"
           header="Phần trăm giảm giá"
@@ -139,9 +125,7 @@ const Promotion = () => {
           body={(rowData) => (
             <div className="flex flex-row gap-2">
               <Link to={`/admin/promotions/edit/${rowData.promotion_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">
-                  Edit
-                </button>
+                <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
               {/* Xóa nút điều hướng */}
               <button
@@ -152,8 +136,8 @@ const Promotion = () => {
               </button>
             </div>
           )}
-          headerStyle={{ width: "8rem", textAlign: "center" }}
-          bodyStyle={{ textAlign: "center" }}
+          headerStyle={{ width: '8rem', textAlign: 'center' }}
+          bodyStyle={{ textAlign: 'center' }}
           headerClassName="bg-[#d2d4d6]"
         ></Column>
       </DataTable>

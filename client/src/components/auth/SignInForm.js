@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { EyeCloseIcon, EyeIcon } from "../../icons";
-import Label from "../form/Label";
-import Input from "../form/input/InputField";
-import Button from "../ui/button/Button";
-import { ToastContainer, toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../../api/auth";
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { EyeCloseIcon, EyeIcon } from '../../icons';
+import Label from '../form/Label';
+import Input from '../form/input/InputField';
+import Button from '../ui/button/Button';
+import { ToastContainer, toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../api/auth';
 
 export default function SignInForm() {
   const dispatch = useDispatch();
@@ -16,20 +16,20 @@ export default function SignInForm() {
   const { user } = useSelector((state) => ({ ...state }));
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const roleBasedRedirect = (user) => {
     let intended = location.state;
-    console.log("user", user);
+    console.log('user', user);
 
     if (intended) {
       navigate(intended.from);
     } else {
       if (user.role_id === 1 || user.role_id === 3) {
-        navigate("/admin/categories");
+        navigate('/admin/categories');
       } else {
-        navigate("/");
+        navigate('/');
       }
     }
   };
@@ -38,28 +38,27 @@ export default function SignInForm() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Vui lòng nhập email và mật khẩu.");
+      toast.error('Vui lòng nhập email và mật khẩu.');
       return;
     }
 
     try {
       const res = await login({ email, password });
-      console.log("res", res);
-
+      console.log('res', res);
 
       const userData = {
         ...res.data.user,
         token: res.data.accessToken,
-        refreshToken: res.data.refreshToken
+        refreshToken: res.data.refreshToken,
       };
 
-      dispatch({ type: "LOGGED_IN_USER", payload: userData });
-      localStorage.setItem("user", JSON.stringify(userData));
+      dispatch({ type: 'LOGGED_IN_USER', payload: userData });
+      localStorage.setItem('user', JSON.stringify(userData));
 
-      toast.success("Đăng nhập thành công!");
+      toast.success('Đăng nhập thành công!');
       roleBasedRedirect(res.data.user);
     } catch (err) {
-      const msg = err.response?.data?.message || "Đăng nhập thất bại.";
+      const msg = err.response?.data?.message || 'Đăng nhập thất bại.';
       toast.error(msg);
     }
   };
@@ -88,7 +87,9 @@ export default function SignInForm() {
           <form onSubmit={handleSubmit} method="POST">
             <div className="space-y-6">
               <div>
-                <Label>Email <span className="text-error-500">*</span></Label>
+                <Label>
+                  Email <span className="text-error-500">*</span>
+                </Label>
                 <Input
                   type="text"
                   name="email"
@@ -99,10 +100,12 @@ export default function SignInForm() {
                 />
               </div>
               <div>
-                <Label>Password <span className="text-error-500">*</span></Label>
+                <Label>
+                  Password <span className="text-error-500">*</span>
+                </Label>
                 <div className="relative">
                   <Input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     id="password"
                     placeholder="Enter your password"
@@ -132,14 +135,16 @@ export default function SignInForm() {
               </div>
 
               <div>
-                <Button className="w-full" type="submit">Sign in</Button>
+                <Button className="w-full" type="submit">
+                  Sign in
+                </Button>
               </div>
             </div>
           </form>
 
           <div className="mt-5">
             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <Link
                 to="/signup"
                 className="text-brand-500 hover:text-brand-600 dark:text-brand-400"

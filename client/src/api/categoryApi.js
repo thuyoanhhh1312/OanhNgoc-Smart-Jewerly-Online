@@ -1,31 +1,35 @@
-import axios from "axios";
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getCategories = async () => {
   try {
     const response = await axios.get(`${API_URL}/categories`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error('Error fetching categories:', error);
     throw error;
   }
 };
 
 const createCategory = async (categoryName, description, accessToken) => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/categories`, {
-      category_name: categoryName,
-      description: description,
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const response = await axiosInstance.post(
+      `${API_URL}/categories`,
+      {
+        category_name: categoryName,
+        description: description,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
     return response.data;
   } catch (error) {
-    console.error("Error creating category:", error);
+    console.error('Error creating category:', error);
     throw error;
   }
 };
@@ -35,27 +39,31 @@ const getCategoryById = async (id) => {
     const response = await axios.get(`${API_URL}/categories/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching category by ID:", error);
+    console.error('Error fetching category by ID:', error);
     throw error;
   }
-}
+};
 
 const updateCategory = async (id, categoryName, description, accessToken) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/categories/${id}`, {
-      category_name: categoryName,
-      description: description,
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      }
-    });
+    const response = await axiosInstance.put(
+      `${API_URL}/categories/${id}`,
+      {
+        category_name: categoryName,
+        description: description,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
     return response.data;
   } catch (error) {
-    console.error("Error updating category:", error);
+    console.error('Error updating category:', error);
     throw error;
   }
-}
+};
 
 // Xóa sản phẩm
 const deleteCategory = async (id, accessToken) => {
@@ -63,11 +71,11 @@ const deleteCategory = async (id, accessToken) => {
     const response = await axiosInstance.delete(`${API_URL}/categories/${id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-      }
+      },
     });
     return response.data;
   } catch (error) {
-    console.error("Error deleting category:", error);
+    console.error('Error deleting category:', error);
     throw error;
   }
 };
@@ -77,5 +85,5 @@ export default {
   createCategory,
   getCategoryById,
   updateCategory,
-  deleteCategory
+  deleteCategory,
 };

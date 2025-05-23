@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import { useNavigate } from "react-router";
-import subCategoryApi from "../../../api/subCategoryApi";
-import categoryApi from "../../../api/categoryApi";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useState, useEffect } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import { useNavigate } from 'react-router';
+import subCategoryApi from '../../../api/subCategoryApi';
+import categoryApi from '../../../api/categoryApi';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 const AddSubCategory = () => {
   const { user } = useSelector((state) => ({ ...state }));
-  const [subCategoryName, setSubCategoryName] = useState("");
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [subCategoryName, setSubCategoryName] = useState('');
+  const [description, setDescription] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
 
@@ -24,7 +24,7 @@ const AddSubCategory = () => {
         const data = await categoryApi.getCategories();
         setCategories(data);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        console.error('Error fetching categories:', error);
       }
     };
     fetchCategories();
@@ -34,10 +34,9 @@ const AddSubCategory = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!subCategoryName.trim())
-      newErrors.subCategoryName = "Subcategory name is required.";
-    if (!description.trim()) newErrors.description = "Description is required.";
-    if (!categoryId) newErrors.categoryId = "Please select a category.";
+    if (!subCategoryName.trim()) newErrors.subCategoryName = 'Subcategory name is required.';
+    if (!description.trim()) newErrors.description = 'Description is required.';
+    if (!categoryId) newErrors.categoryId = 'Please select a category.';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -51,26 +50,26 @@ const AddSubCategory = () => {
         subCategoryName.trim(),
         description.trim(),
         Number(categoryId),
-        user?.token
+        user?.token,
       );
 
-      setSubCategoryName("");
-      setDescription("");
-      setCategoryId("");
+      setSubCategoryName('');
+      setDescription('');
+      setCategoryId('');
       Swal.fire({
-        icon: "success",
-        title: "Thành công!",
-        text: "Danh mục con đã được thêm thành công.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Thành công!',
+        text: 'Danh mục con đã được thêm thành công.',
+        confirmButtonText: 'OK',
       });
-      navigate("/admin/subcategories");
+      navigate('/admin/subcategories');
     } catch (error) {
-      console.error("Error creating subcategory:", error);
+      console.error('Error creating subcategory:', error);
       Swal.fire({
-        icon: "error",
-        title: "Thất bại!",
-        text: "Có lỗi xảy ra khi thêm danh mục con.",
-        confirmButtonText: "OK",
+        icon: 'error',
+        title: 'Thất bại!',
+        text: 'Có lỗi xảy ra khi thêm danh mục con.',
+        confirmButtonText: 'OK',
       });
     }
   };
@@ -92,12 +91,10 @@ const AddSubCategory = () => {
                 placeholder="Subcategory Name"
                 value={subCategoryName}
                 onChange={(e) => setSubCategoryName(e.target.value)}
-                className={errors.subCategoryName ? "border-red-500" : ""}
+                className={errors.subCategoryName ? 'border-red-500' : ''}
               />
               {errors.subCategoryName && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.subCategoryName}
-                </p>
+                <p className="text-sm text-red-500 mt-1">{errors.subCategoryName}</p>
               )}
             </div>
 
@@ -113,12 +110,10 @@ const AddSubCategory = () => {
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className={errors.description ? "border-red-500" : ""}
+                className={errors.description ? 'border-red-500' : ''}
               />
               {errors.description && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.description}
-                </p>
+                <p className="text-sm text-red-500 mt-1">{errors.description}</p>
               )}
             </div>
 
@@ -132,16 +127,11 @@ const AddSubCategory = () => {
                 id="category_id"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className={`w-full p-2 border rounded ${
-                  errors.categoryId ? "border-red-500" : ""
-                }`}
+                className={`w-full p-2 border rounded ${errors.categoryId ? 'border-red-500' : ''}`}
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
-                  <option
-                    key={category.category_id}
-                    value={category.category_id}
-                  >
+                  <option key={category.category_id} value={category.category_id}>
                     {category.category_name}
                   </option>
                 ))}

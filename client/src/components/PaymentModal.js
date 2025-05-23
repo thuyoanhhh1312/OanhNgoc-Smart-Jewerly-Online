@@ -1,5 +1,5 @@
-import React from "react";
-import { QRCodeCanvas } from "qrcode.react";
+import React from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 const PaymentModal = ({ show, onClose, name, bankAccount, amount, orderId }) => {
   if (!show) return null;
@@ -19,10 +19,7 @@ const PaymentModal = ({ show, onClose, name, bankAccount, amount, orderId }) => 
 
         <QRCodeCanvas value={qrValue} size={200} />
 
-        <button
-          className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full"
-          onClick={onClose}
-        >
+        <button className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full" onClick={onClose}>
           Đóng
         </button>
       </div>

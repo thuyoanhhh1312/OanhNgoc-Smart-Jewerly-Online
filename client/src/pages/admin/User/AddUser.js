@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createUser } from "../../../api/userApi";
-import Swal from "sweetalert2";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { createUser } from '../../../api/userApi';
+import Swal from 'sweetalert2';
 
 const AddUser = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role_id: "3", // mặc định là staff (ví dụ)
+    name: '',
+    email: '',
+    password: '',
+    role_id: '3', // mặc định là staff (ví dụ)
   });
 
   const handleChange = (e) => {
@@ -21,24 +21,24 @@ const AddUser = () => {
     e.preventDefault();
 
     // Lấy token từ localStorage
-    const token = JSON.parse(localStorage.getItem("user"))?.token;
+    const token = JSON.parse(localStorage.getItem('user'))?.token;
 
     try {
       await createUser(form, token);
       Swal.fire({
-        icon: "success",
-        title: "Thành công",
-        text: "Thêm nhân viên thành công!",
+        icon: 'success',
+        title: 'Thành công',
+        text: 'Thêm nhân viên thành công!',
         timer: 2000,
         timerProgressBar: true,
         showConfirmButton: false,
       });
-      navigate("/admin/user");
+      navigate('/admin/user');
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "Lỗi",
-        text: error.response?.data?.message || "Thêm nhân viên thất bại!",
+        icon: 'error',
+        title: 'Lỗi',
+        text: error.response?.data?.message || 'Thêm nhân viên thất bại!',
       });
     }
   };
@@ -101,7 +101,7 @@ const AddUser = () => {
       <div className="flex justify-between">
         <button
           type="button"
-          onClick={() => navigate("/admin/user")}
+          onClick={() => navigate('/admin/user')}
           className="px-4 py-2 bg-gray-300 rounded"
         >
           Hủy

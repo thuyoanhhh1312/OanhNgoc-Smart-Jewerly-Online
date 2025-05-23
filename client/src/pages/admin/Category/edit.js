@@ -1,44 +1,39 @@
-import React, { useState, useEffect } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import categoryApi from "../../../api/categoryApi";
-import { useNavigate, useParams } from "react-router";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useState, useEffect } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import categoryApi from '../../../api/categoryApi';
+import { useNavigate, useParams } from 'react-router';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 const EditCategory = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const { id } = useParams();
-  const [categoryName, setCategoryName] = useState("");
-  const [description, setDescription] = useState("");
+  const [categoryName, setCategoryName] = useState('');
+  const [description, setDescription] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await categoryApi.updateCategory(
-        id,
-        categoryName,
-        description,
-        user?.token
-      );
+      await categoryApi.updateCategory(id, categoryName, description, user?.token);
 
       await Swal.fire({
-        icon: "success",
-        title: "Cập nhật thành công!",
-        text: "Danh mục đã được cập nhật.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Danh mục đã được cập nhật.',
+        confirmButtonText: 'OK',
       });
 
-      navigate("/admin/categories");
+      navigate('/admin/categories');
     } catch (err) {
       console.error(err);
       await Swal.fire({
-        icon: "error",
-        title: "Cập nhật thất bại!",
-        text: "Có lỗi xảy ra khi cập nhật danh mục.",
-        confirmButtonText: "OK",
+        icon: 'error',
+        title: 'Cập nhật thất bại!',
+        text: 'Có lỗi xảy ra khi cập nhật danh mục.',
+        confirmButtonText: 'OK',
       });
     }
   };

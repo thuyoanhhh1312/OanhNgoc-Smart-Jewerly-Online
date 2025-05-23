@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import categoryApi from "../../../api/categoryApi";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import categoryApi from '../../../api/categoryApi';
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const Header = () => {
         const data = await categoryApi.getCategories();
         setCategories(data);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách category:", error);
+        console.error('Lỗi khi lấy danh sách category:', error);
       } finally {
         setLoadingCategories(false);
       }
@@ -27,7 +27,7 @@ const Header = () => {
   };
 
   const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter" && searchValue.trim()) {
+    if (e.key === 'Enter' && searchValue.trim()) {
       navigate(`/search?keyword=${encodeURIComponent(searchValue.trim())}`);
     }
   };
@@ -37,7 +37,7 @@ const Header = () => {
   };
 
   const handlePromotionClick = () => {
-    navigate("/promotions");
+    navigate('/promotions');
   };
 
   return (

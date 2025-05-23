@@ -1,5 +1,5 @@
-import React from "react";
-import CountWithControls from "./CountWithControls";
+import React from 'react';
+import CountWithControls from './CountWithControls';
 
 const CartCard = ({ item, onSelectItem, onQuantityChange, onDeleteItem }) => {
   const handleIncrease = () => {
@@ -42,7 +42,7 @@ const CartCard = ({ item, onSelectItem, onQuantityChange, onDeleteItem }) => {
               src={
                 item.ProductImages && item.ProductImages.length > 0
                   ? item.ProductImages[0].image_url
-                  : ""
+                  : ''
               }
               alt={item.product_name}
               className="w-[80px] h-[80px] object-cover"
@@ -60,9 +60,9 @@ const CartCard = ({ item, onSelectItem, onQuantityChange, onDeleteItem }) => {
                 />
               </div>
               <p className="font-bold text-[#C58C46] my-[5px]">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
+                {new Intl.NumberFormat('vi-VN', {
+                  style: 'currency',
+                  currency: 'VND',
                 }).format(item.price)}
               </p>
             </div>

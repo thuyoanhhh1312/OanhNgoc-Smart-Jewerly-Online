@@ -1,6 +1,6 @@
-import PageMeta from "../../components/admin/common/PageMeta";
-import AuthLayout from "./AuthPageLayout";
-import SignUpForm from "../../components/auth/SignUpForm";
+import PageMeta from '../../components/admin/common/PageMeta';
+import AuthLayout from './AuthPageLayout';
+import SignUpForm from '../../components/auth/SignUpForm';
 
 export default function SignUp() {
   return (

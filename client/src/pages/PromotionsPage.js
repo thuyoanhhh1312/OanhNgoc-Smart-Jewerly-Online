@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import promotionApi from "../api/promotionApi"; // import api khuyến mãi của bạn
-import MainLayout from "../layout/MainLayout";
-import dayjs from "dayjs";
+import React, { useEffect, useState } from 'react';
+import promotionApi from '../api/promotionApi'; // import api khuyến mãi của bạn
+import MainLayout from '../layout/MainLayout';
+import dayjs from 'dayjs';
 const PromotionsPage = () => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ const PromotionsPage = () => {
         const data = await promotionApi.getPromotions();
         setPromotions(data);
       } catch (err) {
-        setError("Lỗi khi tải danh sách khuyến mãi.");
+        setError('Lỗi khi tải danh sách khuyến mãi.');
       } finally {
         setLoading(false);
       }
@@ -26,9 +26,7 @@ const PromotionsPage = () => {
     return (
       <div>
         {start_date ? (
-          <p className="text-gray-700">
-            {dayjs(start_date).format("DD/MM/YYYY ")}
-          </p>
+          <p className="text-gray-700">{dayjs(start_date).format('DD/MM/YYYY ')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -41,9 +39,7 @@ const PromotionsPage = () => {
     return (
       <div>
         {endDate ? (
-          <p className="text-gray-700">
-            {dayjs(endDate).format("DD/MM/YYYY ")}
-          </p>
+          <p className="text-gray-700">{dayjs(endDate).format('DD/MM/YYYY ')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -82,12 +78,8 @@ const PromotionsPage = () => {
               <tr key={promo.id || promo.promotion_id}>
                 <td className="border px-4 py-2">{promo.promotion_code}</td>
                 <td className="border px-4 py-2">{promo.discount}%</td>
-                <td className="border px-4 py-2">
-                  {startDateBodyTemplate(promo)}
-                </td>
-                <td className="border px-4 py-2">
-                  {endDateBodyTemplate(promo)}
-                </td>
+                <td className="border px-4 py-2">{startDateBodyTemplate(promo)}</td>
+                <td className="border px-4 py-2">{endDateBodyTemplate(promo)}</td>
               </tr>
             ))}
           </tbody>

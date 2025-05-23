@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getUserById, getRoles, updateUser } from "../../../api/userApi";
-import Swal from "sweetalert2"; // import SweetAlert2
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getUserById, getRoles, updateUser } from '../../../api/userApi';
+import Swal from 'sweetalert2'; // import SweetAlert2
 
 const EditUser = () => {
   const { id } = useParams();
@@ -9,7 +9,7 @@ const EditUser = () => {
 
   const [user, setUser] = useState(null);
   const [roles, setRoles] = useState([]);
-  const [selectedRoleId, setSelectedRoleId] = useState("");
+  const [selectedRoleId, setSelectedRoleId] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,16 +17,16 @@ const EditUser = () => {
       try {
         const userData = await getUserById(id);
         setUser(userData);
-        setSelectedRoleId(userData.role_id || "");
+        setSelectedRoleId(userData.role_id || '');
 
         const roleData = await getRoles();
         setRoles(roleData);
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
+        console.error('Lỗi khi tải dữ liệu:', error);
         Swal.fire({
-          icon: "error",
-          title: "Lỗi!",
-          text: "Lỗi khi tải dữ liệu người dùng",
+          icon: 'error',
+          title: 'Lỗi!',
+          text: 'Lỗi khi tải dữ liệu người dùng',
         });
       } finally {
         setLoading(false);
@@ -38,26 +38,26 @@ const EditUser = () => {
 
   const handleSave = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.token;
+      const token = JSON.parse(localStorage.getItem('user'))?.token;
 
       await updateUser(id, user.name, user.email, selectedRoleId, token);
 
       await Swal.fire({
-        icon: "success",
-        title: "Thành công",
-        text: "Cập nhật thành công!",
+        icon: 'success',
+        title: 'Thành công',
+        text: 'Cập nhật thành công!',
         timer: 2000,
         timerProgressBar: true,
-        confirmButtonText: "OK",
+        confirmButtonText: 'OK',
       });
 
-      navigate("/admin/user");
+      navigate('/admin/user');
     } catch (error) {
-      console.error("Lỗi cập nhật user:", error);
+      console.error('Lỗi cập nhật user:', error);
       Swal.fire({
-        icon: "error",
-        title: "Thất bại",
-        text: "Cập nhật thất bại!",
+        icon: 'error',
+        title: 'Thất bại',
+        text: 'Cập nhật thất bại!',
       });
     }
   };
@@ -66,9 +66,7 @@ const EditUser = () => {
 
   return (
     <div className="p-4 max-w-full mx-auto bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">
-        Chỉnh sửa Role cho {user.name}
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">Chỉnh sửa Role cho {user.name}</h2>
 
       <div className="mb-4">
         <label className="block mb-1 font-medium">Email</label>
@@ -89,7 +87,7 @@ const EditUser = () => {
         >
           <option value="">-- Chọn role --</option>
           {roles
-            .filter((role) => role.name === "admin" || role.name === "staff")
+            .filter((role) => role.name === 'admin' || role.name === 'staff')
             .map((role) => (
               <option key={role.id} value={role.id}>
                 {role.name}
@@ -99,17 +97,11 @@ const EditUser = () => {
       </div>
 
       <div className="flex justify-between">
-        <button
-          onClick={() => navigate("/admin/user")}
-          className="px-4 py-2 bg-gray-300 rounded"
-        >
+        <button onClick={() => navigate('/admin/user')} className="px-4 py-2 bg-gray-300 rounded">
           Hủy
         </button>
 
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
+        <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">
           Lưu
         </button>
       </div>

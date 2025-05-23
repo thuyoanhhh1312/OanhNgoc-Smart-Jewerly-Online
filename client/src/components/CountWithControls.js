@@ -1,13 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-const CountWithControls = ({
-  quantity,
-  onIncrease,
-  onDecrease,
-  onChange,
-  min = 1,
-  max = 9999,
-}) => {
+const CountWithControls = ({ quantity, onIncrease, onDecrease, onChange, min = 1, max = 9999 }) => {
   const [inputValue, setInputValue] = useState(quantity.toString());
 
   useEffect(() => {
@@ -17,8 +10,8 @@ const CountWithControls = ({
   const handleInputChange = (e) => {
     const val = e.target.value;
 
-    if (val === "") {
-      setInputValue("");
+    if (val === '') {
+      setInputValue('');
       return;
     }
 
@@ -33,7 +26,7 @@ const CountWithControls = ({
   };
 
   const handleInputBlur = () => {
-    if (inputValue === "" || parseInt(inputValue, 10) < min) {
+    if (inputValue === '' || parseInt(inputValue, 10) < min) {
       setInputValue(min.toString());
       onChange(min);
     } else {
@@ -42,7 +35,7 @@ const CountWithControls = ({
   };
 
   const handleInputKeyDown = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.target.blur();
     }
   };
@@ -54,10 +47,11 @@ const CountWithControls = ({
         aria-label="Giảm số lượng"
         onClick={onDecrease}
         disabled={quantity <= min}
-        className={`flex-none h-9 px-2 py-0 text-lg font-bold leading-none transition-colors duration-150 ${quantity <= min
-            ? "text-gray-400 cursor-not-allowed bg-gray-100"
-            : "text-gray-700 hover:bg-gray-200"
-          }`}
+        className={`flex-none h-9 px-2 py-0 text-lg font-bold leading-none transition-colors duration-150 ${
+          quantity <= min
+            ? 'text-gray-400 cursor-not-allowed bg-gray-100'
+            : 'text-gray-700 hover:bg-gray-200'
+        }`}
       >
         −
       </button>
@@ -79,10 +73,11 @@ const CountWithControls = ({
         aria-label="Tăng số lượng"
         onClick={onIncrease}
         disabled={quantity >= max}
-        className={`flex-none h-9  px-2 py-0 text-lg font-bold leading-none transition-colors duration-150 ${quantity >= max
-            ? "text-gray-400 cursor-not-allowed bg-gray-100"
-            : "text-gray-700 hover:bg-gray-200"
-          }`}
+        className={`flex-none h-9  px-2 py-0 text-lg font-bold leading-none transition-colors duration-150 ${
+          quantity >= max
+            ? 'text-gray-400 cursor-not-allowed bg-gray-100'
+            : 'text-gray-700 hover:bg-gray-200'
+        }`}
       >
         +
       </button>

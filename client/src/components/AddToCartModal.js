@@ -15,16 +15,16 @@ const AddToCartModal = ({ product, onClose, onConfirm }) => {
         <h3 className="text-lg font-bold mb-3">Thêm vào giỏ hàng</h3>
         <div className="flex items-center gap-4">
           <img
-            src={product?.ProductImages?.[0]?.image_url || ""}
+            src={product?.ProductImages?.[0]?.image_url || ''}
             alt={product?.product_name}
             className="w-20 h-20 object-cover rounded border"
           />
           <div>
             <p className="font-semibold">{product?.product_name}</p>
             <p className="text-yellow-700">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
+              {new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
               }).format(product?.price)}
             </p>
           </div>
@@ -40,8 +40,12 @@ const AddToCartModal = ({ product, onClose, onConfirm }) => {
           />
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 bg-gray-300 rounded">Hủy</button>
-          <button onClick={handleConfirm} className="px-4 py-2 bg-blue-600 text-white rounded">Xác nhận</button>
+          <button onClick={onClose} className="px-3 py-2 bg-gray-300 rounded">
+            Hủy
+          </button>
+          <button onClick={handleConfirm} className="px-4 py-2 bg-blue-600 text-white rounded">
+            Xác nhận
+          </button>
         </div>
       </div>
     </div>

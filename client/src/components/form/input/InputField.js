@@ -1,13 +1,13 @@
-import React from "react";
+import React from 'react';
 
 const Input = ({
-  type = "text",
+  type = 'text',
   id,
   name,
   placeholder,
   value,
   onChange,
-  className = "",
+  className = '',
   min,
   max,
   step,
@@ -47,11 +47,7 @@ const Input = ({
       {hint && (
         <p
           className={`mt-1.5 text-xs ${
-            error
-              ? "text-error-500"
-              : success
-              ? "text-success-500"
-              : "text-gray-500"
+            error ? 'text-error-500' : success ? 'text-success-500' : 'text-gray-500'
           }`}
         >
           {hint}

@@ -1,8 +1,7 @@
-import axios from "axios";
-import axiosInstance from "./axiosInstance";
+import axios from 'axios';
+import axiosInstance from './axiosInstance';
 
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 //  export const getCustomers = async () => {
 //     try{
 //         const response = await axios.get(`${API_URL}/customers`);
@@ -18,11 +17,10 @@ export const getCustomerById = async (id) => {
     const response = await axios.get(`${API_URL}/customers/${id}`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching customer by ID:", error);
+    console.error('Error fetching customer by ID:', error);
     throw error;
   }
 };
-
 
 // // Hàm xóa khách hàng
 // export const deleteCustomer = async (id) => {
@@ -37,7 +35,7 @@ export const getCustomerById = async (id) => {
 export const deleteCustomer = async (id, accessToken) => {
   try {
     const response = await axios.delete(`${API_URL}/customers/${id}`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     return response.data;
   } catch (error) {
@@ -46,14 +44,14 @@ export const deleteCustomer = async (id, accessToken) => {
   }
 };
 
-export const getCustomers = async (keyword = "") => {
+export const getCustomers = async (keyword = '') => {
   try {
     const response = await axios.get(`${API_URL}/customers`, {
-      params: { keyword }
+      params: { keyword },
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching customers:", error);
+    console.error('Error fetching customers:', error);
     throw error;
   }
 };

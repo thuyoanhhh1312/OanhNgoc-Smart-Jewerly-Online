@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import { useNavigate, useParams } from "react-router";
-import ProductAPI from "../../../api/productApi";
-import categoryApi from "../../../api/categoryApi";
-import subCategoryApi from "../../../api/subCategoryApi";
-import Swal from "sweetalert2";
+import React, { useState, useEffect } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import { useNavigate, useParams } from 'react-router';
+import ProductAPI from '../../../api/productApi';
+import categoryApi from '../../../api/categoryApi';
+import subCategoryApi from '../../../api/subCategoryApi';
+import Swal from 'sweetalert2';
 
 const EditProduct = () => {
   const { id } = useParams();
-  const [productName, setProductName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [subCategoryId, setSubCategoryId] = useState("");
+  const [productName, setProductName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [subCategoryId, setSubCategoryId] = useState('');
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
 
@@ -31,20 +31,20 @@ const EditProduct = () => {
           subCategoryApi.getSubCategories(),
         ]);
 
-        console.log("product", product);
+        console.log('product', product);
 
         // 🟰 Gán dữ liệu sản phẩm vào form
-        setProductName(product.product_name || "");
-        setDescription(product.description || "");
-        setPrice(product.price || "");
-        setQuantity(product.quantity || "");
-        setCategoryId(product.category_id || "");
-        setSubCategoryId(product.subcategory_id || "");
+        setProductName(product.product_name || '');
+        setDescription(product.description || '');
+        setPrice(product.price || '');
+        setQuantity(product.quantity || '');
+        setCategoryId(product.category_id || '');
+        setSubCategoryId(product.subcategory_id || '');
 
         setCategories(categoriesData);
         setSubCategories(subCategoriesData);
       } catch (error) {
-        console.error("Error loading product:", error);
+        console.error('Error loading product:', error);
       }
     };
 
@@ -61,28 +61,28 @@ const EditProduct = () => {
         price,
         quantity,
         categoryId,
-        subCategoryId
+        subCategoryId,
       );
       await Swal.fire({
-        icon: "success",
-        title: "Cập nhật thành công!",
-        text: "Sản phẩm đã được cập nhật.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Sản phẩm đã được cập nhật.',
+        confirmButtonText: 'OK',
       });
-      navigate("/admin/products");
+      navigate('/admin/products');
     } catch (error) {
-      console.error("Error updating product:", error);
+      console.error('Error updating product:', error);
       Swal.fire({
-        icon: "error",
-        title: "Lỗi",
-        text: "Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!",
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Đã xảy ra lỗi khi cập nhật nhóm sản phẩm!',
       });
     }
   };
 
   // Lọc subcategory theo categoryId
   const filteredSubCategories = subCategories.filter(
-    (sub) => sub.category_id === Number(categoryId)
+    (sub) => sub.category_id === Number(categoryId),
   );
 
   return (
@@ -162,16 +162,13 @@ const EditProduct = () => {
                   value={categoryId}
                   onChange={(e) => {
                     setCategoryId(e.target.value);
-                    setSubCategoryId(""); // Reset Subcategory khi đổi Category
+                    setSubCategoryId(''); // Reset Subcategory khi đổi Category
                   }}
                   className="w-full p-2 border rounded"
                 >
                   <option value="">Select Category</option>
                   {categories.map((category) => (
-                    <option
-                      key={category.category_id}
-                      value={category.category_id}
-                    >
+                    <option key={category.category_id} value={category.category_id}>
                       {category.category_name}
                     </option>
                   ))}
@@ -193,10 +190,7 @@ const EditProduct = () => {
                   >
                     <option value="">Select SubCategory</option>
                     {filteredSubCategories.map((sub) => (
-                      <option
-                        key={sub.subcategory_id}
-                        value={sub.subcategory_id}
-                      >
+                      <option key={sub.subcategory_id} value={sub.subcategory_id}>
                         {sub.subcategory_name}
                       </option>
                     ))}

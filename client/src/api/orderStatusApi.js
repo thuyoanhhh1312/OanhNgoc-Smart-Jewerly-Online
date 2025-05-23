@@ -1,13 +1,13 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from './axiosInstance';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getOrderStatus = async () => {
   try {
     const response = await axiosInstance.get(`${API_URL}/order-status`);
     return response.data;
   } catch (error) {
-    console.error("Error fetching order status:", error);
+    console.error('Error fetching order status:', error);
     throw error;
   }
 };

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router";
-import SubCategoryAPI from "../../../api/subCategoryApi";
-import categoryApi from "../../../api/categoryApi";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router';
+import SubCategoryAPI from '../../../api/subCategoryApi';
+import categoryApi from '../../../api/categoryApi';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 const EditSubCategory = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -32,7 +32,7 @@ const EditSubCategory = () => {
         setCategoryId(subCategoryData.category_id || '');
         setCategories(categoriesData);
       } catch (error) {
-        console.error("Error loading subcategory:", error);
+        console.error('Error loading subcategory:', error);
       }
     };
 
@@ -43,8 +43,8 @@ const EditSubCategory = () => {
     e.preventDefault();
 
     const newErrors = {};
-    if (!subcategoryName.trim()) newErrors.subcategoryName = "Subcategory name is required.";
-    if (!categoryId) newErrors.categoryId = "Please select a category.";
+    if (!subcategoryName.trim()) newErrors.subcategoryName = 'Subcategory name is required.';
+    if (!categoryId) newErrors.categoryId = 'Please select a category.';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -54,17 +54,21 @@ const EditSubCategory = () => {
     setErrors({}); // Clear errors
 
     try {
-      await SubCategoryAPI.updateSubCategory(id, {
-        subcategory_name: subcategoryName.trim(),
-        description: description.trim(),
-        category_id: Number(categoryId),
-      }, user?.token);
+      await SubCategoryAPI.updateSubCategory(
+        id,
+        {
+          subcategory_name: subcategoryName.trim(),
+          description: description.trim(),
+          category_id: Number(categoryId),
+        },
+        user?.token,
+      );
 
       await Swal.fire({
         icon: 'success',
         title: 'Cập nhật thành công!',
         text: 'Danh mục con đã được cập nhật.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
 
       navigate('/admin/subcategories');
@@ -85,7 +89,9 @@ const EditSubCategory = () => {
           <div className="space-y-6">
             {/* SubCategory Name */}
             <div>
-              <Label>SubCategory Name <span className="text-red">*</span></Label>
+              <Label>
+                SubCategory Name <span className="text-red">*</span>
+              </Label>
               <Input
                 type="text"
                 name="Tên Danh Mục Con"
@@ -93,7 +99,7 @@ const EditSubCategory = () => {
                 placeholder="SubCategory Name"
                 value={subcategoryName}
                 onChange={(e) => setSubcategoryName(e.target.value)}
-                className={errors.subcategoryName ? "border-red-500" : ""}
+                className={errors.subcategoryName ? 'border-red-500' : ''}
               />
               {errors.subcategoryName && (
                 <p className="text-sm text-red-500 mt-1">{errors.subcategoryName}</p>
@@ -115,13 +121,15 @@ const EditSubCategory = () => {
 
             {/* Category */}
             <div>
-              <Label>Category <span className="text-red">*</span></Label>
+              <Label>
+                Category <span className="text-red">*</span>
+              </Label>
               <select
                 name="Tên Danh Mục"
                 id="category_id"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className={`w-full p-2 border rounded ${errors.categoryId ? "border-red-500" : ""}`}
+                className={`w-full p-2 border rounded ${errors.categoryId ? 'border-red-500' : ''}`}
               >
                 <option value="">Select Category</option>
                 {categories.map((category) => (
@@ -137,7 +145,9 @@ const EditSubCategory = () => {
 
             {/* Submit Button */}
             <div>
-              <Button type="submit" className="w-full">Update SubCategory</Button>
+              <Button type="submit" className="w-full">
+                Update SubCategory
+              </Button>
             </div>
           </div>
         </form>

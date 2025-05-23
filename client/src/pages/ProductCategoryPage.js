@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import productApi from "../api/productApi";
-import MainLayout from "../layout/MainLayout";
-import ProductCard from "../components/ui/product/productCard";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import productApi from '../api/productApi';
+import MainLayout from '../layout/MainLayout';
+import ProductCard from '../components/ui/product/productCard';
 
 const ProductCategoryPage = () => {
   const { categoryName } = useParams();
@@ -18,19 +18,17 @@ const ProductCategoryPage = () => {
         // decode để categoryName không bị lỗi khi có dấu hoặc ký tự đặc biệt
         const decodedCategoryName = decodeURIComponent(categoryName);
 
-        const data = await productApi.getProductsByCategory(
-          decodedCategoryName
-        );
+        const data = await productApi.getProductsByCategory(decodedCategoryName);
 
         if (Array.isArray(data)) {
           setProducts(data);
         } else {
           setProducts([]);
-          setError("Dữ liệu sản phẩm trả về không hợp lệ");
+          setError('Dữ liệu sản phẩm trả về không hợp lệ');
         }
       } catch (err) {
-        console.error("Lỗi khi lấy sản phẩm theo category:", err);
-        setError("Lỗi khi lấy sản phẩm, vui lòng thử lại sau.");
+        console.error('Lỗi khi lấy sản phẩm theo category:', err);
+        setError('Lỗi khi lấy sản phẩm, vui lòng thử lại sau.');
         setProducts([]);
       } finally {
         setLoading(false);
@@ -66,15 +64,10 @@ const ProductCategoryPage = () => {
   return (
     <MainLayout>
       <div>
-        <h1 className="text-2xl font-semibold mb-6">
-          {decodeURIComponent(categoryName)}
-        </h1>
+        <h1 className="text-2xl font-semibold mb-6">{decodeURIComponent(categoryName)}</h1>
         <div className="p-[40px] grid grid-cols-4 gap-4">
           {products.map((product) => (
-            <ProductCard
-              key={product.product_id || product.id}
-              product={product}
-            />
+            <ProductCard key={product.product_id || product.id} product={product} />
           ))}
         </div>
       </div>
@@ -83,4 +76,3 @@ const ProductCategoryPage = () => {
 };
 
 export default ProductCategoryPage;
-    

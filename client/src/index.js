@@ -5,8 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppWrapper } from './components/admin/common/PageMeta';
-import { createStore } from "redux";
-import { Provider } from "react-redux";
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
 import rootReducer from './reducers';
 
 const store = createStore(rootReducer);
@@ -21,8 +21,7 @@ root.render(
         </AppWrapper>
       </ThemeProvider>
     </React.StrictMode>
-  </Provider>
-
+  </Provider>,
 );
 
 // If you want to start measuring performance in your app, pass a function

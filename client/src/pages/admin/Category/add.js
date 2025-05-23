@@ -1,37 +1,37 @@
-import React, { useState } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import categoryApi from "../../../api/categoryApi";
-import Button from "../../../components/ui/button/Button";
-import { useNavigate } from "react-router";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useState } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import categoryApi from '../../../api/categoryApi';
+import Button from '../../../components/ui/button/Button';
+import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 const AddCategory = () => {
   const { user } = useSelector((state) => ({ ...state }));
-  const [categoryName, setCategoryName] = useState("");
-  const [description, setDescription] = useState("");
+  const [categoryName, setCategoryName] = useState('');
+  const [description, setDescription] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await categoryApi.createCategory(categoryName, description, user.token);
-      setCategoryName("");
-      setDescription("");
+      setCategoryName('');
+      setDescription('');
       Swal.fire({
-        icon: "success",
-        title: "Thành công!",
-        text: "Danh mục đã được thêm thành công.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Thành công!',
+        text: 'Danh mục đã được thêm thành công.',
+        confirmButtonText: 'OK',
       });
-      navigate("/admin/categories");
+      navigate('/admin/categories');
     } catch (err) {
       console.error(err);
       Swal.fire({
-        icon: "error",
-        title: "Thất bại!",
-        text: "Có lỗi xảy ra khi thêm danh mục.",
-        confirmButtonText: "OK",
+        icon: 'error',
+        title: 'Thất bại!',
+        text: 'Có lỗi xảy ra khi thêm danh mục.',
+        confirmButtonText: 'OK',
       });
     }
   };

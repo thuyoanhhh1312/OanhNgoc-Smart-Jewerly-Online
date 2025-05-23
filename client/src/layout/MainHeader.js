@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Image } from "primereact/image";
-import { Link } from "react-router-dom";
-import { Dropdown } from "../components/ui/dropdown/Dropdown";
-import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../api/auth";
-import { Menu, Badge } from "antd";
-import { ShoppingCartOutlined } from "@ant-design/icons";
-import Header from "../components/ui/home/HomeHeader";
+import React, { useState, useEffect } from 'react';
+import { Image } from 'primereact/image';
+import { Link } from 'react-router-dom';
+import { Dropdown } from '../components/ui/dropdown/Dropdown';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../api/auth';
+import { Menu, Badge } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import Header from '../components/ui/home/HomeHeader';
 
 const MainHeader = () => {
   let dispatch = useDispatch();
@@ -18,18 +18,18 @@ const MainHeader = () => {
 
   const handleLogout = async () => {
     try {
-      const token = JSON.parse(localStorage.getItem("user"))?.token;
+      const token = JSON.parse(localStorage.getItem('user'))?.token;
       if (token) {
         await logout(token);
       }
 
       dispatch({
-        type: "LOGOUT",
+        type: 'LOGOUT',
       });
-      localStorage.removeItem("user");
-      navigate("/");
+      localStorage.removeItem('user');
+      navigate('/');
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     }
   };
 
@@ -64,12 +64,12 @@ const MainHeader = () => {
                 className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
               >
                 <span className="block mr-1 font-medium text-theme-sm">
-                  {"Chào "}
-                  {user?.name ? user?.name : user?.email.split("@")[0]}
+                  {'Chào '}
+                  {user?.name ? user?.name : user?.email.split('@')[0]}
                 </span>
                 <svg
                   className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-                    isOpen ? "rotate-180" : ""
+                    isOpen ? 'rotate-180' : ''
                   }`}
                   width="18"
                   height="20"
@@ -127,7 +127,7 @@ const MainHeader = () => {
                 count={cart.length}
                 offset={[-5, 5]} // Đẩy badge lên phía trên bên trái icon
                 size="small"
-                style={{ backgroundColor: "#ff4d4f", fontWeight: "bold" }} // badge đỏ đậm
+                style={{ backgroundColor: '#ff4d4f', fontWeight: 'bold' }} // badge đỏ đậm
                 showZero={true} // Hiện số 0 nếu cart rỗng
               >
                 <img

@@ -183,21 +183,21 @@
 
 // export default User;
 
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import React, { useEffect, useState, useRef } from "react";
-import { getUsers, getRoles } from "../../../api/userApi";
-import { useNavigate } from "react-router";
-import { useSelector } from "react-redux";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import React, { useEffect, useState, useRef } from 'react';
+import { getUsers, getRoles } from '../../../api/userApi';
+import { useNavigate } from 'react-router';
+import { useSelector } from 'react-redux';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const User = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const [users, setUser] = useState([]);
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [roles, setRoles] = useState([]);
-  const [roleFilter, setRoleFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState('');
 
   const navigate = useNavigate();
   const debounceTimeout = useRef(null);
@@ -213,7 +213,7 @@ const User = () => {
         const roleData = await getRoles();
         setRoles(roleData);
       } catch {
-        toast.error("Lấy danh sách role lỗi");
+        toast.error('Lấy danh sách role lỗi');
       }
     };
 
@@ -222,7 +222,7 @@ const User = () => {
         const data = await getUsers();
         setUser(data);
       } catch {
-        toast.error("Lấy danh sách người dùng lỗi");
+        toast.error('Lấy danh sách người dùng lỗi');
       }
     };
 
@@ -231,12 +231,12 @@ const User = () => {
   }, []);
 
   // Gọi API lấy user theo keyword và roleFilter (role_id)
-  const fetchUsers = async (searchKeyword = "", roleId = "") => {
+  const fetchUsers = async (searchKeyword = '', roleId = '') => {
     try {
       const data = await getUsers(searchKeyword, roleId);
       setUser(data);
     } catch {
-      toast.error("Lấy danh sách người dùng lỗi");
+      toast.error('Lấy danh sách người dùng lỗi');
     }
   };
 
@@ -264,10 +264,10 @@ const User = () => {
   // Xử lý nút thêm user, chỉ admin mới được
   const handleAddUserClick = () => {
     if (user?.role_id !== 1) {
-      toast.error("Bạn không có quyền truy cập chức năng của admin");
+      toast.error('Bạn không có quyền truy cập chức năng của admin');
       return;
     }
-    navigate("/admin/user/add");
+    navigate('/admin/user/add');
   };
 
   return (
@@ -277,10 +277,7 @@ const User = () => {
       <div className="flex flex-row justify-between items-center mb-4">
         <h1 className="text-[32px] font-bold ">User List</h1>
         <div>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={handleAddUserClick}
-          >
+          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleAddUserClick}>
             Add New User
           </button>
         </div>
@@ -302,7 +299,7 @@ const User = () => {
         >
           <option value="">-- Lọc theo Role --</option>
           {roles
-            .filter((role) => role.name === "admin" || role.name === "staff")
+            .filter((role) => role.name === 'admin' || role.name === 'staff')
             .map((role) => (
               <option key={role.id} value={role.id}>
                 {role.name}
@@ -319,18 +316,8 @@ const User = () => {
         showGridlines
         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
       >
-        <Column
-          field="name"
-          header="Tên"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        />
-        <Column
-          field="email"
-          header="Email"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        />
+        <Column field="name" header="Tên" sortable headerClassName="bg-[#d2d4d6]" />
+        <Column field="email" header="Email" sortable headerClassName="bg-[#d2d4d6]" />
         <Column
           field="Role"
           header="Role"
@@ -342,7 +329,7 @@ const User = () => {
           body={(rowData) => {
             const handleEditClick = () => {
               if (user?.role_id !== 1) {
-                toast.error("Bạn không có quyền truy cập chức năng của admin");
+                toast.error('Bạn không có quyền truy cập chức năng của admin');
                 return;
               }
               navigate(`/admin/user/edit/${rowData.id}`);

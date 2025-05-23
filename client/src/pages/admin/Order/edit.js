@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import * as UserAPI from "../../../api/userApi";
-import OrderAPI from "../../../api/orderApi";
-import OrderStatusAPI from "../../../api/orderStatusApi";
-import { useNavigate, useParams } from "react-router";
-import { useSelector } from "react-redux";
-import Swal from "sweetalert2";
+import React, { useEffect, useState } from 'react';
+import Input from '../../../components/form/input/InputField';
+import Label from '../../../components/form/Label';
+import Button from '../../../components/ui/button/Button';
+import * as UserAPI from '../../../api/userApi';
+import OrderAPI from '../../../api/orderApi';
+import OrderStatusAPI from '../../../api/orderStatusApi';
+import { useNavigate, useParams } from 'react-router';
+import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 
 const EditOrder = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const { id } = useParams();
 
   // State form
-  const [orderCode, setOrderCode] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [staffId, setStaffId] = useState("");
-  const [statusId, setStatusId] = useState("");
+  const [orderCode, setOrderCode] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [staffId, setStaffId] = useState('');
+  const [statusId, setStatusId] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
-  const [promotionCode, setPromotionCode] = useState("");
+  const [promotionCode, setPromotionCode] = useState('');
 
   // Danh sách nhân viên và trạng thái
   const [staffList, setStaffList] = useState([]);
@@ -36,7 +36,7 @@ const EditOrder = () => {
       const staffData = await UserAPI.getUsers();
       setStaffList(staffData);
     } catch (error) {
-      console.error("Lỗi lấy danh sách nhân viên:", error);
+      console.error('Lỗi lấy danh sách nhân viên:', error);
     }
   };
 
@@ -46,7 +46,7 @@ const EditOrder = () => {
       const statusData = await OrderStatusAPI.getOrderStatus();
       setStatusList(statusData);
     } catch (error) {
-      console.error("Lỗi lấy danh sách trạng thái:", error);
+      console.error('Lỗi lấy danh sách trạng thái:', error);
     }
   };
 
@@ -54,14 +54,14 @@ const EditOrder = () => {
   const fetchOrder = async () => {
     try {
       const orderData = await OrderAPI.getOrderById(id, user.token);
-      setOrderCode(orderData.order_id || "");
-      setCustomerName(orderData.Customer?.name || "");
-      setStaffId(orderData.user_id || "");
-      setStatusId(orderData.status_id || "");
+      setOrderCode(orderData.order_id || '');
+      setCustomerName(orderData.Customer?.name || '');
+      setStaffId(orderData.user_id || '');
+      setStatusId(orderData.status_id || '');
       setTotalAmount(orderData.total || 0);
-      setPromotionCode(orderData.Promotion?.promotion_code || "");
+      setPromotionCode(orderData.Promotion?.promotion_code || '');
     } catch (error) {
-      console.error("Lỗi lấy thông tin đơn hàng:", error);
+      console.error('Lỗi lấy thông tin đơn hàng:', error);
     }
   };
 
@@ -92,19 +92,19 @@ const EditOrder = () => {
       }
 
       await Swal.fire({
-        icon: "success",
-        title: "Cập nhật thành công!",
-        text: "Đơn hàng đã được cập nhật.",
-        confirmButtonText: "OK",
+        icon: 'success',
+        title: 'Cập nhật thành công!',
+        text: 'Đơn hàng đã được cập nhật.',
+        confirmButtonText: 'OK',
       });
 
-      navigate("/admin/orders");
+      navigate('/admin/orders');
     } catch (error) {
-      console.error("Lỗi cập nhật đơn hàng:", error);
+      console.error('Lỗi cập nhật đơn hàng:', error);
       Swal.fire({
-        icon: "error",
-        title: "Lỗi",
-        text: "Đã xảy ra lỗi khi cập nhật đơn hàng!",
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Đã xảy ra lỗi khi cập nhật đơn hàng!',
       });
     }
   };

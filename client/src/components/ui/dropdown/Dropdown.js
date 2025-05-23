@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-export const Dropdown = ({ isOpen, onClose, children, className = "" }) => {
+export const Dropdown = ({ isOpen, onClose, children, className = '' }) => {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -8,15 +8,15 @@ export const Dropdown = ({ isOpen, onClose, children, className = "" }) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target) &&
-        !event.target.closest(".dropdown-toggle")
+        !event.target.closest('.dropdown-toggle')
       ) {
         onClose();
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onClose]);
 

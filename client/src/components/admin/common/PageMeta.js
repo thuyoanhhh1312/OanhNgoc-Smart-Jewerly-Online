@@ -1,4 +1,4 @@
-import { HelmetProvider, Helmet } from "react-helmet-async";
+import { HelmetProvider, Helmet } from 'react-helmet-async';
 
 // Component để thiết lập meta thông tin cho trang
 const PageMeta = ({ title, description }) => (
@@ -9,8 +9,6 @@ const PageMeta = ({ title, description }) => (
 );
 
 // Component để bọc ứng dụng và sử dụng HelmetProvider
-export const AppWrapper = ({ children }) => (
-  <HelmetProvider>{children}</HelmetProvider>
-);
+export const AppWrapper = ({ children }) => <HelmetProvider>{children}</HelmetProvider>;
 
 export default PageMeta;

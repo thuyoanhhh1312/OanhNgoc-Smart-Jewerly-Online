@@ -1,17 +1,17 @@
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import React, { useEffect, useState } from "react";
-import OrderAPI from "../../../api/orderApi";
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
-import dayjs from "dayjs";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import React, { useEffect, useState } from 'react';
+import OrderAPI from '../../../api/orderApi';
+import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
+import dayjs from 'dayjs';
 import { ToastContainer, toast } from 'react-toastify';
 
 const Order = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const [orders, setOrders] = useState([]);
 
-  console.log("orders", orders);
+  console.log('orders', orders);
 
   const customerBodyTemplate = (rowData) => {
     const customerName = rowData.Customer?.name;
@@ -30,11 +30,7 @@ const Order = () => {
     const userName = rowData.User?.name;
     return (
       <div>
-        {userName ? (
-          <p className="text-gray-700">{userName}</p>
-        ) : (
-          <p className="text-gray-700"></p>
-        )}
+        {userName ? <p className="text-gray-700">{userName}</p> : <p className="text-gray-700"></p>}
       </div>
     );
   };
@@ -71,9 +67,9 @@ const Order = () => {
       <div>
         {totalAmount ? (
           <p className="text-gray-700">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
+            {new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
             }).format(totalAmount)}
           </p>
         ) : (
@@ -88,9 +84,7 @@ const Order = () => {
     return (
       <div>
         {createdAt ? (
-          <p className="text-gray-700">
-            {dayjs(createdAt).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
+          <p className="text-gray-700">{dayjs(createdAt).format('DD/MM/YYYY HH:mm:ss')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -127,12 +121,7 @@ const Order = () => {
         showGridlines
         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
       >
-        <Column
-          field="order_id"
-          header="Mã Đơn Hàng"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        />
+        <Column field="order_id" header="Mã Đơn Hàng" sortable headerClassName="bg-[#d2d4d6]" />
         <Column
           field="Customer"
           header="Tên Khách Hàng"
@@ -183,8 +172,8 @@ const Order = () => {
             const status = rowData.OrderStatus?.status_name?.toLowerCase();
 
             const handleClick = () => {
-              if (status === "đã hủy" || status === "đã giao") {
-                toast.error("Đơn hàng đã hoàn tất không thể chỉnh sửa!");
+              if (status === 'đã hủy' || status === 'đã giao') {
+                toast.error('Đơn hàng đã hoàn tất không thể chỉnh sửa!');
               } else {
                 window.location.href = `/admin/orders/edit/${rowData.order_id}`;
               }
@@ -192,17 +181,14 @@ const Order = () => {
 
             return (
               <div className="flex flex-row gap-2">
-                <button
-                  onClick={handleClick}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
+                <button onClick={handleClick} className="bg-green-500 text-white px-4 py-2 rounded">
                   Update
                 </button>
               </div>
             );
           }}
-          headerStyle={{ width: "8rem", textAlign: "center" }}
-          bodyStyle={{ textAlign: "center" }}
+          headerStyle={{ width: '8rem', textAlign: 'center' }}
+          bodyStyle={{ textAlign: 'center' }}
           headerClassName="bg-[#d2d4d6]"
         />
       </DataTable>

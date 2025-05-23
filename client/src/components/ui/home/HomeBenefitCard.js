@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const BenefitCard = ({ icon, title, subtitle,tooltip }) => {
+const BenefitCard = ({ icon, title, subtitle, tooltip }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -11,14 +11,8 @@ const BenefitCard = ({ icon, title, subtitle,tooltip }) => {
     >
       <img alt={title} loading="lazy" width="45" height="48" src={icon} />
       <div className="flex flex-col">
-        <span className="text-[#003468] font-bold sm:text-[18px] text-[10px]">
-          {title}
-        </span>
-        {subtitle && (
-          <span className="text-[#3F6790] sm:text-[18px] text-[10px]">
-            {subtitle}
-          </span>
-        )}
+        <span className="text-[#003468] font-bold sm:text-[18px] text-[10px]">{title}</span>
+        {subtitle && <span className="text-[#3F6790] sm:text-[18px] text-[10px]">{subtitle}</span>}
       </div>
 
       {/* Tooltip */}

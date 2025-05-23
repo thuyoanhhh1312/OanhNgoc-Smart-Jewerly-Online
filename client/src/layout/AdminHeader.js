@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router";
-import { useSidebar } from "../context/SidebarContext";
-import UserDropdown from "../components/admin/header/UserDropdown";
+import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router';
+import { useSidebar } from '../context/SidebarContext';
+import UserDropdown from '../components/admin/header/UserDropdown';
 
 const AdminHeader = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -23,16 +23,16 @@ const AdminHeader = () => {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
         event.preventDefault();
         inputRef.current?.focus();
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -80,16 +80,8 @@ const AdminHeader = () => {
           </button>
 
           <Link to="/" className="lg:hidden">
-            <img
-              className="dark:hidden"
-              src="./images/logo/logo.svg"
-              alt="Logo"
-            />
-            <img
-              className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
-            />
+            <img className="dark:hidden" src="./images/logo/logo.svg" alt="Logo" />
+            <img className="hidden dark:block" src="./images/logo/logo-dark.svg" alt="Logo" />
           </Link>
 
           <button
@@ -113,8 +105,9 @@ const AdminHeader = () => {
           </button>
 
           <div
-            className={`${isApplicationMenuOpen ? "flex" : "hidden"
-              } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none z-5`}
+            className={`${
+              isApplicationMenuOpen ? 'flex' : 'hidden'
+            } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none z-5`}
           >
             <UserDropdown />
           </div>

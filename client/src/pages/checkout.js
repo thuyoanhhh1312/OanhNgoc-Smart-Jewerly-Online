@@ -1,54 +1,54 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const CheckoutPage = () => {
   const location = useLocation();
   const { selectedItems = [], totalAmount = 0 } = location.state || {};
-  const [gender, setGender] = useState(""); // 'male' or 'female'
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState(''); // 'male' or 'female'
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [dob, setDob] = useState('');
   const [sendCardSms, setSendCardSms] = useState(false);
 
-  const [deliveryMethod, setDeliveryMethod] = useState("delivery"); // delivery or pickup
-  const [province, setProvince] = useState("");
-  const [district, setDistrict] = useState("");
-  const [ward, setWard] = useState("");
-  const [addressDetail, setAddressDetail] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState('delivery'); // delivery or pickup
+  const [province, setProvince] = useState('');
+  const [district, setDistrict] = useState('');
+  const [ward, setWard] = useState('');
+  const [addressDetail, setAddressDetail] = useState('');
 
   const [receivePromo, setReceivePromo] = useState(false);
   const [invoiceRequest, setInvoiceRequest] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(true);
 
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [orderNote, setOrderNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [orderNote, setOrderNote] = useState('');
 
   // Bạn có thể load danh sách tỉnh/thành, quận/huyện, phường/xã từ API hoặc file json tùy chỉnh
   // Hiện demo tạm mảng giả lập
-  const provinces = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
-  const districts = ["Quận 1", "Quận 2", "Quận 3"];
-  const wards = ["Phường A", "Phường B", "Phường C"];
+  const provinces = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'];
+  const districts = ['Quận 1', 'Quận 2', 'Quận 3'];
+  const wards = ['Phường A', 'Phường B', 'Phường C'];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert("Vui lòng nhập họ và tên");
+      alert('Vui lòng nhập họ và tên');
       return;
     }
     if (!phone.trim()) {
-      alert("Vui lòng nhập số điện thoại");
+      alert('Vui lòng nhập số điện thoại');
       return;
     }
-    if (deliveryMethod === "delivery") {
+    if (deliveryMethod === 'delivery') {
       if (!province || !district || !ward || !addressDetail.trim()) {
-        alert("Vui lòng nhập đầy đủ địa chỉ nhận hàng");
+        alert('Vui lòng nhập đầy đủ địa chỉ nhận hàng');
         return;
       }
     }
-    
+
     // Xử lý gửi dữ liệu đặt hàng ở đây
-    alert("Đặt hàng thành công (demo)!");
+    alert('Đặt hàng thành công (demo)!');
   };
 
   return (
@@ -63,41 +63,34 @@ const CheckoutPage = () => {
       <h2 className="text-center text-lg font-bold mb-6">Thông tin đặt hàng</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-
         {/* Danh sách sản phẩm được chọn */}
-  <div className="border p-4 rounded space-y-4">
-    <h3 className="font-semibold mb-2">Sản phẩm đã chọn</h3>
-    {selectedItems.map((item) => (
-    <div key={item.product_id} className="flex gap-4 items-center border-b pb-3">
-      <img
-        src={item.ProductImages?.[0]?.image_url || "https://via.placeholder.com/80"}
-        alt={item.product_name}
-        className="w-16 h-16 object-cover rounded"
-      />
-      <div>
-        <p className="font-semibold">{item.product_name}</p>
-        <p className="text-sm text-gray-600">Mã: {item.product_code}</p>
-        <p className="mt-1">Số lượng: <b>{item.count}</b></p>
-        <p className="text-yellow-700 font-semibold">
-          Đơn giá: {item.price.toLocaleString("vi-VN")} đ
-        </p>
-      </div>
-    </div>
-  ))}
-</div>
-
+        <div className="border p-4 rounded space-y-4">
+          <h3 className="font-semibold mb-2">Sản phẩm đã chọn</h3>
+          {selectedItems.map((item) => (
+            <div key={item.product_id} className="flex gap-4 items-center border-b pb-3">
+              <img
+                src={item.ProductImages?.[0]?.image_url || 'https://via.placeholder.com/80'}
+                alt={item.product_name}
+                className="w-16 h-16 object-cover rounded"
+              />
+              <div>
+                <p className="font-semibold">{item.product_name}</p>
+                <p className="text-sm text-gray-600">Mã: {item.product_code}</p>
+                <p className="mt-1">
+                  Số lượng: <b>{item.count}</b>
+                </p>
+                <p className="text-yellow-700 font-semibold">
+                  Đơn giá: {item.price.toLocaleString('vi-VN')} đ
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Mã ưu đãi */}
         <div className="border p-4 rounded">
-          <input
-            type="text"
-            placeholder="Nhập mã ưu đãi"
-            className="w-full border rounded p-2"
-          />
-          <button
-            type="button"
-            className="mt-2 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
+          <input type="text" placeholder="Nhập mã ưu đãi" className="w-full border rounded p-2" />
+          <button type="button" className="mt-2 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
             Áp dụng
           </button>
         </div>
@@ -105,23 +98,25 @@ const CheckoutPage = () => {
         {/* Tạm tính */}
         <div className="border p-4 rounded space-y-1 text-sm">
           <p>
-  Tạm tính <span className="float-right font-semibold">{totalAmount.toLocaleString("vi-VN")} đ</span>
-</p>
-          <p>
-            Giao hàng{" "}
-            <span className="float-right text-blue-600 cursor-pointer font-semibold">
-              Miễn phí
+            Tạm tính{' '}
+            <span className="float-right font-semibold">
+              {totalAmount.toLocaleString('vi-VN')} đ
             </span>
+          </p>
+          <p>
+            Giao hàng{' '}
+            <span className="float-right text-blue-600 cursor-pointer font-semibold">Miễn phí</span>
           </p>
           <p>
             Giảm giá <span className="float-right font-semibold">- 0 đ</span>
           </p>
           <p className="border-t pt-1">
-  Tổng tiền <span className="float-right font-semibold">{totalAmount.toLocaleString("vi-VN")} đ</span>
-</p>
-          <p className="text-xs text-gray-500">
-            (Giá tham khảo đã bao gồm VAT)
+            Tổng tiền{' '}
+            <span className="float-right font-semibold">
+              {totalAmount.toLocaleString('vi-VN')} đ
+            </span>
           </p>
+          <p className="text-xs text-gray-500">(Giá tham khảo đã bao gồm VAT)</p>
         </div>
 
         {/* Thông tin người mua */}
@@ -134,8 +129,8 @@ const CheckoutPage = () => {
                 type="radio"
                 name="gender"
                 value="female"
-                checked={gender === "female"}
-                onChange={() => setGender("female")}
+                checked={gender === 'female'}
+                onChange={() => setGender('female')}
               />
               Chị
             </label>
@@ -144,8 +139,8 @@ const CheckoutPage = () => {
                 type="radio"
                 name="gender"
                 value="male"
-                checked={gender === "male"}
-                onChange={() => setGender("male")}
+                checked={gender === 'male'}
+                onChange={() => setGender('male')}
               />
               Anh
             </label>
@@ -200,9 +195,9 @@ const CheckoutPage = () => {
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
-              onClick={() => setDeliveryMethod("delivery")}
+              onClick={() => setDeliveryMethod('delivery')}
               className={`border p-3 rounded flex items-center gap-2 cursor-pointer ${
-                deliveryMethod === "delivery" ? "bg-yellow-50" : ""
+                deliveryMethod === 'delivery' ? 'bg-yellow-50' : ''
               }`}
             >
               <img
@@ -218,9 +213,9 @@ const CheckoutPage = () => {
 
             <button
               type="button"
-              onClick={() => setDeliveryMethod("pickup")}
+              onClick={() => setDeliveryMethod('pickup')}
               className={`border p-3 rounded flex items-center gap-2 cursor-pointer ${
-                deliveryMethod === "pickup" ? "bg-yellow-50" : ""
+                deliveryMethod === 'pickup' ? 'bg-yellow-50' : ''
               }`}
             >
               <img
@@ -235,7 +230,7 @@ const CheckoutPage = () => {
           </div>
 
           {/* Địa chỉ nhận hàng nếu chọn giao hàng tận nơi */}
-          {deliveryMethod === "delivery" && (
+          {deliveryMethod === 'delivery' && (
             <div className="mt-4 grid grid-cols-2 gap-4">
               <select
                 required
@@ -299,8 +294,7 @@ const CheckoutPage = () => {
               checked={receivePromo}
               onChange={(e) => setReceivePromo(e.target.checked)}
             />
-            Đồng ý nhận các thông tin và chương trình khuyến mãi của PNJ qua
-            email, SMS, mạng xã hội
+            Đồng ý nhận các thông tin và chương trình khuyến mãi của PNJ qua email, SMS, mạng xã hội
           </label>
           <label className="inline-flex items-center gap-2 cursor-pointer">
             <input
@@ -316,8 +310,7 @@ const CheckoutPage = () => {
               checked={agreePrivacy}
               onChange={(e) => setAgreePrivacy(e.target.checked)}
             />
-            Tôi đồng ý cho PNJ thu thập, xử lý dữ liệu cá nhân của tôi theo
-            quy định tại{" "}
+            Tôi đồng ý cho PNJ thu thập, xử lý dữ liệu cá nhân của tôi theo quy định tại{' '}
             <a
               href="https://www.pnj.com.vn/thong-bao-4"
               target="_blank"
@@ -325,7 +318,7 @@ const CheckoutPage = () => {
               className="text-blue-600"
             >
               Thông báo này
-            </a>{" "}
+            </a>{' '}
             và theo quy định của pháp luật
           </label>
         </div>
@@ -336,30 +329,29 @@ const CheckoutPage = () => {
           <ul className="space-y-2 text-sm">
             <li
               className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "cod" ? "border-blue-600" : ""
+                paymentMethod === 'cod' ? 'border-blue-600' : ''
               }`}
-              onClick={() => setPaymentMethod("cod")}
+              onClick={() => setPaymentMethod('cod')}
             >
               Thanh toán tiền mặt khi nhận hàng (COD)
             </li>
             <li
               className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "bank_transfer" ? "border-blue-600" : ""
+                paymentMethod === 'bank_transfer' ? 'border-blue-600' : ''
               }`}
-              onClick={() => setPaymentMethod("bank_transfer")}
+              onClick={() => setPaymentMethod('bank_transfer')}
             >
               Thanh toán chuyển khoản
             </li>
-            
+
             <li
               className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "qr_code" ? "border-blue-600" : ""
+                paymentMethod === 'qr_code' ? 'border-blue-600' : ''
               }`}
-              onClick={() => setPaymentMethod("qr_code")}
+              onClick={() => setPaymentMethod('qr_code')}
             >
               Quét mã QR
             </li>
-            
           </ul>
         </div>
 
