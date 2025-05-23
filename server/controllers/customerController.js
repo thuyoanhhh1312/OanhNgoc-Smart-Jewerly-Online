@@ -48,24 +48,55 @@ export const getAllCustomers = async (req, res) => {
       where: whereClause,
       attributes: {
         include: [
+          // Đếm số đơn hàng
           [fn('COUNT', col('Orders.order_id')), 'orderCount'],
-          [fn('COALESCE', fn('SUM', col('Orders.total')), 0), 'totalOrderAmount']
-        ]
+          // Tổng tiền đơn hàng (COALESCE xử lý null)
+          [fn('COALESCE', fn('SUM', col('Orders.total')), 0), 'totalOrderAmount'],
+
+          // Đếm đánh giá tích cực (POS)
+          [
+            literal(`(
+              SELECT COUNT(*) FROM product_review AS pr
+              WHERE pr.customer_id = Customer.customer_id AND pr.sentiment = 'POS'
+            )`),
+            'positiveReviewCount'
+          ],
+          // Đếm đánh giá tiêu cực (NEG)
+          [
+            literal(`(
+              SELECT COUNT(*) FROM product_review AS pr
+              WHERE pr.customer_id = Customer.customer_id AND pr.sentiment = 'NEG'
+            )`),
+            'negativeReviewCount'
+          ],
+          // Đếm đánh giá trung tính (NEU)
+          [
+            literal(`(
+              SELECT COUNT(*) FROM product_review AS pr
+              WHERE pr.customer_id = Customer.customer_id AND pr.sentiment = 'NEU'
+            )`),
+            'neutralReviewCount'
+          ],
+        ],
       },
       include: [
         {
           model: db.Order,
           attributes: [],
           required: false, // lấy cả khách hàng chưa có đơn hàng
-        }
+        },
       ],
       group: ['Customer.customer_id'],
       order: [['customer_id', 'ASC']],
+      raw: true,  // để kết quả trả về object thuần, dễ dùng frontend
     });
 
-    res.status(200).json(customers);
+    return res.status(200).json(customers);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Lỗi khi lấy danh sách khách hàng', error: err.message });
+    return res.status(500).json({
+      message: 'Lỗi khi lấy danh sách khách hàng',
+      error: err.message,
+    });
   }
 };
