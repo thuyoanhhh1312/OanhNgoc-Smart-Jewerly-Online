@@ -46,6 +46,7 @@ import Cart from "./pages/Cart";
 import UpdateProfile from "./pages/Customer/UpdateProfile";
 import Search from "./pages/Search";
 import ProductCategoryPage from "./pages/ProductCategoryPage"
+import OrderPage from "./pages/OrderPage";
 import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
 
@@ -72,8 +73,7 @@ function App() {
   return (
     <Router>
       <Routes>
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/checkout" element={<Checkout />} />
+      
         <Route element={<AdminLayout />}>
           {/*User*/}
           <Route
@@ -237,10 +237,12 @@ function App() {
 
         <Route path="/" element={<Home />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/order" element={<OrderPage />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
+        <Route path="/checkout"element={<Checkout/>}/>
         <Route path="/search" element={<Search />} />
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
         <Route path="/promotions" element={<PromotionsPage />} />
