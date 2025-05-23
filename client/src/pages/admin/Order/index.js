@@ -1,17 +1,19 @@
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import React, { useEffect, useState } from "react";
-import OrderAPI from "../../../api/orderApi";
-import { Link } from "react-router";
-import { useSelector } from "react-redux";
-import dayjs from "dayjs";
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import React, { useEffect, useState } from 'react';
+import OrderAPI from '../../../api/orderApi';
+import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
+import dayjs from 'dayjs';
 import { ToastContainer, toast } from 'react-toastify';
 
 const Order = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const [orders, setOrders] = useState([]);
-
-  console.log("orders", orders);
+  const [filterDate, setFilterDate] = useState('');
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [filterCustomerName, setFilterCustomerName] = useState('');
+  console.log('orders', orders);
 
   const customerBodyTemplate = (rowData) => {
     const customerName = rowData.Customer?.name;
@@ -27,12 +29,13 @@ const Order = () => {
   };
 
   const orderBodyTemplate = (rowData) => {
-    const isDeposit = rowData.isDeposit;
+    const isDeposit = rowData.is_deposit;
+
     return (
-      <div>
+      <div className="flex items-center">
         {rowData.order_id}
         {isDeposit ? (
-          <p className="text-gray-700">{"Da dat coc"}</p>
+          <p className="text-red-600 text-xs ml-2">{' (Đã đặt cọc)'}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -44,11 +47,7 @@ const Order = () => {
     const userName = rowData.User?.name;
     return (
       <div>
-        {userName ? (
-          <p className="text-gray-700">{userName}</p>
-        ) : (
-          <p className="text-gray-700"></p>
-        )}
+        {userName ? <p className="text-gray-700">{userName}</p> : <p className="text-gray-700"></p>}
       </div>
     );
   };
@@ -85,9 +84,9 @@ const Order = () => {
       <div>
         {totalAmount ? (
           <p className="text-gray-700">
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
+            {new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
             }).format(totalAmount)}
           </p>
         ) : (
@@ -102,9 +101,7 @@ const Order = () => {
     return (
       <div>
         {createdAt ? (
-          <p className="text-gray-700">
-            {dayjs(createdAt).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
+          <p className="text-gray-700">{dayjs(createdAt).format('DD/MM/YYYY HH:mm:ss')}</p>
         ) : (
           <p className="text-gray-700"></p>
         )}
@@ -126,16 +123,70 @@ const Order = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    let filtered = orders;
+
+    // Lọc theo ngày nếu có
+    if (filterDate) {
+      filtered = filtered.filter((order) => {
+        if (!order.created_at) return false;
+        const orderDate = dayjs(order.created_at).format('YYYY-MM-DD');
+        return orderDate === filterDate;
+      });
+    }
+
+    // Lọc theo tên khách hàng nếu có
+    if (filterCustomerName.trim()) {
+      filtered = filtered.filter((order) => {
+        const customerName = order.Customer?.name || '';
+        return customerName.toLowerCase().includes(filterCustomerName.toLowerCase());
+      });
+    }
+
+    setFilteredOrders(filtered);
+  }, [orders, filterDate, filterCustomerName]);
+
   return (
     <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
       <ToastContainer />
       {/* Tiêu đề */}
       <div className="flex flex-row justify-between items-center mb-4">
-        <h1 className="text-[32px] font-bold ">Promotion List</h1>
+        <h1 className="text-[32px] font-bold ">Order List</h1>
+        <div>
+          <label htmlFor="filterCustomerName" className="mr-2 font-semibold">
+            Tìm kiếm theo tên khách hàng:
+          </label>
+          <input
+            id="filterCustomerName"
+            type="text"
+            value={filterCustomerName}
+            onChange={(e) => setFilterCustomerName(e.target.value)}
+            className="border rounded px-2 py-1"
+            placeholder="Nhập tên khách hàng"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="filterDate" className="mr-2 font-semibold">
+            Tìm kiếm theo ngày tạo:
+          </label>
+          <input
+            id="filterDate"
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="border rounded px-2 py-1"
+            onKeyDown={(e) => {
+              if (e.key === 'Delete' || e.key === 'Backspace') {
+                setFilterDate('');
+              }
+            }}
+          />
+        </div>
       </div>
 
       <DataTable
-        value={orders}
+        value={filteredOrders}
         paginator
         rows={10}
         showGridlines
@@ -187,7 +238,7 @@ const Order = () => {
           body={totalBodyTemplate}
         />
         <Column
-          field="start_date"
+          field="created_at"
           header="Ngày Tạo"
           sortable
           headerClassName="bg-[#d2d4d6]"
@@ -198,8 +249,8 @@ const Order = () => {
             const status = rowData.OrderStatus?.status_name?.toLowerCase();
 
             const handleClick = () => {
-              if (status === "đã hủy" || status === "đã giao") {
-                toast.error("Đơn hàng đã hoàn tất không thể chỉnh sửa!");
+              if (status === 'đã hủy' || status === 'đã giao') {
+                toast.error('Đơn hàng đã hoàn tất không thể chỉnh sửa!');
               } else {
                 window.location.href = `/admin/orders/edit/${rowData.order_id}`;
               }
@@ -207,17 +258,14 @@ const Order = () => {
 
             return (
               <div className="flex flex-row gap-2">
-                <button
-                  onClick={handleClick}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
+                <button onClick={handleClick} className="bg-green-500 text-white px-4 py-2 rounded">
                   Update
                 </button>
               </div>
             );
           }}
-          headerStyle={{ width: "8rem", textAlign: "center" }}
-          bodyStyle={{ textAlign: "center" }}
+          headerStyle={{ width: '8rem', textAlign: 'center' }}
+          bodyStyle={{ textAlign: 'center' }}
           headerClassName="bg-[#d2d4d6]"
         />
       </DataTable>

@@ -1,6 +1,6 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from './axiosInstance';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getAllOrders = async (accessToken) => {
   try {
@@ -11,7 +11,7 @@ const getAllOrders = async (accessToken) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    console.error('Error fetching orders:', error);
     throw error;
   }
 };
@@ -25,7 +25,7 @@ const getOrderById = async (id, accessToken) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching order by ID:", error);
+    console.error('Error fetching order by ID:', error);
     throw error;
   }
 };
@@ -41,11 +41,11 @@ const updateOrder = async (id, status, accessToken) => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating order:", error);
+    console.error('Error updating order:', error);
     throw error;
   }
 };
@@ -61,28 +61,25 @@ const updateStaff = async (id, staff_id, accessToken) => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating order:", error);
+    console.error('Error updating order:', error);
     throw error;
   }
 };
 
 const getOrderByUserId = async (userId, accessToken) => {
   try {
-    const response = await axiosInstance.get(
-      `${API_URL}/orders/user/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await axiosInstance.get(`${API_URL}/orders/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   } catch (error) {
-    console.error("Error fetching orders by user ID:", error);
+    console.error('Error fetching orders by user ID:', error);
     throw error;
   }
 };
@@ -92,7 +89,25 @@ export const createOrder = async (orderData) => {
     const response = await axiosInstance.post(`${API_URL}/orders`, orderData);
     return response.data;
   } catch (error) {
-    console.error("Error creating order:", error);
+    console.error('Error creating order:', error);
+    throw error;
+  }
+};
+
+const updateIsDeposit = async (id, isDeposit, accessToken) => {
+  try {
+    const response = await axiosInstance.patch(
+      `${API_URL}/orders/${id}/deposit`,
+      { is_deposit: isDeposit },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating is_deposit:', error);
     throw error;
   }
 };
@@ -104,4 +119,5 @@ export default {
   updateStaff,
   getOrderByUserId,
   createOrder,
+  updateIsDeposit,
 };
