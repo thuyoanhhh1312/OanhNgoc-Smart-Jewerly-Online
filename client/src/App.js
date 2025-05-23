@@ -50,8 +50,6 @@ import OrderPage from "./pages/OrderPage";
 import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
 
-import Checkout from "./pages/checkout";
-
 import { useDispatch } from "react-redux";
 function App() {
   const dispatch = useDispatch();
