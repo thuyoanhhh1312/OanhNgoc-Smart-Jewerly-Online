@@ -87,10 +87,21 @@ const getOrderByUserId = async (userId, accessToken) => {
   }
 };
 
+export const createOrder = async (orderData) => {
+  try {
+    const response = await axiosInstance.post(`${API_URL}/orders`, orderData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating order:", error);
+    throw error;
+  }
+};
+
 export default {
   getAllOrders,
   getOrderById,
   updateOrder,
   updateStaff,
   getOrderByUserId,
+  createOrder,
 };

@@ -167,3 +167,46 @@ export const getOrderByUserId = async (req, res) => {
     });
   }
 };
+export const createOrder = async (req, res) => {
+  const { customer_id, user_id, promotion_id, sub_total, discount, total, shipping_address, payment_method } = req.body;
+
+  try {
+    const deposit = (total * 0.1).toFixed(2); // 10% đặt cọc
+    const order = await db.Order.create({
+      customer_id,
+      user_id,
+      promotion_id,
+      sub_total,
+      discount,
+      total,
+      deposit,
+      deposit_status: 'pending',
+      shipping_address,
+      payment_method,
+      status_id: 1, // trạng thái mới tạo
+    });
+
+    res.status(201).json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi tạo đơn hàng", error: err.message });
+  }
+};
+
+export const confirmDepositPayment = async (req, res) => {
+  const { orderId } = req.params;
+
+  try {
+    const order = await db.Order.findByPk(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Đơn hàng không tồn tại" });
+    }
+
+    order.deposit_status = "paid";
+    order.status_id = 2; // ví dụ trạng thái: đã thanh toán đặt cọc
+    await order.save();
+
+    res.status(200).json({ message: "Xác nhận thanh toán đặt cọc thành công", order });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi xác nhận thanh toán", error: error.message });
+  }
+};
