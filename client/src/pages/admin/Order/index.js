@@ -26,6 +26,20 @@ const Order = () => {
     );
   };
 
+  const orderBodyTemplate = (rowData) => {
+    const isDeposit = rowData.isDeposit;
+    return (
+      <div>
+        {rowData.order_id}
+        {isDeposit ? (
+          <p className="text-gray-700">{"Da dat coc"}</p>
+        ) : (
+          <p className="text-gray-700"></p>
+        )}
+      </div>
+    );
+  };
+
   const userBodyTemplate = (rowData) => {
     const userName = rowData.User?.name;
     return (
@@ -132,6 +146,7 @@ const Order = () => {
           header="Mã Đơn Hàng"
           sortable
           headerClassName="bg-[#d2d4d6]"
+          body={orderBodyTemplate}
         />
         <Column
           field="Customer"

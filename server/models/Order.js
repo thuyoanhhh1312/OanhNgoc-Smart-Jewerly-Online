@@ -126,6 +126,12 @@ const Order = sequelize.define('Order', {
         defaultValue: 0,
     },
 
+    is_deposit: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+
     // Trạng thái thanh toán đặt cọc: 'pending', 'paid', 'none'
     deposit_status: {
         type: DataTypes.STRING(20),
