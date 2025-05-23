@@ -1,55 +1,92 @@
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import React, { useEffect, useState } from "react";
-import ProductAPI from "../../../api/productApi";
-import { Link } from "react-router";
-import Swal from "sweetalert2";
-import DOMPurify from "dompurify";
-import { Image } from "primereact/image";
-import { InputSwitch } from "primereact/inputswitch";
+import React, { useEffect, useState, useRef } from 'react';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import ProductAPI from '../../../api/productApi';
+import { Link } from 'react-router';
+import Swal from 'sweetalert2';
+import DOMPurify from 'dompurify';
+import { Image } from 'primereact/image';
+import ToggleSwitch from './ToggleSwitch';
+import FilterModal from '../../../components/FilterModal';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
-  const [loadingStatus, setLoadingStatus] = useState(null); // lưu product_id đang update trạng thái
+  const [keyword, setKeyword] = useState('');
+  const [loadingStatus, setLoadingStatus] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [categories, setCategories] = useState([]);
+  console.log('categories', categories);
 
+  const debounceTimeout = useRef(null);
+
+  // Load danh mục khi component mount
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchCategories = async () => {
       try {
-        const data = await ProductAPI.getProducts();
-        setProducts(data);
+        const data = await ProductAPI.getCategoriesWithSubCategories();
+        setCategories(data);
       } catch (error) {
-        console.error("Lỗi khi tải danh sách:", error);
-        Swal.fire("Lỗi", "Không thể tải danh sách sản phẩm.", "error");
+        console.error('Lỗi lấy danh mục:', error);
       }
     };
-    fetchProducts();
+    fetchCategories();
   }, []);
 
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "Bạn chắc chắn muốn xóa?",
-      text: "Hành động này không thể hoàn tác!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "OK",
-      cancelButtonText: "HỦY",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await ProductAPI.deleteProduct(id);
-        setProducts(products.filter((product) => product.product_id !== id));
-        Swal.fire("Đã xóa!", "Sản phẩm đã được xóa thành công.", "success");
-      } catch (error) {
-        console.error("Lỗi khi xóa sản phẩm:", error);
-        Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa sản phẩm!", "error");
+  // Hàm gọi API lấy sản phẩm, hỗ trợ params lọc
+  const fetchProducts = async (params = {}) => {
+    try {
+      if (Object.keys(params).length === 0 && keyword.trim()) {
+        const data = await ProductAPI.getProducts(keyword.trim());
+        setProducts(data);
+        return;
       }
+      const data = await ProductAPI.filterProducts(params);
+      setProducts(data);
+    } catch (error) {
+      console.error('Lỗi khi tải danh sách:', error);
+      Swal.fire('Lỗi', 'Không thể tải danh sách sản phẩm.', 'error');
     }
   };
 
+  // Load sản phẩm lúc đầu
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // Debounce input tìm kiếm
+  const handleKeywordChange = (e) => {
+    const value = e.target.value;
+    setKeyword(value);
+
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+
+    debounceTimeout.current = setTimeout(() => {
+      fetchProducts({ keyword: value.trim() });
+    }, 300);
+  };
+
+  // Xử lý nhận bộ lọc từ FilterModal
+  const handleApplyFilter = (filters) => {
+    const params = { ...filters };
+
+    // Kết hợp với từ khóa tìm kiếm nếu có
+    if (keyword.trim() !== '') {
+      params.keyword = keyword.trim();
+    }
+
+    // Chuyển mảng id thành chuỗi query string (API nhận dạng này)
+    if (params.categoryIds) params.category_id = params.categoryIds.join(',');
+    delete params.categoryIds;
+
+    if (params.subcategoryIds) params.subcategory_id = params.subcategoryIds.join(',');
+    delete params.subcategoryIds;
+
+    fetchProducts(params);
+  };
+
+  // Hiển thị mô tả an toàn (sanitize)
   const descriptionBodyTemplate = (rowData) => {
     const description = rowData?.description;
-
     return description ? (
       <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }} />
     ) : (
@@ -57,9 +94,9 @@ const Product = () => {
     );
   };
 
+  // Hiển thị hình ảnh
   const imageBodyTemplate = (rowData) => {
     const images = rowData?.ProductImages || [];
-
     return (
       <div className="flex flex-wrap gap-2">
         {images.length > 0 ? (
@@ -80,7 +117,7 @@ const Product = () => {
     );
   };
 
-  // Hàm xử lý bật tắt trạng thái bán
+  // Chuyển trạng thái bán (toggle)
   const toggleStatus = async (product) => {
     setLoadingStatus(product.product_id);
     try {
@@ -93,48 +130,59 @@ const Product = () => {
         product.category_id,
         product.subcategory_id,
         null,
-        !product.is_active
+        !product.is_active,
       );
 
-      // Cập nhật local state
       setProducts((prev) =>
         prev.map((p) =>
-          p.product_id === product.product_id ? { ...p, is_active: !p.is_active } : p
-        )
+          p.product_id === product.product_id ? { ...p, is_active: !p.is_active } : p,
+        ),
       );
 
-      Swal.fire("Thành công", "Cập nhật trạng thái thành công", "success");
+      Swal.fire('Thành công', 'Cập nhật trạng thái thành công', 'success');
     } catch (error) {
-      console.error("Lỗi cập nhật trạng thái:", error);
-      Swal.fire("Lỗi", "Không thể cập nhật trạng thái", "error");
+      console.error('Lỗi cập nhật trạng thái:', error);
+      Swal.fire('Lỗi', 'Không thể cập nhật trạng thái', 'error');
     } finally {
       setLoadingStatus(null);
     }
   };
 
-  // Cột trạng thái bán
+  // Template hiển thị cột trạng thái bán
   const statusBodyTemplate = (rowData) => {
     return (
-      <div className="flex justify-center items-center gap-2">
-        <InputSwitch
+      <div className="flex items-center gap-2 justify-center">
+        <ToggleSwitch
           checked={rowData.is_active}
           disabled={loadingStatus === rowData.product_id}
           onChange={() => toggleStatus(rowData)}
         />
-        <span>{rowData.is_active ? "Đang mở bán" : "Đang dừng bán"}</span>
+        <span>{rowData.is_active ? 'Đang mở bán' : 'Đang dừng bán'}</span>
       </div>
     );
   };
 
   return (
-    <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
-      <div className="flex flex-row justify-between items-center mb-4">
-        <h1 className="text-[32px] font-bold ">Product List</h1>
-        <div>
-          <Link to="/admin/products/add">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Product</button>
-          </Link>
+    <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Product List</h1>
+
+        <div className="flex gap-2 flex-1 max-w-md">
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên sản phẩm"
+            className="border border-gray-300 rounded p-2 flex-grow"
+            value={keyword}
+            onChange={handleKeywordChange}
+          />
+          <button className="p-button p-button-secondary" onClick={() => setFilterVisible(true)}>
+            Bộ lọc nâng cao
+          </button>
         </div>
+
+        <Link to="/admin/products/add">
+          <button className="bg-blue-500 text-white px-4 py-2 rounded">Add New Product</button>
+        </Link>
       </div>
 
       <DataTable
@@ -144,29 +192,58 @@ const Product = () => {
         showGridlines
         paginatorTemplate="PrevPageLink PageLinks NextPageLink"
       >
-        <Column field="product_name" header="Tên sản phẩm" sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="ProductImages" header="Hình ảnh" body={imageBodyTemplate} sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="description" header="Mô tả" body={descriptionBodyTemplate} sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="price" header="Giá" sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="quantity" header="Số lượng" sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="Category.category_name" header="Danh mục" sortable headerClassName="bg-[#d2d4d6]" />
-        <Column field="SubCategory.subcategory_name" header="Danh mục con" sortable headerClassName="bg-[#d2d4d6]" />
-        
-        <Column header="Trạng thái bán" body={statusBodyTemplate} headerClassName="bg-[#d2d4d6]" style={{ width: '150px', textAlign: 'center' }} />
-
+        <Column field="product_name" header="Tên sản phẩm" sortable headerClassName="bg-gray-200" />
+        <Column
+          field="ProductImages"
+          header="Hình ảnh"
+          body={imageBodyTemplate}
+          sortable
+          headerClassName="bg-gray-200"
+        />
+        <Column
+          field="description"
+          header="Mô tả"
+          body={descriptionBodyTemplate}
+          sortable
+          headerClassName="bg-gray-200"
+        />
+        <Column field="price" header="Giá" sortable headerClassName="bg-gray-200" />
+        <Column field="quantity" header="Số lượng" sortable headerClassName="bg-gray-200" />
+        <Column
+          field="Category.category_name"
+          header="Danh mục"
+          sortable
+          headerClassName="bg-gray-200"
+        />
+        <Column
+          field="SubCategory.subcategory_name"
+          header="Danh mục con"
+          sortable
+          headerClassName="bg-gray-200"
+        />
+        <Column
+          header="Trạng thái bán"
+          body={statusBodyTemplate}
+          headerClassName="bg-gray-200"
+          style={{ width: '150px', textAlign: 'center' }}
+        />
         <Column
           body={(rowData) => (
-            <div className="flex flex-row gap-2">
-              <Link to={`/admin/products/edit/${rowData.product_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
-              </Link>
-              
-            </div>
+            <Link to={`/admin/products/edit/${rowData.product_id}`}>
+              <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
+            </Link>
           )}
           header="Actions"
-          headerClassName="bg-[#d2d4d6]"
+          headerClassName="bg-gray-200"
         />
       </DataTable>
+
+      <FilterModal
+        visible={filterVisible}
+        onHide={() => setFilterVisible(false)}
+        onApply={handleApplyFilter}
+        categories={categories}
+      />
     </div>
   );
 };

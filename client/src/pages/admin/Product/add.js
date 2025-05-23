@@ -208,16 +208,7 @@ const AddProduct = () => {
                 </div>
               )}
             </div>
-{/* <div className="flex items-center gap-4">
-  <Label>Trạng thái mở bán:</Label>
-  <input
-    type="checkbox"
-    checked={isActive}
-    onChange={(e) => setIsActive(e.target.checked)}
-    className="w-5 h-5"
-  />
-  <span>{isActive ? "Đang mở bán" : "Đang dừng bán"}</span>
-</div> */}
+
 
             <div>
               <Button type="submit" onClick={handleSubmit} className="w-full">Thêm sản phẩm</Button>

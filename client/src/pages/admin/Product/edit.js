@@ -7,7 +7,7 @@ import ProductAPI from "../../../api/productApi";
 import categoryApi from "../../../api/categoryApi";
 import subCategoryApi from "../../../api/subCategoryApi";
 import Swal from "sweetalert2";
-import { InputSwitch } from "primereact/inputswitch";
+import ToggleSwitch from "./ToggleSwitch";
 
 
 const EditProduct = () => {
@@ -213,10 +213,13 @@ const EditProduct = () => {
                 </div>
               )}
               <div className="flex items-center gap-4">
-  <Label>Trạng thái mở bán:</Label>
-  <InputSwitch checked={isActive} onChange={(e) => setIsActive(e.value)} />
-  <span>{isActive ? "Đang mở bán" : "Đang dừng bán"}</span>
-</div>
+                <Label>Trạng thái mở bán:</Label>
+                <ToggleSwitch
+                  checked={isActive}
+                  onChange={(value) => setIsActive(value)}
+                />
+                <span>{isActive ? "Đang mở bán" : "Đang dừng bán"}</span>
+              </div>
 
 
               {/* Submit Button */}
