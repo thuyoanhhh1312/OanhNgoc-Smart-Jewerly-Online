@@ -2,8 +2,8 @@ import React, { useState, useEffect, Fragment } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import ProductCard from "../components/ui/product/productCard";
-import { Dialog, Transition, Listbox } from "@headlessui/react";
-import { XMarkIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline";
+import { Dialog, Transition, Listbox, DialogPanel, DialogTitle, TransitionChild, Label, ListboxOptions, ListboxButton, ListboxOption } from "@headlessui/react";
+import { XMarkIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline"
 import ReactStars from "react-rating-stars-component";
 import categoryApi from "../api/categoryApi";
 import subcategoryApi from "../api/subCategoryApi";
@@ -290,7 +290,7 @@ const Search = () => {
             className="relative z-40 lg:hidden"
             onClose={setMobileFiltersOpen}
           >
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
@@ -300,10 +300,10 @@ const Search = () => {
               leaveTo="opacity-0"
             >
               <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </Transition.Child>
+            </TransitionChild>
 
             <div className="fixed inset-0 flex z-40">
-              <Transition.Child
+              <TransitionChild
                 as={Fragment}
                 enter="transition ease-in-out duration-300 transform"
                 enterFrom="translate-x-full"
@@ -312,7 +312,7 @@ const Search = () => {
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="relative ml-auto max-w-xs w-full h-full bg-white shadow-xl py-4 pb-6 flex flex-col overflow-y-auto">
+                <DialogPanel className="relative ml-auto max-w-xs w-full h-full bg-white shadow-xl py-4 pb-6 flex flex-col overflow-y-auto">
                   <div className="px-4 flex items-center justify-between">
                     <h2 className="text-lg font-medium text-gray-900">
                       Bộ lọc
@@ -336,17 +336,17 @@ const Search = () => {
                       >
                         {({ open }) => (
                           <>
-                            <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                            <Label className="block text-sm font-medium text-gray-700 mb-1">
                               Chủng loại
-                            </Listbox.Label>
+                            </Label>
                             <div className="relative">
-                              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                              <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <span className="block truncate">
                                   {tempFilters.category
                                     ? categories.find(
-                                        (c) =>
-                                          c.category_id === tempFilters.category
-                                      )?.category_name
+                                      (c) =>
+                                        c.category_id === tempFilters.category
+                                    )?.category_name
                                     : "Tất cả"}
                                 </span>
                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -355,7 +355,7 @@ const Search = () => {
                                     aria-hidden="true"
                                   />
                                 </span>
-                              </Listbox.Button>
+                              </ListboxButton>
 
                               <Transition
                                 show={open}
@@ -364,8 +364,8 @@ const Search = () => {
                                 leaveFrom="opacity-100"
                                 leaveTo="opacity-0"
                               >
-                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                  <Listbox.Option
+                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                  <ListboxOption
                                     key="all"
                                     value={null}
                                     className={({ active }) =>
@@ -380,9 +380,9 @@ const Search = () => {
                                     <span className="block truncate">
                                       Tất cả
                                     </span>
-                                  </Listbox.Option>
+                                  </ListboxOption>
                                   {categories.map((cat) => (
-                                    <Listbox.Option
+                                    <ListboxOption
                                       key={cat.category_id}
                                       value={cat.category_id}
                                       className={({ active }) =>
@@ -406,9 +406,9 @@ const Search = () => {
                                           {cat.category_name}
                                         </span>
                                       )}
-                                    </Listbox.Option>
+                                    </ListboxOption>
                                   ))}
-                                </Listbox.Options>
+                                </ListboxOptions >
                               </Transition>
                             </div>
                           </>
@@ -425,18 +425,18 @@ const Search = () => {
                       >
                         {({ open }) => (
                           <>
-                            <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                            <Label className="block text-sm font-medium text-gray-700 mb-1">
                               Chủng loại con
-                            </Listbox.Label>
+                            </Label>
                             <div className="relative">
                               <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50">
                                 <span className="block truncate">
                                   {tempFilters.subcategory
                                     ? filteredSubcategories.find(
-                                        (c) =>
-                                          c.subcategory_id ===
-                                          tempFilters.subcategory
-                                      )?.subcategory_name
+                                      (c) =>
+                                        c.subcategory_id ===
+                                        tempFilters.subcategory
+                                    )?.subcategory_name
                                     : "Tất cả"}
                                 </span>
                                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -454,8 +454,8 @@ const Search = () => {
                                 leaveFrom="opacity-100"
                                 leaveTo="opacity-0"
                               >
-                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                  <Listbox.Option
+                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                  <ListboxOption
                                     key="all"
                                     value={null}
                                     className={({ active }) =>
@@ -470,9 +470,9 @@ const Search = () => {
                                     <span className="block truncate">
                                       Tất cả
                                     </span>
-                                  </Listbox.Option>
+                                  </ListboxOption>
                                   {filteredSubcategories.map((subcat) => (
-                                    <Listbox.Option
+                                    <ListboxOption
                                       key={subcat.subcategory_id}
                                       value={subcat.subcategory_id}
                                       className={({ active }) =>
@@ -496,9 +496,9 @@ const Search = () => {
                                           {subcat.subcategory_name}
                                         </span>
                                       )}
-                                    </Listbox.Option>
+                                    </ListboxOption>
                                   ))}
-                                </Listbox.Options>
+                                </ListboxOptions>
                               </Transition>
                             </div>
                           </>
@@ -531,11 +531,11 @@ const Search = () => {
                       >
                         {({ open }) => (
                           <>
-                            <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                            <Label className="block text-sm font-medium text-gray-700 mb-1">
                               Sắp xếp
-                            </Listbox.Label>
+                            </Label>
                             <div className="relative">
-                              <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                              <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <span className="block truncate">
                                   {tempFilters.sort.name}
                                 </span>
@@ -545,7 +545,7 @@ const Search = () => {
                                     aria-hidden="true"
                                   />
                                 </span>
-                              </Listbox.Button>
+                              </ListboxButton>
 
                               <Transition
                                 show={open}
@@ -554,9 +554,9 @@ const Search = () => {
                                 leaveFrom="opacity-100"
                                 leaveTo="opacity-0"
                               >
-                                <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                                   {sortOptions.map((opt) => (
-                                    <Listbox.Option
+                                    <ListboxOption
                                       key={opt.value}
                                       value={opt}
                                       className={({ active }) =>
@@ -580,9 +580,9 @@ const Search = () => {
                                           {opt.name}
                                         </span>
                                       )}
-                                    </Listbox.Option>
+                                    </ListboxOption>
                                   ))}
-                                </Listbox.Options>
+                                </ListboxOptions>
                               </Transition>
                             </div>
                           </>
@@ -604,8 +604,8 @@ const Search = () => {
                       </button>
                     </div>
                   </form>
-                </Dialog.Panel>
-              </Transition.Child>
+                </DialogPanel>
+              </TransitionChild>
             </div>
           </Dialog>
         </Transition.Root>
@@ -623,16 +623,16 @@ const Search = () => {
               >
                 {({ open }) => (
                   <>
-                    <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
                       Chủng loại
-                    </Listbox.Label>
+                    </Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <span className="block truncate">
                           {tempFilters.category
                             ? categories.find(
-                                (c) => c.category_id === tempFilters.category
-                              )?.category_name
+                              (c) => c.category_id === tempFilters.category
+                            )?.category_name
                             : "Tất cả"}
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -641,7 +641,7 @@ const Search = () => {
                             aria-hidden="true"
                           />
                         </span>
-                      </Listbox.Button>
+                      </ListboxButton>
 
                       <Transition
                         show={open}
@@ -650,8 +650,8 @@ const Search = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          <Listbox.Option
+                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          <ListboxOption
                             key="all"
                             value={null}
                             className={({ active }) =>
@@ -664,9 +664,9 @@ const Search = () => {
                             }
                           >
                             <span className="block truncate">Tất cả</span>
-                          </Listbox.Option>
+                          </ListboxOption>
                           {categories.map((cat) => (
-                            <Listbox.Option
+                            <ListboxOption
                               key={cat.category_id}
                               value={cat.category_id}
                               className={({ active }) =>
@@ -688,9 +688,9 @@ const Search = () => {
                                   {cat.category_name}
                                 </span>
                               )}
-                            </Listbox.Option>
+                            </ListboxOption>
                           ))}
-                        </Listbox.Options>
+                        </ListboxOptions>
                       </Transition>
                     </div>
                   </>
@@ -707,17 +707,17 @@ const Search = () => {
               >
                 {({ open }) => (
                   <>
-                    <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
                       Chủng loại con
-                    </Listbox.Label>
+                    </Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50">
+                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:opacity-50">
                         <span className="block truncate">
                           {tempFilters.subcategory
                             ? filteredSubcategories.find(
-                                (c) =>
-                                  c.subcategory_id === tempFilters.subcategory
-                              )?.subcategory_name
+                              (c) =>
+                                c.subcategory_id === tempFilters.subcategory
+                            )?.subcategory_name
                             : "Tất cả"}
                         </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -726,7 +726,7 @@ const Search = () => {
                             aria-hidden="true"
                           />
                         </span>
-                      </Listbox.Button>
+                      </ListboxButton>
 
                       <Transition
                         show={open}
@@ -735,8 +735,8 @@ const Search = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          <Listbox.Option
+                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          <ListboxOption
                             key="all"
                             value={null}
                             className={({ active }) =>
@@ -749,9 +749,9 @@ const Search = () => {
                             }
                           >
                             <span className="block truncate">Tất cả</span>
-                          </Listbox.Option>
+                          </ListboxOption>
                           {filteredSubcategories.map((subcat) => (
-                            <Listbox.Option
+                            <ListboxOption
                               key={subcat.subcategory_id}
                               value={subcat.subcategory_id}
                               className={({ active }) =>
@@ -773,9 +773,9 @@ const Search = () => {
                                   {subcat.subcategory_name}
                                 </span>
                               )}
-                            </Listbox.Option>
+                            </ListboxOption>
                           ))}
-                        </Listbox.Options>
+                        </ListboxOptions>
                       </Transition>
                     </div>
                   </>
@@ -806,11 +806,11 @@ const Search = () => {
               >
                 {({ open }) => (
                   <>
-                    <Listbox.Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
                       Sắp xếp
-                    </Listbox.Label>
+                    </Label>
                     <div className="relative">
-                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      <ListboxButton className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <span className="block truncate">
                           {tempFilters.sort.name}
                         </span>
@@ -820,7 +820,7 @@ const Search = () => {
                             aria-hidden="true"
                           />
                         </span>
-                      </Listbox.Button>
+                      </ListboxButton>
 
                       <Transition
                         show={open}
@@ -829,9 +829,9 @@ const Search = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                       >
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <ListboxOptions className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                           {sortOptions.map((opt) => (
-                            <Listbox.Option
+                            <ListboxOption
                               key={opt.value}
                               value={opt}
                               className={({ active }) =>
@@ -853,9 +853,9 @@ const Search = () => {
                                   {opt.name}
                                 </span>
                               )}
-                            </Listbox.Option>
+                            </ListboxOption>
                           ))}
-                        </Listbox.Options>
+                        </ListboxOptions>
                       </Transition>
                     </div>
                   </>
@@ -902,8 +902,7 @@ const Search = () => {
                   )}
                 </div>
 
-                <Pagination
-                  currentPage={filters.page}
+                <Pagination currentPage={filters.page}
                   totalPages={Math.ceil(totalProducts / filters.limit)}
                   onPageChange={onPageChange}
                 />
