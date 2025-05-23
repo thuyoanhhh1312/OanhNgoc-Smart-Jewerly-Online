@@ -192,21 +192,19 @@ export const createOrder = async (req, res) => {
   }
 };
 
-export const confirmDepositPayment = async (req, res) => {
-  const { orderId } = req.params;
-
+export const updateIsDeposit = async (req, res) => {
+  const { id } = req.params;
+  const { is_deposit } = req.body;
   try {
-    const order = await db.Order.findByPk(orderId);
+    const order = await db.Order.findByPk(id);
     if (!order) {
-      return res.status(404).json({ message: "Đơn hàng không tồn tại" });
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
-
-    order.deposit_status = "paid";
-    order.status_id = 2; // ví dụ trạng thái: đã thanh toán đặt cọc
+    order.is_deposit = is_deposit;
     await order.save();
-
-    res.status(200).json({ message: "Xác nhận thanh toán đặt cọc thành công", order });
+    res.status(200).json({ message: "Cập nhật trạng thái đặt cọc thành công" });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi xác nhận thanh toán", error: error.message });
+    console.error("Lỗi khi cập nhật trạng thái đặt cọc:", error);
+    res.status(500).json({ message: "Lỗi khi cập nhật trạng thái đặt cọc", error: error.message });
   }
 };

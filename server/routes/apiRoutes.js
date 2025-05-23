@@ -91,11 +91,10 @@ router.delete('/promotions/:id', authenticateToken, isAdminOrStaff, promotionCon
 router.get('/orders', authenticateToken, isAdmin, orderController.getAllOrders);
 router.get('/orders/:id', authenticateToken, isAdminOrStaff, orderController.getOrderById);
 router.post('/orders', authenticateToken, orderController.createOrder);
-router.put('/orders/:orderId/confirm-deposit', authenticateToken, isAdminOrStaff, orderController.confirmDepositPayment);
-
 router.put('/orders/:id', authenticateToken, isAdminOrStaff, orderController.updatedOrder);
 router.put('/update-staff/:id', authenticateToken, isAdmin, orderController.updatedStaff);
 router.get('/orders/user/:user_id', authenticateToken, isAdminOrStaff, orderController.getOrderByUserId);
+router.patch('/orders/:id/deposit', authenticateToken, isAdminOrStaff, orderController.updateIsDeposit);
 
 // Order Status routes
 router.get('/order-status', orderStatusController.getAllOrderStatuses);
