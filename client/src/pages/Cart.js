@@ -279,10 +279,10 @@ const Cart = () => {
     },
     [cart, dispatch]
   );
-  
 
   // Handler quay lại trang trước
-  const handleGoBack = () => { if (navigate) {
+  const handleGoBack = () => {
+    if (navigate) {
       navigate(-1);
     } else {
       window.history.back();

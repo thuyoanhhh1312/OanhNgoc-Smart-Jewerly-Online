@@ -7,6 +7,8 @@ import ProductAPI from "../../../api/productApi";
 import categoryApi from "../../../api/categoryApi";
 import subCategoryApi from "../../../api/subCategoryApi";
 import Swal from "sweetalert2";
+import { InputSwitch } from "primereact/inputswitch";
+
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -18,6 +20,8 @@ const EditProduct = () => {
   const [subCategoryId, setSubCategoryId] = useState("");
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+    const [isActive, setIsActive] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -43,6 +47,8 @@ const EditProduct = () => {
 
         setCategories(categoriesData);
         setSubCategories(subCategoriesData);
+        setIsActive(product.is_active || false);
+
       } catch (error) {
         console.error("Error loading product:", error);
       }
@@ -61,7 +67,9 @@ const EditProduct = () => {
         price,
         quantity,
         categoryId,
-        subCategoryId
+        subCategoryId,
+        null,
+        isActive 
       );
       await Swal.fire({
         icon: "success",
@@ -200,9 +208,16 @@ const EditProduct = () => {
                         {sub.subcategory_name}
                       </option>
                     ))}
+
                   </select>
                 </div>
               )}
+              <div className="flex items-center gap-4">
+  <Label>Trạng thái mở bán:</Label>
+  <InputSwitch checked={isActive} onChange={(e) => setIsActive(e.value)} />
+  <span>{isActive ? "Đang mở bán" : "Đang dừng bán"}</span>
+</div>
+
 
               {/* Submit Button */}
               <div>
