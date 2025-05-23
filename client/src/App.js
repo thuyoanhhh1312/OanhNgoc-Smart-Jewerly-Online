@@ -50,7 +50,6 @@ import OrderPage from "./pages/OrderPage";
 import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
 
-
 import { useDispatch } from "react-redux";
 function App() {
   const dispatch = useDispatch();
@@ -74,6 +73,7 @@ function App() {
     <Router>
       <Routes>
       
+      <Route path="/checkout" element={<Checkout />} />
         <Route element={<AdminLayout />}>
           {/*User*/}
           <Route

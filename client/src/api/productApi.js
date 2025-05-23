@@ -24,7 +24,7 @@ const getProductWithReviewSummary = async () => {
 }
 
 // Tạo một sản phẩm mới
-const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], accessToken) => {
+const createProduct = async (productName, description, price, quantity, categoryId, subcategoryId, images = [], accessToken, isActive = false) => {
   try {
     const formData = new FormData();
     formData.append('product_name', productName);
@@ -33,6 +33,7 @@ const createProduct = async (productName, description, price, quantity, category
     formData.append('quantity', quantity);
     formData.append('category_id', categoryId);
     formData.append('subcategory_id', subcategoryId);
+    formData.append('is_active', isActive); // ✅ gửi trạng thái
 
     // Thêm tất cả ảnh
     images.forEach((image) => {
@@ -66,7 +67,7 @@ const getProductById = async (id) => {
 };
 
 // Cập nhật sản phẩm
-const updateProduct = async (id, productName, description, price, quantity, categoryId, subcategoryId, imageUrl) => {
+const updateProduct = async (id, productName, description, price, quantity, categoryId, subcategoryId, imageUrl, isActive) => {
   try {
     const response = await axiosInstance.put(`${API_URL}/products/${id}`, {
       product_name: productName,
@@ -74,7 +75,8 @@ const updateProduct = async (id, productName, description, price, quantity, cate
       price: price,
       quantity: quantity,
       category_id: categoryId,
-      subcategory_id: subcategoryId
+      subcategory_id: subcategoryId,
+      is_active: isActive
     });
     return response.data;
   } catch (error) {

@@ -145,7 +145,16 @@ export const createProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
+  const {
+    product_name,
+    description,
+    price,
+    quantity,
+    category_id,
+    subcategory_id,
+    is_active, // Thêm trường is_active
+  } = req.body;
+
   try {
     const product = await db.Product.findByPk(id);
     if (!product) {
@@ -159,12 +168,18 @@ export const updateProduct = async (req, res) => {
     product.category_id = category_id || product.category_id;
     product.subcategory_id = subcategory_id || product.subcategory_id;
 
+    // Cập nhật trường is_active nếu có trong body
+    if (typeof is_active !== 'undefined') {
+      product.is_active = is_active;
+    }
+
     await product.save();
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi cập nhật sản phẩm", error: error.message });
   }
 };
+
 
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;

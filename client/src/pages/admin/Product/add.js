@@ -23,6 +23,8 @@ const AddProduct = () => {
   const [subCategories, setSubCategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState(false); // Mặc định là DỪNG BÁN
+
 
   const navigate = useNavigate();
 
@@ -68,7 +70,8 @@ const AddProduct = () => {
         categoryId,
         subCategory_id,
         images,
-        user?.token
+        user?.token,
+        isActive
       );
 
       Swal.fire({
@@ -205,6 +208,16 @@ const AddProduct = () => {
                 </div>
               )}
             </div>
+{/* <div className="flex items-center gap-4">
+  <Label>Trạng thái mở bán:</Label>
+  <input
+    type="checkbox"
+    checked={isActive}
+    onChange={(e) => setIsActive(e.target.checked)}
+    className="w-5 h-5"
+  />
+  <span>{isActive ? "Đang mở bán" : "Đang dừng bán"}</span>
+</div> */}
 
             <div>
               <Button type="submit" onClick={handleSubmit} className="w-full">Thêm sản phẩm</Button>

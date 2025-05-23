@@ -28,6 +28,11 @@ const Product = sequelize.define('Product', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+    is_active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true, // true: đang bán, false: dừng bán
+    },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

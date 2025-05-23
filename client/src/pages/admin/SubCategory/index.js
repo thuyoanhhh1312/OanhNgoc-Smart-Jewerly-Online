@@ -70,12 +70,12 @@ const SubCategory = () => {
               <Link to={`/admin/subcategories/edit/${rowData.subcategory_id}`}>
                 <button className="bg-green-500 text-white px-4 py-2 rounded">Edit</button>
               </Link>
-              <button
+              {/* <button
                 onClick={() => handleDelete(rowData.subcategory_id)}
                 className="bg-red-500 text-white px-4 py-2 rounded"
               >
                 Delete
-              </button>
+              </button> */}
             </div>
           )}
           header="Actions"
