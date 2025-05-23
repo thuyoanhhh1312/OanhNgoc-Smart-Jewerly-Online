@@ -38,6 +38,8 @@ import User from "./pages/admin/User";
 import AddUser from './pages/admin/User/AddUser';
 import EditUser from "./pages/admin/User/edit";
 
+import Dashboard from "./pages/admin/Dashboard";
+
 import CustomerList from './pages/admin/Customer/index';
 
 import Home from "./pages/Home";
@@ -72,9 +74,19 @@ function App() {
   return (
     <Router>
       <Routes>
-      
-      <Route path="/checkout" element={<Checkout />} />
+
+        <Route path="/checkout" element={<Checkout />} />
         <Route element={<AdminLayout />}>
+          {/*Dashboard*/}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <Dashboard />
+              </AdminRoute>
+            }
+          />
+
           {/*User*/}
           <Route
             path="/admin/user"
@@ -84,9 +96,6 @@ function App() {
               </AdminOrStaffRoute>
             }
           />
-
-
-
           <Route
             path="/admin/user/add"
             element={
@@ -242,7 +251,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
-        <Route path="/checkout"element={<Checkout/>}/>
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/search" element={<Search />} />
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
         <Route path="/promotions" element={<PromotionsPage />} />

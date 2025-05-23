@@ -24,6 +24,11 @@ import {
 const navItems = [
   {
     icon: <GridIcon />,
+    name: "Dashboard",
+    path: "/admin/dashboard",
+  },
+  {
+    icon: <GridIcon />,
     name: "Product",
     path: "/admin/products",
   },

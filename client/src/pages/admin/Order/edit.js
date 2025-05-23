@@ -8,8 +8,6 @@ import OrderStatusAPI from "../../../api/orderStatusApi";
 import { useNavigate, useParams } from "react-router";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
-import { Checkbox } from '@headlessui/react'
-import { CheckIcon } from '@heroicons/react/16/solid'
 
 const EditOrder = () => {
   const { user } = useSelector((state) => ({ ...state }));
@@ -116,21 +114,7 @@ const EditOrder = () => {
     <div className="flex flex-col flex-1">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <form onSubmit={handleSubmit} method="POST">
-          <Checkbox
-            checked={enabled}
-            onChange={setEnabled}
-            className="group size-6 rounded-md bg-black  p-1 ring-1 ring-white/15 ring-inset focus:not-data-focus:outline-none data-checked:bg-white data-focus:outline data-focus:outline-offset-2 data-focus:outline-white"
-          >
-            <CheckIcon className="hidden size-4 fill-black group-data-checked:block" />
-          </Checkbox>
           <div className="space-y-6">
-            <Checkbox
-              checked={enabled}
-              onChange={setEnabled}
-              className="group size-6 rounded-md bg-white/10 p-1 ring-1 ring-white/15 ring-inset focus:not-data-focus:outline-none data-checked:bg-white data-focus:outline data-focus:outline-offset-2 data-focus:outline-white"
-            >
-              <CheckIcon className="hidden size-4 fill-black group-data-checked:block" />
-            </Checkbox>
             <div>
               <Label>
                 Mã đơn hàng <span className="text-red">*</span>
