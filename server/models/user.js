@@ -48,6 +48,4 @@ const User = sequelize.define('User', {
   timestamps: false,
 });
 
-// User.belongsTo(Role, { foreignKey: 'role_id' });
-
 export default User;

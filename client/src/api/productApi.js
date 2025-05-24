@@ -87,6 +87,16 @@ const getProductById = async (id) => {
   }
 };
 
+const getProductBySlug = async (slug) => {
+  try {
+    const response = await axios.get(`${API_URL}/get-product-by-slug/${slug}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product by slug:', error);
+    throw error;
+  }
+};
+
 // Cập nhật sản phẩm
 const updateProduct = async (
   id,
@@ -222,6 +232,18 @@ const searchProduct = async ({
   }
 };
 
+const quickSearchProducts = async (keyword, limit = 8) => {
+  try {
+    const res = await axios.get(`${API_URL}/quick-search-products`, {
+      params: { keyword, limit },
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error("Quick Search API error:", error);
+    return [];
+  }
+};
+
 const getProductsByCategory = async (categoryName) => {
   try {
     const response = await axios.get(`${API_URL}/product-by-category`, {
@@ -235,12 +257,23 @@ const getProductsByCategory = async (categoryName) => {
     throw error;
   }
 };
+
 const getCategoriesWithSubCategories = async () => {
   try {
     const response = await axios.get(`${API_URL}/get-category-subcategory`); // API trả về danh sách category kèm theo SubCategories
     return response.data;
   } catch (error) {
     console.error('Lỗi lấy danh mục:', error);
+    throw error;
+  }
+};
+
+const getTopRatedProductsBySentiment = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get-product-top-rated-by-sentiment`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching top rated products by sentiment:', error);
     throw error;
   }
 };
@@ -262,4 +295,7 @@ export default {
   getProductsByCategory,
   filterProducts,
   getCategoriesWithSubCategories,
+  quickSearchProducts,
+  getProductBySlug,
+  getTopRatedProductsBySentiment
 };

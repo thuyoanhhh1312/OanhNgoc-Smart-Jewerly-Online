@@ -12,6 +12,11 @@ const Product = sequelize.define('Product', {
         allowNull: false,
         unique: true,
     },
+    slug: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+    },
     description: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -31,7 +36,7 @@ const Product = sequelize.define('Product', {
     is_active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true, // true: đang bán, false: dừng bán
+        defaultValue: true,
     },
     created_at: {
         type: DataTypes.DATE,
@@ -45,10 +50,5 @@ const Product = sequelize.define('Product', {
     tableName: 'product',
     timestamps: false,
 });
-
-// Thiết lập quan hệ
-// Product.belongsTo(Category, { foreignKey: 'category_id' });
-// Product.belongsTo(Subcategory, { foreignKey: 'subcategory_id' });
-// Product.hasMany(ProductImage, { foreignKey: 'product_id' });
 
 export default Product;

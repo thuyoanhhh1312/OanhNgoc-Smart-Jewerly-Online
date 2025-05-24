@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import categoryApi from "../../../api/categoryApi";
+import QuickSearchPopup from "../../QuickSearchPopup";
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [searchValue, setSearchValue] = useState("");
+  const [openQuickSearch, setOpenQuickSearch] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,6 +40,12 @@ const Header = () => {
 
   const handlePromotionClick = () => {
     navigate("/promotions");
+  };
+
+  const handleSearch = (keyword) => {
+    if (keyword) {
+      navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
+    }
   };
 
   return (
@@ -83,23 +91,26 @@ const Header = () => {
 
           {/* Thanh tìm kiếm */}
           <div className="relative h-[35px] w-[360px] mt-[3px]">
-            <input
-              type="text"
-              className="border-2 border-solid h-[35px] w-full rounded-[100px] pl-[10px] italic bg-[#ededed] leading-[35px] outline-none"
-              placeholder="Tìm kiếm nhanh"
-              value={searchValue}
-              onChange={handleSearchChange}
-              onKeyDown={handleSearchKeyDown}
-            />
-            <div className="absolute top-[10px] right-3 bg-[#ededed] pointer-events-none">
+            <button
+              className="w-full h-[35px] rounded-[100px] pl-[14px] italic bg-[#ededed] leading-[35px] text-left text-gray-700 outline-none border-2 border-solid hover:border-yellow-500 transition"
+              style={{ border: "2px solid #ededed" }}
+              onClick={() => setOpenQuickSearch(true)}
+            >
+              <span style={{ color: "#888" }}>Tìm kiếm nhanh</span>
               <img
                 alt="Tìm kiếm nhanh"
                 loading="lazy"
-                width="14.5"
-                height="15"
+                width="16"
+                height="16"
                 src="https://cdn.pnj.io/images/image-update/layout/mobile/find-icon.svg"
+                style={{ position: "absolute", right: 20, top: 10 }}
               />
-            </div>
+            </button>
+            <QuickSearchPopup
+              open={openQuickSearch}
+              onClose={() => setOpenQuickSearch(false)}
+              onSearch={handleSearch}
+            />
           </div>
         </nav>
       </div>
