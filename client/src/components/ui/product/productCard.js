@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
   const goProductDetail = () => {
-    navigate(`/product-detail/${product.product_id}`);
+    navigate(`/${product.slug}`);
   };
 
   const avgRating = Number(product.avgRating) || 0;

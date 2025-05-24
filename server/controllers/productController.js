@@ -1,5 +1,6 @@
 import db from '../models/index.js';
 import { Op, fn, col, literal, Sequelize } from 'sequelize';
+import slugify from 'slugify';
 
 
 export const getAllProducts = async (req, res) => {
@@ -56,6 +57,7 @@ export const getAllProductsWithRatingSummary = async (req, res) => {
       attributes: [
         'product_id',
         'product_name',
+        'slug',
         'description',
         'price',
         'quantity',
@@ -140,14 +142,69 @@ export const getProductById = async (req, res) => {
   }
 };
 
+export const getProductBySlug = async (req, res, next) => {
+  const { slug } = req.params;
+
+  try {
+    const product = await db.Product.findOne({
+      where: { slug },
+      include: [
+        {
+          model: db.Category,
+          attributes: ['category_name'],
+        },
+        {
+          model: db.SubCategory,
+          attributes: ['subcategory_name'],
+        },
+        {
+          model: db.ProductImage,
+          attributes: ['image_id', 'image_url', 'alt_text', 'is_main'],
+        },
+      ],
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Không tìm thấy sản phẩm với slug này' });
+    }
+
+    const reviews = await db.ProductReview.findAll({
+      where: { product_id: product.product_id },
+      include: [
+        {
+          model: db.Customer,
+          attributes: ['name', 'email', 'phone'],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+
+    return res.status(200).json({
+      message: 'Lấy sản phẩm thành công',
+      product,
+      reviews,
+    });
+  } catch (err) {
+    console.error('Lỗi khi lấy sản phẩm theo slug:', err);
+    return next({
+      statusCode: 500,
+      message: 'Lỗi khi lấy sản phẩm theo slug',
+      error: err.message,
+    });
+  }
+};
+
 
 export const createProduct = async (req, res) => {
   try {
     const { product_name, description, price, quantity, category_id, subcategory_id } = req.body;
     const imageFiles = req.files;
 
+    const slug = slugify(product_name, { lower: true, locale: 'vi', strict: true });
+
     const newProduct = await db.Product.create({
       product_name,
+      slug,
       description,
       price,
       quantity,
@@ -181,7 +238,7 @@ export const updateProduct = async (req, res) => {
     quantity,
     category_id,
     subcategory_id,
-    is_active, // Thêm trường is_active
+    is_active,
   } = req.body;
 
   try {
@@ -190,7 +247,10 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
     }
 
-    product.product_name = product_name || product.product_name;
+    if (product_name) {
+      product.product_name = product_name;
+      product.slug = slugify(product_name, { lower: true, locale: 'vi', strict: true });
+    }
     product.description = description || product.description;
     product.price = price || product.price;
     product.quantity = quantity || product.quantity;
@@ -414,3 +474,70 @@ export const filterProducts = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lọc sản phẩm", error: error.message });
   }
 };
+
+export const getTopRatedProductsBySentiment = async (req, res, next) => {
+  try {
+    // 1. Lấy danh sách product_id, avg_rating, pos_review_count theo sentiment POS, limit 5
+    const topReviews = await db.ProductReview.findAll({
+      attributes: [
+        'product_id',
+        [Sequelize.fn('AVG', Sequelize.col('rating')), 'avg_rating'],
+        [Sequelize.fn('COUNT', Sequelize.col('review_id')), 'pos_review_count'],
+      ],
+      where: { sentiment: 'POS' },
+      group: ['product_id'],
+      order: [
+        [Sequelize.literal('pos_review_count'), 'DESC'],
+        [Sequelize.literal('avg_rating'), 'DESC'],
+      ],
+      limit: 5,
+      raw: true,
+    });
+
+    const productIds = topReviews.map(r => r.product_id);
+    if (productIds.length === 0) {
+      return res.status(200).json({ message: 'Không có sản phẩm được đánh giá tích cực', products: [] });
+    }
+
+    // 2. Lấy chi tiết sản phẩm với product_id trên, kèm ảnh chính
+    const products = await db.Product.findAll({
+      where: {
+        product_id: { [Sequelize.Op.in]: productIds },
+        is_active: true,
+      },
+      include: [
+        {
+          model: db.ProductImage,
+          as: 'ProductImages',
+          attributes: ['image_id', 'image_url', 'alt_text'],
+          where: { is_main: true },
+          required: false,
+        },
+      ],
+    });
+
+    // 3. Map avg_rating và pos_review_count vào từng product
+    const productsWithStats = products.map(product => {
+      const stats = topReviews.find(r => r.product_id === product.product_id);
+      return {
+        ...product.toJSON(),
+        avg_rating: stats ? parseFloat(stats.avg_rating).toFixed(2) : null,
+        pos_review_count: stats ? stats.pos_review_count : 0,
+      };
+    });
+
+    return res.status(200).json({
+      message: 'Lấy danh sách 5 sản phẩm được đánh giá tích cực nhiều nhất thành công',
+      products: productsWithStats,
+    });
+  } catch (error) {
+    console.error('Lỗi lấy sản phẩm theo sentiment POS:', error);
+    return next({
+      statusCode: 500,
+      message: 'Lỗi khi lấy sản phẩm đánh giá tốt theo sentiment',
+      error: error.message,
+    });
+  }
+};
+
+

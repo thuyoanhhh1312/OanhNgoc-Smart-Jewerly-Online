@@ -106,3 +106,78 @@ export const searchProducts = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+export const quickSearchProducts = async (req, res) => {
+  try {
+    const { keyword = "", limit = 8, sort_by = "product_name" } = req.query;
+    const parsedLimit = Math.min(parseInt(limit, 10) || 8, 20);
+    const keywordTrimmed = keyword.trim();
+
+    if (!keywordTrimmed) {
+      return res.status(400).json({ message: "Thiếu từ khóa tìm kiếm" });
+    }
+
+    const validSortFields = ["product_name", "avg_rating"];
+    const orderField = validSortFields.includes(sort_by) ? sort_by : "product_name";
+
+    let orderDirection = "ASC";
+    if (orderField === "avg_rating") {
+      orderDirection = "DESC";
+    }
+
+    const products = await db.Product.findAll({
+      where: {
+        product_name: {
+          [Op.like]: `%${keywordTrimmed}%`,
+        },
+      },
+      attributes: [
+        "product_id",
+        "product_name",
+        "price",
+        "slug",
+        [fn("AVG", col("ProductReviews.rating")), "avg_rating"],
+      ],
+      include: [
+        {
+          model: db.ProductImage,
+          attributes: ["image_url"],
+          where: { is_main: true },
+          required: false,
+        },
+        {
+          model: db.Category,
+          attributes: ["category_name"],
+        },
+        {
+          model: db.SubCategory,
+          attributes: ["subcategory_name"],
+        },
+        {
+          model: db.ProductReview,
+          attributes: [],
+          required: false,
+        },
+      ],
+      group: [
+        "Product.product_id",
+        "Category.category_id",
+        "SubCategory.subcategory_id",
+        "ProductImages.image_id",
+      ],
+      limit: parsedLimit,
+      order: [[orderField, orderDirection]],
+      distinct: true,
+      subQuery: false,
+    });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
+    }
+
+    return res.json({ data: products });
+  } catch (error) {
+    console.error("Error in quickSearchProducts:", error);
+    return res.status(500).json({ message: "Lỗi máy chủ" });
+  }
+};

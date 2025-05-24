@@ -39,7 +39,4 @@ const SubCategory = sequelize.define('SubCategory', {
     timestamps: false,
 });
 
-// Thiết lập mối quan hệ
-// SubCategory.belongsTo(Category, { foreignKey: 'category_id' });
-
 export default SubCategory;

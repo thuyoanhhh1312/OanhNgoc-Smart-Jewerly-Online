@@ -1,6 +1,6 @@
 // routes/apiRoutes.js
 import express from 'express';
-import { getSimilarProducts, filterProducts} from '../controllers/productController.js';
+import { getSimilarProducts, filterProducts } from '../controllers/productController.js';
 
 
 const router = express.Router();
@@ -68,13 +68,16 @@ router.delete('/categories/:id', authenticateToken, isAdminOrStaff, categoryCont
 router.get('/products', productController.getAllProducts);
 router.get('/products/with-review-summary', productController.getAllProductsWithRatingSummary);
 router.get('/product-by-category', productController.getProductsByCategoryWithRatingSummary);
-router.get('/products/similar', getSimilarProducts); // Lấy sản phẩm tương tự
-router.get('/products/filter', filterProducts); // Lọc sản phẩm theo category_id và subcategory_id
+router.get('/products/similar', getSimilarProducts);
+router.get('/products/filter', filterProducts);
 router.get('/products/:id', productController.getProductById);
+router.get('/get-product-by-slug/:slug', productController.getProductBySlug);
 router.post('/products', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.createProduct);
 router.put('/products/:id', authenticateToken, isAdminOrStaff, upload.array('images', 5), productController.updateProduct);
 router.delete('/products/:id', authenticateToken, isAdminOrStaff, productController.deleteProduct);
 router.get('/get-category-subcategory', productController.getCategoryesWithSubCategory);
+router.get('/get-product-top-rated-by-sentiment', productController.getTopRatedProductsBySentiment);
+
 
 // SubCategory routes
 router.get('/subcategories', subCategoryController.getAllSubCategories);
@@ -110,6 +113,7 @@ router.post('/products/:id/reviews', authenticateToken, productReviewController.
 
 // Search routes
 router.get("/search", searchController.searchProducts);
+router.get("/quick-search-products", searchController.quickSearchProducts);
 
 //Dashboard routes
 router.get('/dashboard/revenue', authenticateToken, isAdmin, dashboardController.getRevenueByPeriod);

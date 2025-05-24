@@ -3,25 +3,22 @@ import MainLayout from '../layout/MainLayout';
 import { useParams, Link } from 'react-router-dom';
 import productApi from '../api/productApi';
 import DOMPurify from "dompurify";
-import { ShippingIcon, Shopping247, ThuDoi } from '../assets';
 import ViewedProducts from "../components/ViewedProducts";
 import _ from "lodash";
 import { useDispatch, useSelector } from 'react-redux';
 import ReviewModal from '../components/ReviewMoal';
 import { ToastContainer, toast } from 'react-toastify';
-import ReactStars from "react-rating-stars-component";
 import RatingSummary from '../components/RatingSummary';
-import dayjs from 'dayjs';
 import ReviewTabs from '../components/ReviewTabs';
 import { useNavigate } from 'react-router-dom';
-import AddToCartModal from '../components/AddToCartModal'; 
+import AddToCartModal from '../components/AddToCartModal';
 
 
 const ProductDetail = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => ({ ...state }));
 
-    const { id } = useParams();
+    const { slug } = useParams();
     const [product, setProduct] = useState(null);
     const [isDescriptionVisible, setIsDescriptionVisible] = useState(false);
     const [isPolicyVisible, setIsPolicyVisible] = useState(false);
@@ -30,10 +27,10 @@ const ProductDetail = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewSummary, setReviewSummary] = useState(null);
-      const navigate = useNavigate();
-  const cart = useSelector((state) => state.cart); 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isBuyNowModalOpen, setIsBuyNowModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const cart = useSelector((state) => state.cart);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isBuyNowModalOpen, setIsBuyNowModalOpen] = useState(false);
 
     console.log("reviewSummary", reviewSummary)
 
@@ -57,8 +54,8 @@ const ProductDetail = () => {
 
     const handleGetProduct = async () => {
         try {
-            const res = await productApi.getProductById(id);
-            setProduct(res);
+            const res = await productApi.getProductBySlug(slug);
+            setProduct(res?.product);
 
             const similarRes = await productApi.getSimilarProducts(res.category_id, res.subcategory_id);
             setSimilarProducts(similarRes);
@@ -67,49 +64,49 @@ const ProductDetail = () => {
             console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
         }
     };
-const handleBuyNow = (count) => {
-  const selectedItems = [{ ...product, count }];
-  const total = product.price * count;
+    const handleBuyNow = (count) => {
+        const selectedItems = [{ ...product, count }];
+        const total = product.price * count;
 
-  // Chuyển sang trang checkout, truyền sản phẩm + số lượng
-  navigate("/checkout", {
-    state: {
-      selectedItems,
-      totalAmount: total,
-    },
-  });
-  setIsBuyNowModalOpen(false);
-};
+        // Chuyển sang trang checkout, truyền sản phẩm + số lượng
+        navigate("/checkout", {
+            state: {
+                selectedItems,
+                totalAmount: total,
+            },
+        });
+        setIsBuyNowModalOpen(false);
+    };
 
-const handleAddToCart = (count) => {
-  const updatedItem = { ...product, count };
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const handleAddToCart = (count) => {
+        const updatedItem = { ...product, count };
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const existIndex = cart.findIndex(item => item.product_id === product.product_id);
-  if (existIndex >= 0) {
-    cart[existIndex].count += count;
-  } else {
-    cart.push(updatedItem);
-  }
+        const existIndex = cart.findIndex(item => item.product_id === product.product_id);
+        if (existIndex >= 0) {
+            cart[existIndex].count += count;
+        } else {
+            cart.push(updatedItem);
+        }
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  dispatch({ type: "ADD_TO_CART", payload: updatedItem });
-  toast.success("Đã thêm vào giỏ hàng thành công!");
-};
+        localStorage.setItem("cart", JSON.stringify(cart));
+        dispatch({ type: "ADD_TO_CART", payload: updatedItem });
+        toast.success("Đã thêm vào giỏ hàng thành công!");
+    };
 
-    
-  // Khi bấm nút Mua ngay: chuyển sang trang OrderPage, truyền totalPrice qua state
- const handleContinue = () => {
-  const selectedItems = [{ ...product, count: 1 }];
-  const total = product.price * 1;
 
-  navigate("/checkout", {
-    state: {
-      selectedItems,
-      totalAmount: total
-    }
-  });
-};
+    // Khi bấm nút Mua ngay: chuyển sang trang OrderPage, truyền totalPrice qua state
+    const handleContinue = () => {
+        const selectedItems = [{ ...product, count: 1 }];
+        const total = product.price * 1;
+
+        navigate("/checkout", {
+            state: {
+                selectedItems,
+                totalAmount: total
+            }
+        });
+    };
 
 
     const handleSubmitReview = async (review) => {
@@ -142,47 +139,47 @@ const handleAddToCart = (count) => {
         }
     }
     const benefitItems = [
-  {
-    title: "MIỄN PHÍ",
-    subtitle: "VẬN CHUYỂN",
-    icon: "https://cdn.pnj.io/images/2023/relayout-pdp/shipping-icon.svg",
-    tooltip: (
-      <>
-        <strong>Miễn phí giao hàng trong 3 giờ.</strong> Nếu giao trễ, tặng
-        ngay voucher 100k cho lần mua hàng tiếp theo.
-      </>
-    ),
-  },
-  {
-    title: "PHỤC VỤ 24/7",
-    subtitle: "",
-    icon: "https://cdn.pnj.io/images/2023/relayout-pdp/shopping%20247-icon.svg",
-    tooltip: (
-      <>Khách hàng có thể xem, đặt hàng và thanh toán 24/7 tại website PNJ.</>
-    ),
-  },
-  {
-    title: "THU ĐỔI 48H",
-    subtitle: "",
-    icon: "https://cdn.pnj.io/images/2023/relayout-pdp/thudoi-icon.svg",
-    tooltip: (
-      <>
-        <strong>
-          Áp dụng đổi 48 giờ đối với trang sức vàng và 72 giờ đối với trang
-          sức bạc (chỉ đổi size).
-        </strong>
-        <br />
-        Tính từ lúc cửa hàng xuất hóa đơn (nhận tại cửa hàng) hoặc khi khách
-        hàng nhận được sản phẩm (giao hàng tận nơi).
-      </>
-    ),
-  },
-];
+        {
+            title: "MIỄN PHÍ",
+            subtitle: "VẬN CHUYỂN",
+            icon: "https://cdn.pnj.io/images/2023/relayout-pdp/shipping-icon.svg",
+            tooltip: (
+                <>
+                    <strong>Miễn phí giao hàng trong 3 giờ.</strong> Nếu giao trễ, tặng
+                    ngay voucher 100k cho lần mua hàng tiếp theo.
+                </>
+            ),
+        },
+        {
+            title: "PHỤC VỤ 24/7",
+            subtitle: "",
+            icon: "https://cdn.pnj.io/images/2023/relayout-pdp/shopping%20247-icon.svg",
+            tooltip: (
+                <>Khách hàng có thể xem, đặt hàng và thanh toán 24/7 tại website PNJ.</>
+            ),
+        },
+        {
+            title: "THU ĐỔI 48H",
+            subtitle: "",
+            icon: "https://cdn.pnj.io/images/2023/relayout-pdp/thudoi-icon.svg",
+            tooltip: (
+                <>
+                    <strong>
+                        Áp dụng đổi 48 giờ đối với trang sức vàng và 72 giờ đối với trang
+                        sức bạc (chỉ đổi size).
+                    </strong>
+                    <br />
+                    Tính từ lúc cửa hàng xuất hóa đơn (nhận tại cửa hàng) hoặc khi khách
+                    hàng nhận được sản phẩm (giao hàng tận nơi).
+                </>
+            ),
+        },
+    ];
 
 
     useEffect(() => {
         handleGetProduct();
-    }, [id]);
+    }, [slug]);
 
     useEffect(() => {
         if (!product) return;
@@ -252,28 +249,28 @@ const handleAddToCart = (count) => {
                                 <p>Số lượng còn lại: {product.quantity}</p>
                             </div>
 
-<div className="flex mt-[10px] items-center bg-[#f2f2f2] sm:px-[10px] px-[5px] py-[5px] rounded-md justify-between">
-  {benefitItems.map((item, index) => (
-    <div key={index} className="flex flex-col items-center sm:text-[13px] text-[9px] cursor-pointer group">
-      <img
-        alt={item.title}
-        loading="lazy"
-        width="25px"
-        height="25px"
-        decoding="async"
-        className="w-4 h-4"
-        src={item.icon}
-      />
-      <p className="text-[#202E65] font-bold">
-        {item.title} {item.subtitle && <span>{item.subtitle}</span>}
-      </p>
-      {/* Tooltip */}
-      <div className="absolute hidden group-hover:block bg-white border border-gray-300 p-2 rounded text-xs text-gray-700 max-w-xs z-10 mt-1 shadow-lg">
-        {item.tooltip}
-      </div>
-    </div>
-  ))}
-</div>
+                            <div className="flex mt-[10px] items-center bg-[#f2f2f2] sm:px-[10px] px-[5px] py-[5px] rounded-md justify-between">
+                                {benefitItems.map((item, index) => (
+                                    <div key={index} className="flex flex-col items-center sm:text-[13px] text-[9px] cursor-pointer group">
+                                        <img
+                                            alt={item.title}
+                                            loading="lazy"
+                                            width="25px"
+                                            height="25px"
+                                            decoding="async"
+                                            className="w-4 h-4"
+                                            src={item.icon}
+                                        />
+                                        <p className="text-[#202E65] font-bold">
+                                            {item.title} {item.subtitle && <span>{item.subtitle}</span>}
+                                        </p>
+                                        {/* Tooltip */}
+                                        <div className="absolute hidden group-hover:block bg-white border border-gray-300 p-2 rounded text-xs text-gray-700 max-w-xs z-10 mt-1 shadow-lg">
+                                            {item.tooltip}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
 
                             {/* Các nút hành động */}
@@ -285,16 +282,16 @@ const handleAddToCart = (count) => {
                                     <span className="text-[16px]">Mua ngay</span>
                                     <span className="text-[12px]">(Giao hàng miễn phí tận nhà hoặc nhận tại cửa hàng)</span>
                                 </button>
-                                   
+
                             </div>
                             <div className="flex justify-center items-center gap-2 my-[10px]">
                                 <div className='flex items-center  space-x-4 flex-1'>
                                     <button
                                         onClick={() => setIsAddModalOpen(true)}
                                         className="w-full border border-[#202E65] flex flex-col justify-center items-center font-bold text-[#202E65] h-[40px] rounded-lg"
->
+                                    >
                                         <span className="text-[13px]">Thêm vào giỏ hàng</span>
-                                </button>
+                                    </button>
 
                                 </div>
                                 <div className='flex gap-5 flex-1'>
@@ -336,23 +333,23 @@ const handleAddToCart = (count) => {
                                     </div>
                                 </div>
                             </div>
-                             {/* Hiển thị thông tin sản phẩm chọn số lượng để mua ngay */}
+                            {/* Hiển thị thông tin sản phẩm chọn số lượng để mua ngay */}
                             {isBuyNowModalOpen && (
                                 <AddToCartModal
-                                product={product}
-                                onClose={() => setIsBuyNowModalOpen(false)}
-                                onConfirm={handleBuyNow}
-                            />
-            )}
-                           
+                                    product={product}
+                                    onClose={() => setIsBuyNowModalOpen(false)}
+                                    onConfirm={handleBuyNow}
+                                />
+                            )}
+
                             {/* Hiển thị thông tin sản phẩm chọn số lượng để thêm vào giỏ hàng */}
                             {isAddModalOpen && (
                                 <AddToCartModal
-                                product={product}
-                                onClose={() => setIsAddModalOpen(false)}
-                                onConfirm={handleAddToCart}
+                                    product={product}
+                                    onClose={() => setIsAddModalOpen(false)}
+                                    onConfirm={handleAddToCart}
                                 />
-                     )}
+                            )}
 
 
                             {/* Hiển thị mô tả sản phẩm */}
