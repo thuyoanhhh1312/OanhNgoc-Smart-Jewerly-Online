@@ -2,30 +2,39 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import ProductCard from "../components/ui/product/productCard";
-
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
+  Box,
+  Grid,
+  Typography,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Fade,
-  Backdrop,
-  Box,
-  Typography,
+  Button,
+  CircularProgress,
+  Pagination,
+  Stack,
+  useMediaQuery,
+  Drawer,
+  IconButton,
+  Divider,
 } from "@mui/material";
-
+import FilterListIcon from "@mui/icons-material/FilterList";
+import CloseIcon from "@mui/icons-material/Close";
 import ReactStars from "react-rating-stars-component";
-
 import categoryApi from "../api/categoryApi";
 import subcategoryApi from "../api/subCategoryApi";
 import productApi from "../api/productApi";
 
-const ratingOptions = [0, 1, 2, 3, 4, 5];
+const colors = {
+  primary: "#b8860b",
+  secondary: "#d4af37",
+  textPrimary: "#4a3c31",
+  textSecondary: "#7e705f",
+  background: "#ffffff",
+  borderLight: "#e4d6b0",
+};
+
 const sortOptions = [
   { name: "Mặc định", value: "default" },
   { name: "Giá: Thấp đến Cao", value: "price_asc" },
@@ -33,97 +42,233 @@ const sortOptions = [
   { name: "Đánh giá: Cao đến Thấp", value: "rating_desc" },
 ];
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
-const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  if (totalPages <= 1) return null;
-
-  const range = (start, end) => {
-    let arr = [];
-    for (let i = start; i <= end; i++) arr.push(i);
-    return arr;
-  };
-
-  let pages = [];
-
-  if (totalPages <= 7) {
-    pages = range(1, totalPages);
-  } else {
-    if (currentPage <= 4) {
-      pages = [...range(1, 5), "...", totalPages];
-    } else if (currentPage >= totalPages - 3) {
-      pages = [1, "...", ...range(totalPages - 4, totalPages)];
-    } else {
-      pages = [
-        1,
-        "...",
-        currentPage - 1,
-        currentPage,
-        currentPage + 1,
-        "...",
-        totalPages,
-      ];
-    }
-  }
-
-  return (
-    <nav
-      className="mt-6 flex justify-center items-center select-none space-x-1"
-      aria-label="Pagination"
-    >
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 hover:bg-indigo-100"
-        aria-label="Trang trước"
-      >
-        ‹
-      </button>
-
-      {pages.map((page, idx) =>
-        page === "..." ? (
-          <span
-            key={`dots-${idx}`}
-            className="px-3 py-1 text-gray-500 cursor-default select-none"
-          >
-            …
-          </span>
-        ) : (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            className={classNames(
-              "px-3 py-1 rounded border border-gray-300 hover:bg-indigo-100",
-              page === currentPage
-                ? "bg-indigo-600 text-white cursor-default"
-                : "bg-white text-gray-700"
-            )}
-            aria-current={page === currentPage ? "page" : undefined}
-          >
-            {page}
-          </button>
-        )
+const SidebarFilter = ({
+  categories,
+  filteredSubcategories,
+  tempFilters,
+  updateTempFilter,
+  applyFilters,
+  isMobile,
+  onClose,
+}) => (
+  <Box
+    sx={{
+      p: 3,
+      width: { xs: 280, sm: 320 },
+      height: "calc(100vh - 88px)",
+      overflowY: "auto",
+      bgcolor: colors.background,
+      borderRadius: 1,
+      "&::-webkit-scrollbar": { width: "6px" },
+      "&::-webkit-scrollbar-thumb": { backgroundColor: colors.primary, borderRadius: "3px" },
+      "&::-webkit-scrollbar-track": { backgroundColor: "#f0e6d2" },
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+      <Typography variant="h6" fontWeight={600} sx={{ color: colors.textPrimary }}>
+        Bộ lọc
+      </Typography>
+      {isMobile && (
+        <IconButton onClick={onClose} sx={{ color: colors.primary }}>
+          <CloseIcon />
+        </IconButton>
       )}
+    </Stack>
+    <Divider sx={{ mb: 2, borderColor: colors.borderLight }} />
 
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 hover:bg-indigo-100"
-        aria-label="Trang sau"
+    <FormControl fullWidth margin="normal">
+      <InputLabel sx={{ color: colors.textSecondary }}>Chủng loại</InputLabel>
+      <Select
+        value={tempFilters.category ?? ""}
+        label="Chủng loại"
+        onChange={(e) => updateTempFilter("category", e.target.value || null)}
+        sx={{
+          color: colors.textPrimary,
+          "& .MuiSelect-icon": { color: colors.primary },
+        }}
       >
-        ›
-      </button>
-    </nav>
-  );
-};
+        <MenuItem value="">Tất cả</MenuItem>
+        {categories.map((cat) => (
+          <MenuItem key={cat.category_id} value={cat.category_id}>
+            {cat.category_name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    <FormControl fullWidth margin="normal" disabled={!tempFilters.category}>
+      <InputLabel sx={{ color: colors.textSecondary }}>Chủng loại con</InputLabel>
+      <Select
+        value={tempFilters.subcategory ?? ""}
+        label="Chủng loại con"
+        onChange={(e) => updateTempFilter("subcategory", e.target.value || null)}
+        sx={{
+          color: colors.textPrimary,
+          "& .MuiSelect-icon": { color: colors.primary },
+        }}
+      >
+        <MenuItem value="">Tất cả</MenuItem>
+        {filteredSubcategories.map((subcat) => (
+          <MenuItem key={subcat.subcategory_id} value={subcat.subcategory_id}>
+            {subcat.subcategory_name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    <Box my={2}>
+      <Typography variant="subtitle1" gutterBottom sx={{ color: colors.textPrimary }}>
+        Đánh giá tối thiểu
+      </Typography>
+      <ReactStars
+        count={5}
+        size={28}
+        activeColor={colors.primary}
+        value={tempFilters.rating}
+        isHalf={false}
+        onChange={(newRating) => updateTempFilter("rating", newRating)}
+      />
+    </Box>
+
+    <FormControl fullWidth margin="normal">
+      <InputLabel sx={{ color: colors.textSecondary }}>Sắp xếp</InputLabel>
+      <Select
+        value={tempFilters.sort.value}
+        label="Sắp xếp"
+        onChange={(e) => {
+          const selectedSort = sortOptions.find((so) => so.value === e.target.value);
+          updateTempFilter("sort", selectedSort || sortOptions[0]);
+        }}
+        sx={{
+          color: colors.textPrimary,
+          "& .MuiSelect-icon": { color: colors.primary },
+        }}
+      >
+        {sortOptions.map((opt) => (
+          <MenuItem key={opt.value} value={opt.value}>
+            {opt.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    <Box mt={3} display="flex" justifyContent="flex-end">
+      <Button
+        variant="contained"
+        onClick={applyFilters}
+        sx={{
+          bgcolor: colors.primary,
+          "&:hover": { bgcolor: colors.secondary },
+        }}
+      >
+        Áp dụng
+      </Button>
+    </Box>
+  </Box>
+);
+
+const ProductList = ({
+  products,
+  filters,
+  totalProducts,
+  loading,
+  onPageChange,
+  isMobile,
+  keyword,
+}) => (
+  <Box
+    sx={{
+      height: "calc(100vh - 88px)",
+      overflowY: "auto",
+      display: "flex",
+      flexDirection: "column",
+      "&::-webkit-scrollbar": { width: "6px" },
+      "&::-webkit-scrollbar-thumb": { backgroundColor: colors.background, borderRadius: "3px" },
+      "&::-webkit-scrollbar-track": { backgroundColor: "#ffffff" },
+    }}
+  >
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
+      mb={3}
+      flexWrap="wrap"
+    >
+      <Typography
+        variant="h5"
+        fontWeight={700}
+        sx={{ color: colors.textPrimary }}
+        flex="1 1 auto"
+        minWidth={240}
+      >
+        Kết quả tìm kiếm cho{" "}
+        <Box component="span" sx={{ color: colors.secondary }}>
+          {keyword || "tất cả"}
+        </Box>
+      </Typography>
+
+      <Typography variant="subtitle1" color="text.secondary" minWidth={120}>
+        {totalProducts.toLocaleString()} sản phẩm
+      </Typography>
+    </Box>
+
+    {loading ? (
+      <Box display="flex" justifyContent="center" py={20} flexGrow={1}>
+        <CircularProgress color="secondary" size={48} />
+      </Box>
+    ) : products.length > 0 ? (
+      <Grid container spacing={3} flexGrow={1}>
+        {products.map((product) => (
+          <Grid key={product.product_id} item xs={12} sm={3} md={3} lg={3}>
+            <ProductCard product={product} />
+          </Grid>
+        ))}
+      </Grid>
+    ) : (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mt: 10,
+          flexGrow: 1,
+        }}
+      >
+        <img
+          src="https://www.pnj.com.vn/site/assets/images/empty_product_line.png"
+          alt="empty"
+          style={{ width: 160, height: "auto", marginBottom: 16 }}
+        />
+        <Typography variant="body1" align="center" color="text.secondary">
+          Không tìm thấy sản phẩm phù hợp
+        </Typography>
+      </Box>
+    )}
+
+    {totalProducts > filters.limit && (
+      <Box display="flex" justifyContent="center" mt={6} pb={2}>
+        <Pagination
+          count={Math.ceil(totalProducts / filters.limit)}
+          page={filters.page}
+          onChange={onPageChange}
+          color="secondary"
+          shape="rounded"
+          siblingCount={1}
+          boundaryCount={1}
+          size={isMobile ? "small" : "medium"}
+          showFirstButton
+          showLastButton
+        />
+      </Box>
+    )}
+  </Box>
+);
 
 const Search = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     category: null,
@@ -139,31 +284,16 @@ const Search = () => {
 
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-
   const [products, setProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
-
   const [loading, setLoading] = useState(false);
 
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down("md"));
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        const cats = await categoryApi.getCategories();
-        setCategories(cats);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    async function loadSubcategories() {
-      try {
-        const subs = await subcategoryApi.getSubCategories();
-        setSubcategories(subs);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    loadCategories();
-    loadSubcategories();
+    categoryApi.getCategories().then(setCategories).catch(console.error);
+    subcategoryApi.getSubCategories().then(setSubcategories).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -194,6 +324,11 @@ const Search = () => {
   }, [location.search]);
 
   useEffect(() => {
+    if (!filters.keyword || filters.keyword.trim() === "") {
+      setProducts([]);
+      setTotalProducts(0);
+      return;
+    }
     async function loadProducts() {
       setLoading(true);
       try {
@@ -222,7 +357,7 @@ const Search = () => {
           keyword: filters.keyword,
           categoryId: filters.category,
           subcategoryId: filters.subcategory,
-          rating_min: filters.rating > 0 ? filters.rating : null,
+          ratingMax: filters.rating > 0 ? filters.rating : null,
           limit: filters.limit,
           page: filters.page,
           sortField,
@@ -231,9 +366,7 @@ const Search = () => {
 
         const safeProducts = res.data.map((product) => ({
           ...product,
-          ProductImages: Array.isArray(product.ProductImages)
-            ? product.ProductImages
-            : [],
+          ProductImages: Array.isArray(product.ProductImages) ? product.ProductImages : [],
         }));
 
         setProducts(safeProducts);
@@ -246,9 +379,9 @@ const Search = () => {
     loadProducts();
   }, [filters]);
 
-  const filteredSubcategories = filters.category
-    ? subcategories.filter((sc) => sc.category_id === Number(filters.category))
-    : [];
+  const filteredSubcategories = tempFilters.category
+    ? subcategories.filter((sc) => sc.category_id === Number(tempFilters.category))
+    : subcategories;
 
   const updateTempFilter = (key, value) => {
     setTempFilters((prev) => ({
@@ -270,20 +403,18 @@ const Search = () => {
 
     if (tempFilters.keyword) params.set("keyword", tempFilters.keyword);
     if (tempFilters.category) params.set("category", tempFilters.category);
-    if (tempFilters.subcategory)
-      params.set("subcategory", tempFilters.subcategory);
-    if (tempFilters.rating > 0)
-      params.set("rating", tempFilters.rating.toString());
+    if (tempFilters.subcategory) params.set("subcategory", tempFilters.subcategory);
+    if (tempFilters.rating > 0) params.set("rating", tempFilters.rating.toString());
     if (tempFilters.sort && tempFilters.sort.value !== "default")
       params.set("sort", tempFilters.sort.value);
     params.set("page", "1");
 
     navigate(`/search?${params.toString()}`, { replace: true });
+    if (isMobile) setDrawerOpen(false);
   };
 
-  const onPageChange = (pageNum) => {
-    if (pageNum < 1 || pageNum > Math.ceil(totalProducts / filters.limit))
-      return;
+  const onPageChange = (e, pageNum) => {
+    if (pageNum < 1 || pageNum > Math.ceil(totalProducts / filters.limit)) return;
 
     setFilters((prev) => ({
       ...prev,
@@ -298,222 +429,91 @@ const Search = () => {
 
   return (
     <MainLayout>
-      <div className="bg-white">
-        {/* Mobile filter modal */}
-        <Dialog
-          open={mobileFiltersOpen}
-          onClose={() => setMobileFiltersOpen(false)}
-          fullScreen
-          TransitionComponent={Fade}
-          BackdropComponent={Backdrop}
-          BackdropProps={{ timeout: 500 }}
-        >
-          <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            Bộ lọc
-            <Button onClick={() => setMobileFiltersOpen(false)}>Đóng</Button>
-          </DialogTitle>
-          <DialogContent dividers>
-            {/* Category */}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Chủng loại</InputLabel>
-              <Select
-                value={tempFilters.category ?? ""}
-                label="Chủng loại"
-                onChange={(e) => updateTempFilter("category", e.target.value || null)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {categories.map((cat) => (
-                  <MenuItem key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Subcategory */}
-            <FormControl fullWidth margin="normal" disabled={!tempFilters.category}>
-              <InputLabel>Chủng loại con</InputLabel>
-              <Select
-                value={tempFilters.subcategory ?? ""}
-                label="Chủng loại con"
-                onChange={(e) => updateTempFilter("subcategory", e.target.value || null)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {filteredSubcategories.map((subcat) => (
-                  <MenuItem key={subcat.subcategory_id} value={subcat.subcategory_id}>
-                    {subcat.subcategory_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Rating */}
-            <Box sx={{ my: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Đánh giá tối thiểu
-              </Typography>
-              <ReactStars
-                count={5}
-                size={30}
-                activeColor="#2563eb"
-                value={tempFilters.rating}
-                isHalf={false}
-                onChange={(newRating) => updateTempFilter("rating", newRating)}
-              />
-            </Box>
-
-            {/* Sort */}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Sắp xếp</InputLabel>
-              <Select
-                value={tempFilters.sort.value}
-                label="Sắp xếp"
-                onChange={(e) => {
-                  const selectedSort = sortOptions.find((so) => so.value === e.target.value);
-                  updateTempFilter("sort", selectedSort || sortOptions[0]);
-                }}
-              >
-                {sortOptions.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Apply button */}
-            <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-              <Button variant="contained" onClick={() => {
-                applyFilters();
-                setMobileFiltersOpen(false);
-              }}>
-                Áp dụng
-              </Button>
-            </Box>
-          </DialogContent>
-        </Dialog>
-
-        {/* Desktop filter */}
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
-          <aside className="hidden lg:block w-72 shrink-0">
-            <Typography variant="h6" gutterBottom>
+      <Box sx={{ bgcolor: colors.background, minHeight: "100vh", py: 4 }}>
+        {/* Mobile filter button */}
+        {isMobile && (
+          <Box mb={2} px={2} display="flex" justifyContent="flex-start">
+            <Button
+              variant="outlined"
+              startIcon={<FilterListIcon />}
+              onClick={() => setDrawerOpen(true)}
+              sx={{ color: colors.primary, borderColor: colors.primary }}
+            >
               Bộ lọc
-            </Typography>
+            </Button>
+          </Box>
+        )}
 
-            {/* Category */}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Chủng loại</InputLabel>
-              <Select
-                value={tempFilters.category ?? ""}
-                label="Chủng loại"
-                onChange={(e) => updateTempFilter("category", e.target.value || null)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {categories.map((cat) => (
-                  <MenuItem key={cat.category_id} value={cat.category_id}>
-                    {cat.category_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Subcategory */}
-            <FormControl fullWidth margin="normal" disabled={!tempFilters.category}>
-              <InputLabel>Chủng loại con</InputLabel>
-              <Select
-                value={tempFilters.subcategory ?? ""}
-                label="Chủng loại con"
-                onChange={(e) => updateTempFilter("subcategory", e.target.value || null)}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                {filteredSubcategories.map((subcat) => (
-                  <MenuItem key={subcat.subcategory_id} value={subcat.subcategory_id}>
-                    {subcat.subcategory_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Rating */}
-            <Box sx={{ my: 2 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Đánh giá tối thiểu
-              </Typography>
-              <ReactStars
-                count={5}
-                size={30}
-                activeColor="#2563eb"
-                value={tempFilters.rating}
-                isHalf={false}
-                onChange={(newRating) => updateTempFilter("rating", newRating)}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 4,
+            px: isMobile ? 2 : 6,
+            height: "calc(100vh - 88px)",
+          }}
+        >
+          {/* Sidebar filters */}
+          {!isMobile ? (
+            <Box
+              sx={{
+                flex: "0 0 320px",
+                height: "100%",
+                overflowY: "auto",
+                bgcolor: colors.background,
+                borderRadius: 1,
+              }}
+            >
+              <SidebarFilter
+                categories={categories}
+                filteredSubcategories={filteredSubcategories}
+                tempFilters={tempFilters}
+                updateTempFilter={updateTempFilter}
+                applyFilters={applyFilters}
+                isMobile={isMobile}
+                onClose={() => setDrawerOpen(false)}
               />
             </Box>
+          ) : (
+            <Drawer
+              anchor="left"
+              open={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              ModalProps={{ keepMounted: true }}
+            >
+              <SidebarFilter
+                categories={categories}
+                filteredSubcategories={filteredSubcategories}
+                tempFilters={tempFilters}
+                updateTempFilter={updateTempFilter}
+                applyFilters={applyFilters}
+                isMobile={isMobile}
+                onClose={() => setDrawerOpen(false)}
+              />
+            </Drawer>
+          )}
 
-            {/* Sort */}
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Sắp xếp</InputLabel>
-              <Select
-                value={tempFilters.sort.value}
-                label="Sắp xếp"
-                onChange={(e) => {
-                  const selectedSort = sortOptions.find((so) => so.value === e.target.value);
-                  updateTempFilter("sort", selectedSort || sortOptions[0]);
-                }}
-              >
-                {sortOptions.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>
-                    {opt.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Apply button desktop */}
-            <Box sx={{ mt: 3 }}>
-              <Button variant="contained" fullWidth onClick={applyFilters}>
-                Áp dụng
-              </Button>
-            </Box>
-          </aside>
-
-          {/* Product List and Pagination */}
-          <section className="flex-1">
-            <div className="mb-4 flex justify-between items-center">
-              <h1 className="text-xl font-semibold">
-                Kết quả tìm kiếm cho{" "}
-                <span className="text-indigo-600">
-                  {filters.keyword || "tất cả"}
-                </span>
-              </h1>
-              <span className="text-gray-500">{totalProducts} sản phẩm</span>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-20 text-gray-500">Đang tải...</div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {products.length > 0 ? (
-                    products.map((product) => (
-                      <ProductCard key={product.product_id} product={product} />
-                    ))
-                  ) : (
-                    <p className="col-span-full text-center text-gray-500">
-                      Không tìm thấy sản phẩm phù hợp
-                    </p>
-                  )}
-                </div>
-
-                <Pagination
-                  currentPage={filters.page}
-                  totalPages={Math.ceil(totalProducts / filters.limit)}
-                  onPageChange={onPageChange}
-                />
-              </>
-            )}
-          </section>
-        </main>
-      </div>
+          {/* Product list */}
+          <Box
+            sx={{
+              flex: "1 1 auto",
+              height: "100%",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <ProductList
+              products={products}
+              filters={filters}
+              totalProducts={totalProducts}
+              loading={loading}
+              onPageChange={onPageChange}
+              isMobile={isMobile}
+              keyword={filters.keyword}
+            />
+          </Box>
+        </Box>
+      </Box>
     </MainLayout>
   );
 };

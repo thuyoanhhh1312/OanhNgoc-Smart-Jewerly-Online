@@ -201,7 +201,7 @@ const searchProduct = async ({
   subcategoryId = null,
   priceMin = null,
   priceMax = null,
-  ratingMin = null,
+  ratingMax = null,
   limit = 20,
   page = 1,
   sortField = 'product_name',
@@ -215,13 +215,13 @@ const searchProduct = async ({
     if (subcategoryId) params.subcategory = subcategoryId;
     if (priceMin !== null) params.price_min = priceMin;
     if (priceMax !== null) params.price_max = priceMax;
-    if (ratingMin !== null) params.rating_min = ratingMin;
+    if (ratingMax !== null) params.rating_max = ratingMax;
     if (limit) params.limit = limit;
     if (page) params.page = page;
     if (sortField) params.sort_field = sortField;
     if (sortOrder) params.sort_order = sortOrder;
 
-    const response = await axios.get(`${API_URL}/search`, {
+    const response = await axios.get(`${API_URL}/search-product`, {
       params,
     });
 

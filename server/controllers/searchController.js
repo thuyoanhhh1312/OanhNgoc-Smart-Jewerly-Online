@@ -8,7 +8,7 @@ export const searchProducts = async (req, res) => {
       subcategory,
       price_min,
       price_max,
-      rating_min, // ta sẽ dùng làm max_rating filter
+      rating_max, // rating trung bình <= rating_max
       keyword,
       limit = 20,
       page = 1,
@@ -22,44 +22,70 @@ export const searchProducts = async (req, res) => {
 
     const whereProduct = {};
 
-    if (category) whereProduct.category_id = category;
-    if (subcategory) whereProduct.subcategory_id = subcategory;
+    if (category) {
+      const catId = parseInt(category, 10);
+      if (!isNaN(catId)) whereProduct.category_id = catId;
+    }
+
+    if (subcategory) {
+      const subcatId = parseInt(subcategory, 10);
+      if (!isNaN(subcatId)) whereProduct.subcategory_id = subcatId;
+    }
+
     if (price_min || price_max) {
       whereProduct.price = {};
-      if (price_min) whereProduct.price[Op.gte] = parseFloat(price_min);
-      if (price_max) whereProduct.price[Op.lte] = parseFloat(price_max);
-    }
-    if (keyword) {
-      whereProduct[Op.or] = [{ product_name: { [Op.like]: `%${keyword}%` } }];
+      if (price_min) {
+        const min = parseFloat(price_min);
+        if (!isNaN(min)) whereProduct.price[Op.gte] = min;
+      }
+      if (price_max) {
+        const max = parseFloat(price_max);
+        if (!isNaN(max)) whereProduct.price[Op.lte] = max;
+      }
     }
 
-    // Filter rating trung bình nhỏ hơn hoặc bằng rating_min (thực ra là ratingMax)
+    if (keyword && keyword.trim()) {
+      const kw = keyword.trim();
+      whereProduct[Op.or] = [
+        { product_name: { [Op.like]: `%${kw}%` } },
+      ];
+    }
+
     let havingCondition = undefined;
-    if (rating_min && !isNaN(parseFloat(rating_min))) {
-      havingCondition = Sequelize.where(
-        fn("AVG", col("ProductReviews.rating")),
-        {
-          [Op.lte]: parseFloat(rating_min), // <= rating_min (là max rating lọc)
-        }
-      );
+    if (rating_max) {
+      const ratingMaxNum = parseFloat(rating_max);
+      if (!isNaN(ratingMaxNum)) {
+        havingCondition = Sequelize.where(
+          fn("AVG", col("ProductReviews.rating")),
+          { [Op.lte]: ratingMaxNum }
+        );
+      }
     }
 
-    const validSortFields = ["product_name", "price", "avg_rating"];
-    const orderField = validSortFields.includes(sort_field)
-      ? sort_field
-      : "product_name";
+    const validSortFields = ["product_name", "price", "avgRating"];
+    const orderField = validSortFields.includes(sort_field) ? sort_field : "product_name";
     const orderDirection = sort_order.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
     const products = await db.Product.findAndCountAll({
       where: whereProduct,
       attributes: {
-        include: [[fn("AVG", col("ProductReviews.rating")), "avg_rating"]],
+        include: [
+          [fn("AVG", col("ProductReviews.rating")), "avgRating"],
+          [fn("COUNT", col("ProductReviews.review_id")), "totalReviews"],
+          [
+            fn(
+              "SUM",
+              Sequelize.literal(`CASE WHEN ProductReviews.sentiment = 'POS' THEN 1 ELSE 0 END`)
+            ),
+            "positiveCount",
+          ],
+        ],
       },
       include: [
         {
           model: db.ProductReview,
           attributes: [],
-          required: rating_min ? true : false,
+          required: rating_max ? true : false,
         },
         {
           model: db.Category,
@@ -71,7 +97,9 @@ export const searchProducts = async (req, res) => {
         },
         {
           model: db.ProductImage,
-          attributes: ["image_url"],
+          attributes: ["image_id", "image_url", "is_main"],
+          where: { is_main: true },
+          required: false,
         },
       ],
       group: [
@@ -88,9 +116,12 @@ export const searchProducts = async (req, res) => {
       distinct: true,
     });
 
-    const totalCount = Array.isArray(products.count)
-      ? products.count.length
-      : products.count;
+    let totalCount;
+    if (Array.isArray(products.count)) {
+      totalCount = products.count.length;
+    } else {
+      totalCount = products.count;
+    }
 
     res.json({
       data: products.rows,

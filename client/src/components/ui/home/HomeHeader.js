@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import categoryApi from "../../../api/categoryApi";
 import QuickSearchPopup from "../../QuickSearchPopup";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [searchValue, setSearchValue] = useState("");
   const [openQuickSearch, setOpenQuickSearch] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -24,15 +25,9 @@ const Header = () => {
     fetchCategories();
   }, []);
 
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === "Enter" && searchValue.trim()) {
-      navigate(`/search?keyword=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
+  useEffect(() => {
+    setOpenQuickSearch(false);
+  }, [location.pathname, location.search]);
 
   const handleCategoryClick = (categoryName) => {
     navigate(`/product-by-category/${encodeURIComponent(categoryName)}`);
@@ -40,12 +35,6 @@ const Header = () => {
 
   const handlePromotionClick = () => {
     navigate("/promotions");
-  };
-
-  const handleSearch = (keyword) => {
-    if (keyword) {
-      navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
-    }
   };
 
   return (
@@ -109,7 +98,6 @@ const Header = () => {
             <QuickSearchPopup
               open={openQuickSearch}
               onClose={() => setOpenQuickSearch(false)}
-              onSearch={handleSearch}
             />
           </div>
         </nav>

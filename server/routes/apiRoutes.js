@@ -112,7 +112,7 @@ router.get('/products/:id/reviews/summary', productReviewController.getReviewSum
 router.post('/products/:id/reviews', authenticateToken, productReviewController.createReview);
 
 // Search routes
-router.get("/search", searchController.searchProducts);
+router.get("/search-product", searchController.searchProducts);
 router.get("/quick-search-products", searchController.quickSearchProducts);
 
 //Dashboard routes

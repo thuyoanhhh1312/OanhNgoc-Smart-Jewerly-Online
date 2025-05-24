@@ -180,7 +180,7 @@ const QuickSearchResults = ({
         return (
             <Box
                 sx={{
-                    mt: 4, mx: 4, mb: 3, minHeight: "180px",
+                    mt: 2, mx: 4, mb: 3, minHeight: "180px",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                     background: grayBg, borderRadius: '18px',
                 }}
@@ -196,7 +196,7 @@ const QuickSearchResults = ({
         return (
             <Box
                 sx={{
-                    mt: 4, mx: 4, mb: 3, minHeight: "180px",
+                    mt: 2, mx: 4, mb: 3, minHeight: "180px",
                     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                     background: grayBg, borderRadius: '18px',
                 }}
@@ -220,7 +220,7 @@ const QuickSearchResults = ({
     return (
         <Box
             sx={{
-                mt: 4,
+                mt: 2,
                 mx: 4,
                 mb: 3,
                 background: grayBg,

@@ -4,16 +4,18 @@ import CloseIcon from '@mui/icons-material/Close';
 import QuickSearchInput from './QuickSearchInput';
 import QuickSearchResults from './QuickSearchResults';
 import productApi from '../api/productApi';
+import { useNavigate } from "react-router-dom";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="down" ref={ref} {...props} />;
 });
 
-const QuickSearchPopup = ({ open, onClose, onSearch }) => {
+const QuickSearchPopup = ({ open, onClose }) => {
     const [searchText, setSearchText] = useState("");
     const [quickResults, setQuickResults] = useState([]);
     const [searching, setSearching] = useState(false);
     const [noResult, setNoResult] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!open) {
@@ -41,14 +43,14 @@ const QuickSearchPopup = ({ open, onClose, onSearch }) => {
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && searchText.trim()) {
-            onSearch(searchText.trim());
+            navigate(`/search?keyword=${encodeURIComponent(searchText.trim())}`);
             onClose();
         }
     };
 
     const handleSelectKeyword = (keyword) => {
         setSearchText(keyword);
-        onSearch(keyword);
+        navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
         onClose();
     };
 
