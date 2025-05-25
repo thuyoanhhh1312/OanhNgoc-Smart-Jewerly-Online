@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import productApi from "../api/productApi";
 import MainLayout from "../layout/MainLayout";
 import ProductCard from "../components/ui/product/productCard";
+import Breadcrumb from "../components/ui/Breadcrumb";  // Đường dẫn theo project bạn
 
 const ProductCategoryPage = () => {
   const { categoryName } = useParams();
@@ -15,12 +16,8 @@ const ProductCategoryPage = () => {
       setLoading(true);
       setError(null);
       try {
-        // decode để categoryName không bị lỗi khi có dấu hoặc ký tự đặc biệt
         const decodedCategoryName = decodeURIComponent(categoryName);
-
-        const data = await productApi.getProductsByCategory(
-          decodedCategoryName
-        );
+        const data = await productApi.getProductsByCategory(decodedCategoryName);
 
         if (Array.isArray(data)) {
           setProducts(data);
@@ -63,12 +60,18 @@ const ProductCategoryPage = () => {
       </MainLayout>
     );
 
+  const decodedCategoryName = decodeURIComponent(categoryName);
+
+  // Mảng breadcrumb
+  const breadcrumbItems = [
+    { label: "Trang chủ", to: "/" },
+    { label: decodedCategoryName },
+  ];
+
   return (
     <MainLayout>
       <div>
-        <h1 className="text-2xl font-semibold mb-6">
-          {decodeURIComponent(categoryName)}
-        </h1>
+        <Breadcrumb items={breadcrumbItems} />       
         <div className="p-[40px] grid grid-cols-4 gap-4">
           {products.map((product) => (
             <ProductCard
@@ -83,4 +86,3 @@ const ProductCategoryPage = () => {
 };
 
 export default ProductCategoryPage;
-    
