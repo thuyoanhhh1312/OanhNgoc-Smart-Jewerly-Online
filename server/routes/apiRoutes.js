@@ -7,6 +7,11 @@ const router = express.Router();
 
 // Middleware
 import { isAdmin, authenticateToken, isAdminOrStaff } from '../middlewares/auth.js';
+import { validateRequest } from '../middlewares/validateRequest.js';
+
+//validators
+import { calculatePriceSchema, checkoutSchema } from '../validators/orderValidator.js';
+
 import upload from '../middlewares/upload.js';
 
 // Controllers
@@ -101,6 +106,8 @@ router.put('/orders/:id', authenticateToken, isAdminOrStaff, orderController.upd
 router.put('/update-staff/:id', authenticateToken, isAdmin, orderController.updatedStaff);
 router.get('/orders/user/:user_id', authenticateToken, isAdminOrStaff, orderController.getOrderByUserId);
 router.patch('/orders/:id/deposit', authenticateToken, isAdminOrStaff, orderController.updateIsDeposit);
+router.post('/calculate-price', authenticateToken, validateRequest(calculatePriceSchema), orderController.calculatePrice);
+router.post('/checkout', authenticateToken, validateRequest(checkoutSchema), orderController.checkout);
 
 // Order Status routes
 router.get('/order-status', orderStatusController.getAllOrderStatuses);

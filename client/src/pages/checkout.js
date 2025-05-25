@@ -1,21 +1,63 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Stack,
+  FormControlLabel,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  Select,
+  Menu, MenuItem
+} from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import { QRCodeSVG } from "qrcode.react";
+import MainLayout from "../layout/MainLayout";
+import orderApi from "../api/orderApi";
+import { QRPay, BanksObject } from "vietnam-qr-pay";
+import "react-toastify/dist/ReactToastify.css";
+
+const provinces = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
+const districts = ["Quận 1", "Quận 2", "Quận 3"];
+const wards = ["Phường A", "Phường B", "Phường C"];
+
+// Thông tin ngân hàng MB Bank
+const BANK_NAME = "MB Bank";
+const BANK_CODE = BanksObject.mbbank.bin; // MBBank
+const BANK_ACCOUNT = "0792360150";
+
+// Thông tin tài khoản ví MoMo của bạn
+const MOMO_ACCOUNT = "99MM24030M03578011";
+// Thông tin tài khoản ví ZaloPay của bạn
+const ZALOPAY_ACCOUNT = "99ZP24187M32217896";
 
 const CheckoutPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { selectedItems = [], totalAmount = 0 } = location.state || {};
-  const [gender, setGender] = useState(""); // 'male' or 'female'
+
+  const [gender, setGender] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
   const [sendCardSms, setSendCardSms] = useState(false);
 
-  const [deliveryMethod, setDeliveryMethod] = useState("delivery"); // delivery or pickup
+  const [deliveryMethod, setDeliveryMethod] = useState("delivery");
   const [province, setProvince] = useState("");
   const [district, setDistrict] = useState("");
   const [ward, setWard] = useState("");
   const [addressDetail, setAddressDetail] = useState("");
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoResult, setPromoResult] = useState({ valid: false, message: "", discount: 0 });
 
   const [receivePromo, setReceivePromo] = useState(false);
   const [invoiceRequest, setInvoiceRequest] = useState(false);
@@ -24,365 +66,576 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [orderNote, setOrderNote] = useState("");
 
-  // Bạn có thể load danh sách tỉnh/thành, quận/huyện, phường/xã từ API hoặc file json tùy chỉnh
-  // Hiện demo tạm mảng giả lập
-  const provinces = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
-  const districts = ["Quận 1", "Quận 2", "Quận 3"];
-  const wards = ["Phường A", "Phường B", "Phường C"];
+  const [subTotal, setSubTotal] = useState(totalAmount || 0);
+  const [discount, setDiscount] = useState(0);
+  const [total, setTotal] = useState(totalAmount || 0);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [submitting, setSubmitting] = useState(false);
+  const [qrValue, setQrValue] = useState("");
+
+  const validateForm = () => {
     if (!name.trim()) {
-      alert("Vui lòng nhập họ và tên");
-      return;
+      toast.error("Vui lòng nhập họ và tên.");
+      return false;
     }
     if (!phone.trim()) {
-      alert("Vui lòng nhập số điện thoại");
-      return;
+      toast.error("Vui lòng nhập số điện thoại.");
+      return false;
     }
     if (deliveryMethod === "delivery") {
-      if (!province || !district || !ward || !addressDetail.trim()) {
-        alert("Vui lòng nhập đầy đủ địa chỉ nhận hàng");
-        return;
+      if (!province) {
+        toast.error("Vui lòng chọn tỉnh/thành.");
+        return false;
+      }
+      if (!district) {
+        toast.error("Vui lòng chọn quận/huyện.");
+        return false;
+      }
+      if (!ward) {
+        toast.error("Vui lòng chọn phường/xã.");
+        return false;
+      }
+      if (!addressDetail.trim()) {
+        toast.error("Vui lòng nhập địa chỉ chi tiết.");
+        return false;
       }
     }
-    
-    // Xử lý gửi dữ liệu đặt hàng ở đây
-    alert("Đặt hàng thành công (demo)!");
+    if (!agreePrivacy) {
+      toast.error("Bạn phải đồng ý với chính sách bảo mật.");
+      return false;
+    }
+    return true;
   };
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      toast.warn("Vui lòng nhập mã ưu đãi.");
+      setDiscount(0);
+      setTotal(subTotal);
+      setPromoResult({ valid: false, message: "", discount: 0 });
+      return;
+    }
+    setPromoLoading(true);
+    try {
+      const priceData = {
+        items: selectedItems.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.count,
+        })),
+        promotion_code: promoCode.trim(),
+      };
+      const res = await orderApi.calculatePrice(priceData, localStorage.getItem("accessToken"));
+      if (res.valid) {
+        setDiscount(res.discount);
+        setTotal(res.total);
+        toast.success(res.message);
+      } else {
+        setDiscount(0);
+        setTotal(subTotal);
+        toast.error(res.message);
+      }
+      setPromoResult(res);
+    } catch (err) {
+      toast.error("Lỗi khi áp dụng mã ưu đãi.");
+      setDiscount(0);
+      setTotal(subTotal);
+      setPromoResult({ valid: false, message: "", discount: 0 });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    if (selectedItems.length === 0) {
+      toast.error("Không có sản phẩm nào trong đơn hàng.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const orderData = {
+        customer_id: 1, // TODO: Lấy customer_id thực tế (đăng nhập)
+        user_id: null,
+        promotion_code: promoResult.valid ? promoCode.trim() : null,
+        payment_method: paymentMethod,
+        shipping_address:
+          deliveryMethod === "delivery"
+            ? `${addressDetail}, ${ward}, ${district}, ${province}`
+            : "Nhận tại cửa hàng",
+        is_deposit: false,
+        deposit_status: "none",
+        items: selectedItems.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.count,
+          price: item.price,
+        })),
+      };
+      const res = await orderApi.checkout(orderData, localStorage.getItem("accessToken"));
+      toast.success("Đặt hàng thành công! Mã đơn hàng: " + res.order.order_id);
+      navigate("/order-success", { state: { order: res.order } });
+    } catch (error) {
+      toast.error(
+        "Lỗi khi đặt hàng: " +
+        (error.response?.data?.message || error.message || "Vui lòng thử lại sau.")
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Tạo QR code string
+  useEffect(() => {
+    let amount = 0;
+    if (paymentMethod === "cod") {
+      amount = Math.round(subTotal * 0.1); // 10% tổng tiền
+    } else if (paymentMethod === "momo" || paymentMethod === "ck") {
+      amount = Math.round(total); // 100% tổng tiền
+    }
+
+    let qrStr = "";
+
+    if (paymentMethod === "cod") {
+      // QR VietQR ngân hàng MB Bank
+      const qrPay = QRPay.initVietQR({
+        bankBin: BANK_CODE,
+        bankNumber: BANK_ACCOUNT,
+        amount: amount.toString(),
+        purpose: "Thanh toán đặt cọc PNJ",
+      });
+      qrStr = qrPay.build();
+    } else if (paymentMethod === "momo") {
+      // QR VietQR MoMo
+      const momoQR = QRPay.initVietQR({
+        bankBin: BanksObject.banviet.bin, // Mã ngân hàng ví MoMo (Ban Viet)
+        bankNumber: MOMO_ACCOUNT,
+        amount: amount.toString(),
+        purpose: "Thanh toán đơn hàng PNJ qua MoMo",
+      });
+      // Thêm tham chiếu giao dịch (tùy chọn)
+      momoQR.additionalData.reference = "MOMOW2W" + MOMO_ACCOUNT.slice(-3);
+      momoQR.setUnreservedField("80", "046"); // VD 3 số cuối điện thoại người nhận
+      qrStr = momoQR.build();
+    } else if (paymentMethod === "ck") {
+      const qrPay = QRPay.initVietQR({
+        bankBin: BANK_CODE,
+        bankNumber: BANK_ACCOUNT,
+        amount: amount.toString(),
+        purpose: "Thanh toán đặt cọc PNJ",
+      });
+      qrStr = qrPay.build();
+    }
+
+    setQrValue(qrStr);
+  }, [paymentMethod, subTotal, total]);
+
   return (
-    <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded shadow">
-      <button
-        onClick={() => window.history.back()}
-        className="mb-4 text-blue-700 font-semibold flex items-center gap-1"
+    <MainLayout>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          maxWidth: 1200,
+          width: "100%",
+          mx: "auto",
+          my: 5,
+          p: 4,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 3,
+          color: "text.primary",
+        }}
       >
-        ← Quay lại
-      </button>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Button
+          onClick={() => navigate(-1)}
+          sx={{ mb: 3, color: "primary.main", fontWeight: "bold" }}
+        >
+          ← Quay lại
+        </Button>
+        <Typography variant="h5" fontWeight="bold" mb={4} color="primary.main" align="center">
+          Thông tin đặt hàng
+        </Typography>
+        {/* Sản phẩm đã chọn */}
+        <Box mb={4} borderRadius={1} p={2} sx={{ border: 1, borderColor: "divider" }}>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            color="text.primary"
+            gutterBottom
+          >
+            Sản phẩm đã chọn
+          </Typography>
+          {selectedItems.length === 0 && (
+            <Typography color="text.secondary">Không có sản phẩm nào.</Typography>
+          )}
+          {selectedItems.map((item) => (
+            <Box
+              key={item.product_id}
+              display="flex"
+              alignItems="center"
+              borderBottom={1}
+              borderColor="divider"
+              pb={1}
+              mb={1}
+              sx={{ "&:last-child": { borderBottom: "none", mb: 0, pb: 0 } }}
+            >
+              <img
+                src={item.ProductImages?.[0]?.image_url || "https://via.placeholder.com/80"}
+                alt={item.product_name}
+                width={64}
+                height={64}
+                style={{ objectFit: "cover", borderRadius: 4 }}
+              />
+              <Box ml={2}>
+                <Typography fontWeight="bold" color="text.primary">
+                  {item.product_name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Mã: {item.product_code}
+                </Typography>
+                <Typography variant="body2" mt={0.5} color="text.primary">
+                  Số lượng: <strong>{item.count}</strong>
+                </Typography>
+                <Typography variant="body2" fontWeight="bold" color="primary.main" mt={0.5}>
+                  Đơn giá: {item.price.toLocaleString("vi-VN")} đ
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
 
-      <h2 className="text-center text-lg font-bold mb-6">Thông tin đặt hàng</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-
-        {/* Danh sách sản phẩm được chọn */}
-  <div className="border p-4 rounded space-y-4">
-    <h3 className="font-semibold mb-2">Sản phẩm đã chọn</h3>
-    {selectedItems.map((item) => (
-    <div key={item.product_id} className="flex gap-4 items-center border-b pb-3">
-      <img
-        src={item.ProductImages?.[0]?.image_url || "https://via.placeholder.com/80"}
-        alt={item.product_name}
-        className="w-16 h-16 object-cover rounded"
-      />
-      <div>
-        <p className="font-semibold">{item.product_name}</p>
-        <p className="text-sm text-gray-600">Mã: {item.product_code}</p>
-        <p className="mt-1">Số lượng: <b>{item.count}</b></p>
-        <p className="text-yellow-700 font-semibold">
-          Đơn giá: {item.price.toLocaleString("vi-VN")} đ
-        </p>
-      </div>
-    </div>
-  ))}
-</div>
-
+        {/* --- Chỗ này bạn có thể thêm phần nhập thông tin khách hàng, địa chỉ, ... --- */}
 
         {/* Mã ưu đãi */}
-        <div className="border p-4 rounded">
-          <input
-            type="text"
-            placeholder="Nhập mã ưu đãi"
-            className="w-full border rounded p-2"
+        <Box mb={4}>
+          <TextField
+            label="Mã ưu đãi"
+            fullWidth
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            disabled={promoLoading}
+            InputProps={{
+              endAdornment: promoLoading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Button size="small" onClick={handleApplyPromo} disabled={promoLoading} sx={{ color: "primary.main", fontWeight: "bold" }}>
+                  Áp dụng
+                </Button>
+              ),
+            }}
+            helperText={promoResult.message}
+            error={!promoResult.valid && promoResult.message !== ""}
           />
-          <button
-            type="button"
-            className="mt-2 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-          >
-            Áp dụng
-          </button>
-        </div>
+        </Box>
 
-        {/* Tạm tính */}
-        <div className="border p-4 rounded space-y-1 text-sm">
-          <p>
-  Tạm tính <span className="float-right font-semibold">{totalAmount.toLocaleString("vi-VN")} đ</span>
-</p>
-          <p>
-            Giao hàng{" "}
-            <span className="float-right text-blue-600 cursor-pointer font-semibold">
-              Miễn phí
-            </span>
-          </p>
-          <p>
-            Giảm giá <span className="float-right font-semibold">- 0 đ</span>
-          </p>
-          <p className="border-t pt-1">
-  Tổng tiền <span className="float-right font-semibold">{totalAmount.toLocaleString("vi-VN")} đ</span>
-</p>
-          <p className="text-xs text-gray-500">
+        {/* Tổng tiền */}
+        <Box
+          mb={4}
+          p={2}
+          borderRadius={1}
+          sx={{ border: 1, borderColor: "divider" }}
+          color="text.primary"
+          fontWeight="bold"
+        >
+          <Typography display="flex" justifyContent="space-between" mb={1}>
+            <span>Tạm tính</span>
+            <span>{subTotal.toLocaleString("vi-VN")} đ</span>
+          </Typography>
+          <Typography display="flex" justifyContent="space-between" mb={1}>
+            <span>Giảm giá</span>
+            <span style={{ color: "#d32f2f" }}>- {discount.toLocaleString("vi-VN")} đ</span>
+          </Typography>
+          <Typography
+            display="flex"
+            justifyContent="space-between"
+            borderTop={1}
+            borderColor="divider"
+            pt={1}
+            fontSize="1.2rem"
+          >
+            <span>Tổng tiền</span>
+            <span>{total.toLocaleString("vi-VN")} đ</span>
+          </Typography>
+          <Typography fontSize="0.75rem" fontStyle="italic" mt={1} color="text.secondary">
             (Giá tham khảo đã bao gồm VAT)
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* Thông tin người mua */}
-        <div>
-          <p className="font-semibold mb-2">Thông tin người mua</p>
+        <Box mb={4}>
+          <FormControl component="fieldset" sx={{ mb: 2 }}>
+            <FormLabel component="legend" sx={{ color: "text.primary" }}>
+              Giới tính
+            </FormLabel>
+            <RadioGroup
+              row
+              name="gender"
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              sx={{ color: "text.primary" }}
+            >
+              <FormControlLabel value="female" control={<Radio />} label="Chị" />
+              <FormControlLabel value="male" control={<Radio />} label="Anh" />
+            </RadioGroup>
+          </FormControl>
 
-          <div className="flex gap-4 mb-2">
-            <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="gender"
-                value="female"
-                checked={gender === "female"}
-                onChange={() => setGender("female")}
-              />
-              Chị
-            </label>
-            <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                name="gender"
-                value="male"
-                checked={gender === "male"}
-                onChange={() => setGender("male")}
-              />
-              Anh
-            </label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <input
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <TextField
               required
-              type="text"
-              placeholder="Họ và tên *"
+              label="Họ và tên"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border rounded p-2"
+              fullWidth
             />
-            <input
-              type="tel"
-              placeholder="Số điện thoại *"
+            <TextField
+              required
+              label="Số điện thoại"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="border rounded p-2"
-              required
+              fullWidth
             />
-            <input
+            <TextField
+              label="Email"
               type="email"
-              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border rounded p-2 col-span-2"
+              fullWidth
+              sx={{ gridColumn: "span 2" }}
             />
-            <input
+            <TextField
+              label="Ngày sinh"
               type="date"
-              placeholder="Ngày sinh"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
-              className="border rounded p-2 col-span-2"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              sx={{ gridColumn: "span 2" }}
             />
-          </div>
+          </Box>
 
-          <label className="inline-flex items-center gap-2 mt-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={sendCardSms}
-              onChange={(e) => setSendCardSms(e.target.checked)}
-            />
-            Tôi muốn gửi thiệp và lời chúc qua SMS
-          </label>
-        </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={sendCardSms}
+                onChange={(e) => setSendCardSms(e.target.checked)}
+                sx={{ color: "primary.main" }}
+              />
+            }
+            label="Tôi muốn gửi thiệp và lời chúc qua SMS"
+            sx={{ mt: 2, color: "text.primary" }}
+          />
+        </Box>
 
         {/* Hình thức nhận hàng */}
-        <div className="mt-4 border rounded p-4">
-          <p className="font-semibold mb-4">Hình thức nhận hàng</p>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
+        <Box mb={4}>
+          <Typography variant="h6" sx={{ color: "text.primary", mb: 2 }}>
+            Hình thức nhận hàng
+          </Typography>
+          <Box display="flex" gap={2} flexWrap="wrap">
+            <Button
+              variant={deliveryMethod === "delivery" ? "contained" : "outlined"}
+              color="primary"
+              startIcon={
+                <img
+                  src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon.png"
+                  alt="Giao hàng tận nơi"
+                  width={24}
+                  height={24}
+                  style={{ objectFit: "contain" }}
+                />
+              }
               onClick={() => setDeliveryMethod("delivery")}
-              className={`border p-3 rounded flex items-center gap-2 cursor-pointer ${
-                deliveryMethod === "delivery" ? "bg-yellow-50" : ""
-              }`}
+              sx={{ flexGrow: 1, minWidth: 150 }}
             >
-              <img
-                src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon.png"
-                alt="Giao hàng tận nơi"
-                className="w-6 h-6"
-              />
-              <div>
-                <p className="font-semibold">Giao hàng tận nơi</p>
-                <p className="text-xs text-gray-500">Miễn phí toàn quốc</p>
-              </div>
-            </button>
-
-            <button
-              type="button"
+              Giao hàng tận nơi
+            </Button>
+            <Button
+              variant={deliveryMethod === "pickup" ? "contained" : "outlined"}
+              color="primary"
+              startIcon={
+                <img
+                  src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon_2.png"
+                  alt="Nhận tại cửa hàng"
+                  width={24}
+                  height={24}
+                  style={{ objectFit: "contain" }}
+                />
+              }
               onClick={() => setDeliveryMethod("pickup")}
-              className={`border p-3 rounded flex items-center gap-2 cursor-pointer ${
-                deliveryMethod === "pickup" ? "bg-yellow-50" : ""
-              }`}
+              sx={{ flexGrow: 1, minWidth: 150 }}
             >
-              <img
-                src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon_2.png"
-                alt="Nhận tại cửa hàng"
-                className="w-6 h-6"
-              />
-              <div>
-                <p className="font-semibold">Nhận tại cửa hàng</p>
-              </div>
-            </button>
-          </div>
+              Nhận tại cửa hàng
+            </Button>
+          </Box>
 
-          {/* Địa chỉ nhận hàng nếu chọn giao hàng tận nơi */}
           {deliveryMethod === "delivery" && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <select
+            <Box
+              mt={3}
+              display="grid"
+              gridTemplateColumns="repeat(2, 1fr)"
+              gap={2}
+              maxWidth={480}
+            >
+              <FormControl fullWidth required>
+                <Select
+                  value={province}
+                  onChange={(e) => setProvince(e.target.value)}
+                  displayEmpty
+                  sx={{ color: province ? "inherit" : "text.secondary" }}
+                >
+                  <MenuItem disabled value="">
+                    Chọn tỉnh/thành *
+                  </MenuItem>
+                  {provinces.map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required>
+                <Select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  displayEmpty
+                  sx={{ color: district ? "inherit" : "text.secondary" }}
+                >
+                  <MenuItem disabled value="">
+                    Quận/huyện *
+                  </MenuItem>
+                  {districts.map((d) => (
+                    <MenuItem key={d} value={d}>
+                      {d}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required>
+                <Select
+                  value={ward}
+                  onChange={(e) => setWard(e.target.value)}
+                  displayEmpty
+                  sx={{ color: ward ? "inherit" : "text.secondary" }}
+                >
+                  <MenuItem disabled value="">
+                    Phường/xã *
+                  </MenuItem>
+                  {wards.map((w) => (
+                    <MenuItem key={w} value={w}>
+                      {w}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
                 required
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
-                className="border p-2 rounded"
-              >
-                <option value="">Chọn tỉnh/thành *</option>
-                {provinces.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                required
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className="border p-2 rounded"
-              >
-                <option value="">Quận/huyện *</option>
-                {districts.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                required
-                value={ward}
-                onChange={(e) => setWard(e.target.value)}
-                className="border p-2 rounded"
-              >
-                <option value="">Phường/xã *</option>
-                {wards.map((w) => (
-                  <option key={w} value={w}>
-                    {w}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                required
-                type="text"
-                placeholder="Nhập địa chỉ khách hàng *"
+                label="Địa chỉ chi tiết *"
                 value={addressDetail}
                 onChange={(e) => setAddressDetail(e.target.value)}
-                className="border p-2 rounded"
+                fullWidth
               />
-            </div>
+            </Box>
           )}
-        </div>
-
-        {/* Các checkbox đồng ý */}
-        <div className="mt-4 space-y-2 text-sm">
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={receivePromo}
-              onChange={(e) => setReceivePromo(e.target.checked)}
-            />
-            Đồng ý nhận các thông tin và chương trình khuyến mãi của PNJ qua
-            email, SMS, mạng xã hội
-          </label>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={invoiceRequest}
-              onChange={(e) => setInvoiceRequest(e.target.checked)}
-            />
-            Xuất hóa đơn công ty (Không áp dụng phiếu quà tặng điện tử)
-          </label>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={agreePrivacy}
-              onChange={(e) => setAgreePrivacy(e.target.checked)}
-            />
-            Tôi đồng ý cho PNJ thu thập, xử lý dữ liệu cá nhân của tôi theo
-            quy định tại{" "}
-            <a
-              href="https://www.pnj.com.vn/thong-bao-4"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600"
-            >
-              Thông báo này
-            </a>{" "}
-            và theo quy định của pháp luật
-          </label>
-        </div>
+        </Box>
 
         {/* Phương thức thanh toán */}
-        <div className="mt-6">
-          <p className="font-semibold mb-2">Phương thức thanh toán</p>
-          <ul className="space-y-2 text-sm">
-            <li
-              className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "cod" ? "border-blue-600" : ""
-              }`}
+        <Box mb={4}>
+          <Typography variant="h6" gutterBottom color="text.primary">
+            Phương thức thanh toán
+          </Typography>
+          <Stack spacing={1}>
+            <Button
+              variant={paymentMethod === "cod" ? "contained" : "outlined"}
+              color="primary"
               onClick={() => setPaymentMethod("cod")}
+              fullWidth
+              sx={{ justifyContent: "flex-start" }}
             >
               Thanh toán tiền mặt khi nhận hàng (COD)
-            </li>
-            <li
-              className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "bank_transfer" ? "border-blue-600" : ""
-              }`}
-              onClick={() => setPaymentMethod("bank_transfer")}
+            </Button>
+            <Button
+              variant={paymentMethod === "momo" ? "contained" : "outlined"}
+              color="primary"
+              onClick={() => setPaymentMethod("momo")}
+              fullWidth
+              sx={{ justifyContent: "flex-start" }}
             >
-              Thanh toán chuyển khoản
-            </li>
-            
-            <li
-              className={`border p-2 rounded cursor-pointer ${
-                paymentMethod === "qr_code" ? "border-blue-600" : ""
-              }`}
-              onClick={() => setPaymentMethod("qr_code")}
+              Thanh toán bằng MoMo
+            </Button>
+            <Button
+              variant={paymentMethod === "ck" ? "contained" : "outlined"}
+              color="primary"
+              onClick={() => setPaymentMethod("ck")}
+              fullWidth
+              sx={{ justifyContent: "flex-start" }}
             >
-              Quét mã QR
-            </li>
-            
-          </ul>
-        </div>
+              Thanh toán bằng ngân hàng
+            </Button>
+          </Stack>
+          {(paymentMethod === "cod" || paymentMethod === "momo" || paymentMethod === "ck") && (
+            <Box
+              mt={3}
+              p={2}
+              borderRadius={2}
+              border="0px solid"
+              borderColor="primary.main"
+              textAlign="center"
+              maxWidth={300}
+              mx="auto"
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {/* <Typography variant="subtitle1" color="primary.main" fontWeight="bold" mb={1}>
+                Mã QR thanh toán
+              </Typography> */}
+              <QRCodeSVG value={qrValue} size={180} />
+              <Typography mt={1} fontWeight="medium" color="text.primary">
+                Số tiền:{" "}
+                <strong>
+                  {paymentMethod === "cod"
+                    ? Math.round(subTotal * 0.1).toLocaleString("vi-VN")
+                    : Math.round(total).toLocaleString("vi-VN")}{" "}
+                  đ
+                </strong>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {paymentMethod === "momo"
+                  ? "Ví MoMo"
+                  : paymentMethod === "ck"
+                    ? BANK_NAME
+                    : BANK_NAME}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                {paymentMethod === "momo"
+                  ? MOMO_ACCOUNT
+                  : paymentMethod === "ck"
+                    ? BANK_ACCOUNT
+                    : BANK_ACCOUNT}
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
-        {/* Ghi chú đơn hàng */}
-        <div className="mt-6">
-          <label className="font-semibold mb-2 block">Ghi chú đơn hàng (Không bắt buộc)</label>
-          <textarea
-            rows={4}
-            placeholder="Vui lòng ghi chú thêm để PNJ có thể hỗ trợ tốt nhất cho Quý khách!"
-            className="w-full border p-2 rounded resize-none"
-            value={orderNote}
-            onChange={(e) => setOrderNote(e.target.value)}
-          />
-        </div>
-
-        <button
+        <Button
           type="submit"
-          className="w-full mt-8 bg-[#003468] text-white rounded-lg py-3 font-bold"
+          variant="contained"
+          color="primary"
+          fullWidth
+          size="large"
+          disabled={submitting}
         >
-          ĐẶT HÀNG
-        </button>
-      </form>
-    </div>
+          {submitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "ĐẶT HÀNG"}
+        </Button>
+      </Box>
+    </MainLayout>
   );
 };
 
