@@ -97,32 +97,47 @@ const getProductBySlug = async (slug) => {
   }
 };
 
-// Cập nhật sản phẩm
-const updateProduct = async (
-  id,
-  productName,
-  description,
-  price,
-  quantity,
-  categoryId,
-  subcategoryId,
-  imageUrl,
-  isActive,
-) => {
+// // Cập nhật sản phẩm
+// const updateProduct = async (
+//   id,
+//   productName,
+//   description,
+//   price,
+//   quantity,
+//   categoryId,
+//   subcategoryId,
+//   imageUrl,
+//   isActive,
+// ) => {
+//   try {
+//     const response = await axiosInstance.put(`${API_URL}/products/${id}`, {
+//       product_name: productName,
+//       description: description,
+//       price: price,
+//       quantity: quantity,
+//       category_id: categoryId,
+//       subcategory_id: subcategoryId,
+//       is_active: isActive,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error updating product:', error);
+//     throw error; // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+//   }
+// };
+// Thay thế hàm updateProduct hiện tại bằng hàm nhận FormData
+const updateProduct = async (id, formData, accessToken) => {
   try {
-    const response = await axiosInstance.put(`${API_URL}/products/${id}`, {
-      product_name: productName,
-      description: description,
-      price: price,
-      quantity: quantity,
-      category_id: categoryId,
-      subcategory_id: subcategoryId,
-      is_active: isActive,
+    const response = await axiosInstance.put(`${API_URL}/products/${id}`, formData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   } catch (error) {
     console.error('Error updating product:', error);
-    throw error; // Đảm bảo lỗi được ném ra để xử lý ở nơi gọi
+    throw error;
   }
 };
 
@@ -239,7 +254,7 @@ const quickSearchProducts = async (keyword, limit = 8) => {
     });
     return res.data.data;
   } catch (error) {
-    console.error("Quick Search API error:", error);
+    console.error('Quick Search API error:', error);
     return [];
   }
 };
@@ -297,5 +312,5 @@ export default {
   getCategoriesWithSubCategories,
   quickSearchProducts,
   getProductBySlug,
-  getTopRatedProductsBySentiment
+  getTopRatedProductsBySentiment,
 };

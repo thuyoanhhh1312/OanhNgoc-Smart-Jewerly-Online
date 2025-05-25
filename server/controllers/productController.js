@@ -229,6 +229,47 @@ export const createProduct = async (req, res) => {
   }
 };
 
+// export const updateProduct = async (req, res) => {
+//   const { id } = req.params;
+//   const {
+//     product_name,
+//     description,
+//     price,
+//     quantity,
+//     category_id,
+//     subcategory_id,
+//     is_active,
+//   } = req.body;
+
+//   try {
+//     const product = await db.Product.findByPk(id);
+//     if (!product) {
+//       return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
+//     }
+
+//     if (product_name) {
+//       product.product_name = product_name;
+//       product.slug = slugify(product_name, { lower: true, locale: 'vi', strict: true });
+//     }
+//     product.description = description || product.description;
+//     product.price = price || product.price;
+//     product.quantity = quantity || product.quantity;
+//     product.category_id = category_id || product.category_id;
+//     product.subcategory_id = subcategory_id || product.subcategory_id;
+
+//     // Cập nhật trường is_active nếu có trong body
+//     if (typeof is_active !== 'undefined') {
+//       product.is_active = is_active;
+//     }
+
+//     await product.save();
+//     res.status(200).json(product);
+//   } catch (error) {
+//     res.status(500).json({ message: "Lỗi khi cập nhật sản phẩm", error: error.message });
+//   }
+// };
+
+
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
@@ -239,7 +280,17 @@ export const updateProduct = async (req, res) => {
     category_id,
     subcategory_id,
     is_active,
+    existingImageIds, // JSON string danh sách ảnh giữ lại
   } = req.body;
+
+  let existingImageIdsParsed = [];
+  if (existingImageIds) {
+    try {
+      existingImageIdsParsed = JSON.parse(existingImageIds);
+    } catch (e) {
+      return res.status(400).json({ message: 'existingImageIds không đúng định dạng JSON' });
+    }
+  }
 
   try {
     const product = await db.Product.findByPk(id);
@@ -247,6 +298,7 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Sản phẩm không tìm thấy" });
     }
 
+    // Cập nhật thông tin sản phẩm
     if (product_name) {
       product.product_name = product_name;
       product.slug = slugify(product_name, { lower: true, locale: 'vi', strict: true });
@@ -257,18 +309,40 @@ export const updateProduct = async (req, res) => {
     product.category_id = category_id || product.category_id;
     product.subcategory_id = subcategory_id || product.subcategory_id;
 
-    // Cập nhật trường is_active nếu có trong body
     if (typeof is_active !== 'undefined') {
       product.is_active = is_active;
+    }
+
+    // Lấy danh sách ảnh hiện có
+    const currentImages = await db.ProductImage.findAll({ where: { product_id: id } });
+
+    // Xác định ảnh cần xóa (không có trong danh sách giữ lại)
+    const imagesToDelete = currentImages.filter(img => !existingImageIdsParsed.includes(img.image_id));
+
+    // Xóa ảnh không giữ lại
+    await Promise.all(imagesToDelete.map(img => img.destroy()));
+
+    // Thêm ảnh mới nếu có
+    const imageFiles = req.files;
+    if (imageFiles && imageFiles.length > 0) {
+      // Xem có ảnh chính chưa, nếu không có thì ảnh đầu tiên mới upload sẽ là ảnh chính
+      const hasMainImage = await db.ProductImage.findOne({ where: { product_id: id, is_main: true } });
+      const imagesToCreate = imageFiles.map((file, index) => ({
+        product_id: id,
+        image_url: file.path,
+        alt_text: product_name,
+        is_main: hasMainImage ? false : index === 0,
+      }));
+      await db.ProductImage.bulkCreate(imagesToCreate);
     }
 
     await product.save();
     res.status(200).json(product);
   } catch (error) {
+    console.error('Lỗi khi cập nhật sản phẩm:', error);
     res.status(500).json({ message: "Lỗi khi cập nhật sản phẩm", error: error.message });
   }
 };
-
 
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
