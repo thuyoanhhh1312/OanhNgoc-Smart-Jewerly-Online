@@ -341,6 +341,7 @@ export const getProductsByCategoryWithRatingSummary = async (req, res) => {
         'sold_quantity',
         'created_at',
         'updated_at',
+        'slug',
         [Sequelize.fn('COUNT', Sequelize.col('ProductReviews.review_id')), 'totalReviews'],
         [Sequelize.fn('IFNULL', Sequelize.fn('AVG', Sequelize.col('ProductReviews.rating')), 0), 'avgRating'],
         [
