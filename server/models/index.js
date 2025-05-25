@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname } from 'path';
+import sequelize from '../config/db.js';
+import { Sequelize } from 'sequelize';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -119,5 +121,7 @@ if (Order && OrderStatus) {
   OrderStatus.hasMany(Order, { foreignKey: 'status_id' });
 }
 
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
 export default db;

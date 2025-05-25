@@ -7,14 +7,9 @@ import {
   Typography,
   CircularProgress,
   Stack,
-  FormControlLabel,
-  Checkbox,
   FormControl,
-  FormLabel,
-  RadioGroup,
-  Radio,
   Select,
-  Menu, MenuItem
+  MenuItem,
 } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import { QRCodeSVG } from "qrcode.react";
@@ -22,6 +17,10 @@ import MainLayout from "../layout/MainLayout";
 import orderApi from "../api/orderApi";
 import { QRPay, BanksObject } from "vietnam-qr-pay";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CloseIcon from '@mui/icons-material/Close';
+import { useDispatch } from "react-redux";
 
 const provinces = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
 const districts = ["Quận 1", "Quận 2", "Quận 3"];
@@ -29,15 +28,15 @@ const wards = ["Phường A", "Phường B", "Phường C"];
 
 // Thông tin ngân hàng MB Bank
 const BANK_NAME = "MB Bank";
-const BANK_CODE = BanksObject.mbbank.bin; // MBBank
-const BANK_ACCOUNT = "0792360150";
+const BANK_CODE = BanksObject.mbbank.bin;
+const BANK_ACCOUNT = "0816837690";
 
 // Thông tin tài khoản ví MoMo của bạn
-const MOMO_ACCOUNT = "99MM24030M03578011";
-// Thông tin tài khoản ví ZaloPay của bạn
-const ZALOPAY_ACCOUNT = "99ZP24187M32217896";
+const MOMO_ACCOUNT = "99MM23332M53758772";
 
 const CheckoutPage = () => {
+  const { user } = useSelector(state => ({ ...state }));
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedItems = [], totalAmount = 0 } = location.state || {};
@@ -57,14 +56,9 @@ const CheckoutPage = () => {
 
   const [promoCode, setPromoCode] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
-  const [promoResult, setPromoResult] = useState({ valid: false, message: "", discount: 0 });
-
-  const [receivePromo, setReceivePromo] = useState(false);
-  const [invoiceRequest, setInvoiceRequest] = useState(false);
-  const [agreePrivacy, setAgreePrivacy] = useState(true);
+  const [promoResult, setPromoResult] = useState({ valid: false, message: "", discount: 0, promotion: null });
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [orderNote, setOrderNote] = useState("");
 
   const [subTotal, setSubTotal] = useState(totalAmount || 0);
   const [discount, setDiscount] = useState(0);
@@ -73,15 +67,18 @@ const CheckoutPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [qrValue, setQrValue] = useState("");
 
+  // Hiển thị box thông tin mã khuyến mãi đã áp dụng
+  const promoInfo = promoResult.valid && promoResult.promotion;
+
+  const handleRemovePromo = () => {
+    setPromoCode("");
+    setDiscount(0);
+    setTotal(subTotal);
+    setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
+    toast.info("Đã bỏ áp dụng mã khuyến mãi.");
+  };
+
   const validateForm = () => {
-    if (!name.trim()) {
-      toast.error("Vui lòng nhập họ và tên.");
-      return false;
-    }
-    if (!phone.trim()) {
-      toast.error("Vui lòng nhập số điện thoại.");
-      return false;
-    }
     if (deliveryMethod === "delivery") {
       if (!province) {
         toast.error("Vui lòng chọn tỉnh/thành.");
@@ -100,10 +97,6 @@ const CheckoutPage = () => {
         return false;
       }
     }
-    if (!agreePrivacy) {
-      toast.error("Bạn phải đồng ý với chính sách bảo mật.");
-      return false;
-    }
     return true;
   };
 
@@ -112,7 +105,7 @@ const CheckoutPage = () => {
       toast.warn("Vui lòng nhập mã ưu đãi.");
       setDiscount(0);
       setTotal(subTotal);
-      setPromoResult({ valid: false, message: "", discount: 0 });
+      setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
       return;
     }
     setPromoLoading(true);
@@ -124,7 +117,7 @@ const CheckoutPage = () => {
         })),
         promotion_code: promoCode.trim(),
       };
-      const res = await orderApi.calculatePrice(priceData, localStorage.getItem("accessToken"));
+      const res = await orderApi.calculatePrice(priceData, user?.token);
       if (res.valid) {
         setDiscount(res.discount);
         setTotal(res.total);
@@ -139,7 +132,7 @@ const CheckoutPage = () => {
       toast.error("Lỗi khi áp dụng mã ưu đãi.");
       setDiscount(0);
       setTotal(subTotal);
-      setPromoResult({ valid: false, message: "", discount: 0 });
+      setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
     } finally {
       setPromoLoading(false);
     }
@@ -157,24 +150,22 @@ const CheckoutPage = () => {
     setSubmitting(true);
     try {
       const orderData = {
-        customer_id: 1, // TODO: Lấy customer_id thực tế (đăng nhập)
+        customer_id: user?.id,
         user_id: null,
         promotion_code: promoResult.valid ? promoCode.trim() : null,
         payment_method: paymentMethod,
-        shipping_address:
-          deliveryMethod === "delivery"
-            ? `${addressDetail}, ${ward}, ${district}, ${province}`
-            : "Nhận tại cửa hàng",
+        shipping_address: `${addressDetail}, ${ward}, ${district}, ${province}`,
         is_deposit: false,
-        deposit_status: "none",
+        deposit_status: paymentMethod === "cod" ? "pending" : "none",
         items: selectedItems.map((item) => ({
           product_id: item.product_id,
           quantity: item.count,
           price: item.price,
         })),
       };
-      const res = await orderApi.checkout(orderData, localStorage.getItem("accessToken"));
+      const res = await orderApi.checkout(orderData, user?.token);
       toast.success("Đặt hàng thành công! Mã đơn hàng: " + res.order.order_id);
+      dispatch({ type: "CLEAR_CART" });
       navigate("/order-success", { state: { order: res.order } });
     } catch (error) {
       toast.error(
@@ -190,40 +181,37 @@ const CheckoutPage = () => {
   useEffect(() => {
     let amount = 0;
     if (paymentMethod === "cod") {
-      amount = Math.round(subTotal * 0.1); // 10% tổng tiền
+      amount = Math.round(total * 0.1);
     } else if (paymentMethod === "momo" || paymentMethod === "ck") {
-      amount = Math.round(total); // 100% tổng tiền
+      amount = Math.round(total);
     }
 
     let qrStr = "";
 
     if (paymentMethod === "cod") {
-      // QR VietQR ngân hàng MB Bank
       const qrPay = QRPay.initVietQR({
         bankBin: BANK_CODE,
         bankNumber: BANK_ACCOUNT,
         amount: amount.toString(),
-        purpose: "Thanh toán đặt cọc PNJ",
+        purpose: "Thanh toan đat coc",
       });
       qrStr = qrPay.build();
     } else if (paymentMethod === "momo") {
-      // QR VietQR MoMo
       const momoQR = QRPay.initVietQR({
-        bankBin: BanksObject.banviet.bin, // Mã ngân hàng ví MoMo (Ban Viet)
+        bankBin: BanksObject.banviet.bin,
         bankNumber: MOMO_ACCOUNT,
         amount: amount.toString(),
-        purpose: "Thanh toán đơn hàng PNJ qua MoMo",
+        purpose: "Thanh toan don hang qua MoMo",
       });
-      // Thêm tham chiếu giao dịch (tùy chọn)
       momoQR.additionalData.reference = "MOMOW2W" + MOMO_ACCOUNT.slice(-3);
-      momoQR.setUnreservedField("80", "046"); // VD 3 số cuối điện thoại người nhận
+      momoQR.setUnreservedField("80", "046");
       qrStr = momoQR.build();
     } else if (paymentMethod === "ck") {
       const qrPay = QRPay.initVietQR({
         bankBin: BANK_CODE,
         bankNumber: BANK_ACCOUNT,
         amount: amount.toString(),
-        purpose: "Thanh toán đặt cọc PNJ",
+        purpose: "Thanh toan",
       });
       qrStr = qrPay.build();
     }
@@ -251,23 +239,17 @@ const CheckoutPage = () => {
         <ToastContainer position="top-right" autoClose={3000} />
         <Button
           onClick={() => navigate(-1)}
-          sx={{ mb: 3, color: "primary.main", fontWeight: "bold" }}
+          startIcon={<ArrowBackIcon />}
+          sx={{ mb: 3, color: "#003468", fontWeight: "bold" }}
         >
-          ← Quay lại
+          Quay lại
         </Button>
-        <Typography variant="h5" fontWeight="bold" mb={4} color="primary.main" align="center">
+        <Typography variant="h5" fontWeight="bold" mb={4} color="#272727" align="center">
           Thông tin đặt hàng
         </Typography>
+
         {/* Sản phẩm đã chọn */}
-        <Box mb={4} borderRadius={1} p={2} sx={{ border: 1, borderColor: "divider" }}>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            color="text.primary"
-            gutterBottom
-          >
-            Sản phẩm đã chọn
-          </Typography>
+        <Box mb={4} borderRadius={0} p={2} sx={{ border: 0, borderColor: "none" }}>
           {selectedItems.length === 0 && (
             <Typography color="text.secondary">Không có sản phẩm nào.</Typography>
           )}
@@ -283,61 +265,136 @@ const CheckoutPage = () => {
               sx={{ "&:last-child": { borderBottom: "none", mb: 0, pb: 0 } }}
             >
               <img
-                src={item.ProductImages?.[0]?.image_url || "https://via.placeholder.com/80"}
+                src={item.ProductImages?.[0]?.image_url || "https://cdn.pnj.io/images/logo/pnj.com.vn.png"}
                 alt={item.product_name}
                 width={64}
                 height={64}
                 style={{ objectFit: "cover", borderRadius: 4 }}
               />
               <Box ml={2}>
-                <Typography fontWeight="bold" color="text.primary">
+                <Typography fontWeight="bold" color="#003468">
                   {item.product_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Mã: {item.product_code}
                 </Typography>
                 <Typography variant="body2" mt={0.5} color="text.primary">
                   Số lượng: <strong>{item.count}</strong>
                 </Typography>
-                <Typography variant="body2" fontWeight="bold" color="primary.main" mt={0.5}>
-                  Đơn giá: {item.price.toLocaleString("vi-VN")} đ
-                </Typography>
+                <div className="flex flex-row">
+                  <Typography variant="body2" fontWeight="normal" color="primary.main" mt={0.5}>
+                    Đơn giá:
+                  </Typography>
+                  <Typography variant="body2" fontWeight="bold" color="#C58C46" mt={0.5} ml={0.5}>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                  </Typography>
+                </div>
               </Box>
             </Box>
           ))}
         </Box>
 
-
-        {/* --- Chỗ này bạn có thể thêm phần nhập thông tin khách hàng, địa chỉ, ... --- */}
-
         {/* Mã ưu đãi */}
-        <Box mb={4}>
+        <Box mb={2}>
           <TextField
-            label="Mã ưu đãi"
+            label="Nhập mã ưu đãi"
             fullWidth
             value={promoCode}
             onChange={(e) => setPromoCode(e.target.value)}
-            disabled={promoLoading}
+            disabled={promoLoading || (promoResult.valid && !!promoResult.promotion)}
             InputProps={{
-              endAdornment: promoLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <Button size="small" onClick={handleApplyPromo} disabled={promoLoading} sx={{ color: "primary.main", fontWeight: "bold" }}>
-                  Áp dụng
-                </Button>
+              sx: {
+                '& .MuiInputBase-input': {
+                  py: 1.5,
+                  textAlign: 'center',
+                },
+              },
+              endAdornment: (
+                promoLoading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <Box ml={1} display="flex" alignItems="center" height="100%">
+                    <Button
+                      size="medium"
+                      onClick={handleApplyPromo}
+                      disabled={promoLoading || (promoResult.valid && !!promoResult.promotion)}
+                      sx={{
+                        color: "#fff",
+                        fontWeight: "bold",
+                        px: 4,
+                        minWidth: 110,
+                        backgroundColor: "#b1b1b1",
+                        borderRadius: 2,
+                        whiteSpace: 'nowrap',
+                        '&:hover': {
+                          backgroundColor: "#979797"
+                        }
+                      }}
+                    >
+                      Áp dụng
+                    </Button>
+                  </Box>
+                )
               ),
             }}
             helperText={promoResult.message}
             error={!promoResult.valid && promoResult.message !== ""}
           />
+
+          {/* BOX THÔNG TIN MÃ KHUYẾN MÃI ĐÃ ÁP DỤNG */}
+          {promoInfo && (
+            <Box
+              mt={2}
+              p={2}
+              borderRadius={2}
+              sx={{
+                bgcolor: "#e3f1fc",
+                border: "1px solid #1976d2",
+                color: "#003468",
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                justifyContent: "space-between"
+              }}
+            >
+              <Box>
+                <Typography fontWeight="bold" color="#1976d2">
+                  Mã ưu đãi: {promoInfo.promotion_code}
+                </Typography>
+                {promoInfo.discount_percent && (
+                  <Typography fontSize="1rem" color="#003468" mt={0.5}>
+                    Giảm {promoInfo.discount_percent}% ({discount.toLocaleString("vi-VN")} đ)
+                  </Typography>
+                )}
+                {promoInfo.description && (
+                  <Typography color="#1976d2" fontSize="0.95rem">
+                    {promoInfo.description}
+                  </Typography>
+                )}
+              </Box>
+              <Button
+                onClick={handleRemovePromo}
+                variant="text"
+                color="primary"
+                sx={{
+                  minWidth: 40,
+                  borderRadius: "50%",
+                  p: 1,
+                  ml: 2,
+                  color: "#1976d2",
+                  '&:hover': { bgcolor: "#e0e0e0" }
+                }}
+                title="Bỏ mã khuyến mãi"
+              >
+                <CloseIcon />
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Tổng tiền */}
         <Box
-          mb={4}
+          mb={2}
           p={2}
           borderRadius={1}
-          sx={{ border: 1, borderColor: "divider" }}
+          sx={{ border: 0, borderColor: "divider" }}
           color="text.primary"
           fontWeight="bold"
         >
@@ -365,120 +422,21 @@ const CheckoutPage = () => {
           </Typography>
         </Box>
 
-        {/* Thông tin người mua */}
-        <Box mb={4}>
-          <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <FormLabel component="legend" sx={{ color: "text.primary" }}>
-              Giới tính
-            </FormLabel>
-            <RadioGroup
-              row
-              name="gender"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              sx={{ color: "text.primary" }}
-            >
-              <FormControlLabel value="female" control={<Radio />} label="Chị" />
-              <FormControlLabel value="male" control={<Radio />} label="Anh" />
-            </RadioGroup>
-          </FormControl>
-
-          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-            <TextField
-              required
-              label="Họ và tên"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              required
-              label="Số điện thoại"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              fullWidth
-              sx={{ gridColumn: "span 2" }}
-            />
-            <TextField
-              label="Ngày sinh"
-              type="date"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              sx={{ gridColumn: "span 2" }}
-            />
-          </Box>
-
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={sendCardSms}
-                onChange={(e) => setSendCardSms(e.target.checked)}
-                sx={{ color: "primary.main" }}
-              />
-            }
-            label="Tôi muốn gửi thiệp và lời chúc qua SMS"
-            sx={{ mt: 2, color: "text.primary" }}
-          />
-        </Box>
-
-        {/* Hình thức nhận hàng */}
-        <Box mb={4}>
+        {/* Địa chỉ nhận hàng */}
+        <Box mb={2}>
           <Typography variant="h6" sx={{ color: "text.primary", mb: 2 }}>
-            Hình thức nhận hàng
+            Địa chỉ nhận hàng
           </Typography>
-          <Box display="flex" gap={2} flexWrap="wrap">
-            <Button
-              variant={deliveryMethod === "delivery" ? "contained" : "outlined"}
-              color="primary"
-              startIcon={
-                <img
-                  src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon.png"
-                  alt="Giao hàng tận nơi"
-                  width={24}
-                  height={24}
-                  style={{ objectFit: "contain" }}
-                />
-              }
-              onClick={() => setDeliveryMethod("delivery")}
-              sx={{ flexGrow: 1, minWidth: 150 }}
-            >
-              Giao hàng tận nơi
-            </Button>
-            <Button
-              variant={deliveryMethod === "pickup" ? "contained" : "outlined"}
-              color="primary"
-              startIcon={
-                <img
-                  src="https://cdn.pnj.io/images/2023/relayout-pdp/shipping_icon_2.png"
-                  alt="Nhận tại cửa hàng"
-                  width={24}
-                  height={24}
-                  style={{ objectFit: "contain" }}
-                />
-              }
-              onClick={() => setDeliveryMethod("pickup")}
-              sx={{ flexGrow: 1, minWidth: 150 }}
-            >
-              Nhận tại cửa hàng
-            </Button>
-          </Box>
-
           {deliveryMethod === "delivery" && (
             <Box
               mt={3}
               display="grid"
               gridTemplateColumns="repeat(2, 1fr)"
               gap={2}
-              maxWidth={480}
+              sx={{
+                maxWidth: 1200,
+                width: "100%",
+              }}
             >
               <FormControl fullWidth required>
                 <Select
@@ -550,32 +508,51 @@ const CheckoutPage = () => {
           <Stack spacing={1}>
             <Button
               variant={paymentMethod === "cod" ? "contained" : "outlined"}
-              color="primary"
               onClick={() => setPaymentMethod("cod")}
               fullWidth
-              sx={{ justifyContent: "flex-start" }}
+              sx={{
+                justifyContent: "flex-start",
+                ...(paymentMethod === "cod" && {
+                  backgroundColor: "#003468",
+                  color: "#fff",
+                  '&:hover': { backgroundColor: "#002954" },
+                }),
+              }}
             >
               Thanh toán tiền mặt khi nhận hàng (COD)
             </Button>
             <Button
               variant={paymentMethod === "momo" ? "contained" : "outlined"}
-              color="primary"
               onClick={() => setPaymentMethod("momo")}
               fullWidth
-              sx={{ justifyContent: "flex-start" }}
+              sx={{
+                justifyContent: "flex-start",
+                ...(paymentMethod === "momo" && {
+                  backgroundColor: "#003468",
+                  color: "#fff",
+                  '&:hover': { backgroundColor: "#002954" },
+                }),
+              }}
             >
               Thanh toán bằng MoMo
             </Button>
             <Button
               variant={paymentMethod === "ck" ? "contained" : "outlined"}
-              color="primary"
               onClick={() => setPaymentMethod("ck")}
               fullWidth
-              sx={{ justifyContent: "flex-start" }}
+              sx={{
+                justifyContent: "flex-start",
+                ...(paymentMethod === "ck" && {
+                  backgroundColor: "#003468",
+                  color: "#fff",
+                  '&:hover': { backgroundColor: "#002954" },
+                }),
+              }}
             >
               Thanh toán bằng ngân hàng
             </Button>
           </Stack>
+
           {(paymentMethod === "cod" || paymentMethod === "momo" || paymentMethod === "ck") && (
             <Box
               mt={3}
@@ -593,15 +570,12 @@ const CheckoutPage = () => {
                 justifyContent: "center",
               }}
             >
-              {/* <Typography variant="subtitle1" color="primary.main" fontWeight="bold" mb={1}>
-                Mã QR thanh toán
-              </Typography> */}
               <QRCodeSVG value={qrValue} size={180} />
               <Typography mt={1} fontWeight="medium" color="text.primary">
                 Số tiền:{" "}
                 <strong>
                   {paymentMethod === "cod"
-                    ? Math.round(subTotal * 0.1).toLocaleString("vi-VN")
+                    ? Math.round(total * 0.1).toLocaleString("vi-VN")
                     : Math.round(total).toLocaleString("vi-VN")}{" "}
                   đ
                 </strong>
@@ -631,6 +605,14 @@ const CheckoutPage = () => {
           fullWidth
           size="large"
           disabled={submitting}
+          sx={{
+            justifyContent: "flex-center",
+            ...({
+              backgroundColor: "#003468",
+              color: "#fff",
+              '&:hover': { backgroundColor: "#002954" },
+            }),
+          }}
         >
           {submitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "ĐẶT HÀNG"}
         </Button>

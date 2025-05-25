@@ -35,6 +35,9 @@ export const cartReducer = (state = initialState, action) => {
     case "UPDATE_CART":
       return action.payload;
 
+    case "CLEAR_CART":
+      return [];
+
     default:
       return state;
   }

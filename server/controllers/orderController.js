@@ -32,6 +32,7 @@ export const getAllOrders = async (req, res) => {
           ],
         },
       ],
+      order: [['created_at', 'DESC']],
     });
     res.status(200).json(orders);
   } catch (error) {
@@ -220,7 +221,7 @@ export const calculatePrice = async (req, res) => {
     }
 
     const productIds = items.map((i) => i.product_id);
-    const products = await Product.findAll({ where: { product_id: productIds } });
+    const products = await db.Product.findAll({ where: { product_id: productIds } });
 
     if (products.length !== productIds.length) {
       return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
@@ -244,9 +245,10 @@ export const calculatePrice = async (req, res) => {
     let discount = 0;
     let valid = false;
     let message = "Không có mã khuyến mãi áp dụng.";
+    let promoInfo = null;
 
     if (promotion_code) {
-      const promo = await Promotion.findOne({
+      const promo = await db.Promotion.findOne({
         where: {
           promotion_code,
           start_date: { [Op.lte]: new Date() },
@@ -254,9 +256,14 @@ export const calculatePrice = async (req, res) => {
         },
       });
       if (promo) {
-        discount = Number(promo.discount);
+        discount = sub_total * (Number(promo.discount) / 100);
         valid = true;
-        message = "Mã khuyến mãi hợp lệ và được áp dụng.";
+        message = `Mã khuyến mãi hợp lệ, giảm ${promo.discount}% (${discount.toLocaleString('vi-VN')} đ).`;
+        promoInfo = {
+          promotion_code: promo.promotion_code,
+          description: promo.description,
+          discount_percent: promo.discount,
+        };
       } else {
         message = "Mã khuyến mãi không hợp lệ hoặc đã hết hạn.";
       }
@@ -265,7 +272,14 @@ export const calculatePrice = async (req, res) => {
     let total = sub_total - discount;
     if (total < 0) total = 0;
 
-    return res.json({ sub_total, discount, total, valid, message });
+    return res.json({
+      sub_total,
+      discount,
+      total,
+      valid,
+      message,
+      promotion: promoInfo, // Trả về object hoặc null
+    });
   } catch (error) {
     console.error("calculatePrice error:", error);
     return res.status(500).json({ message: "Lỗi hệ thống khi tính toán giá." });
@@ -274,6 +288,7 @@ export const calculatePrice = async (req, res) => {
 
 export const checkout = async (req, res) => {
   const t = await db.sequelize.transaction();
+  let finished = false;
   try {
     const {
       customer_id,
@@ -282,9 +297,10 @@ export const checkout = async (req, res) => {
       payment_method = null,
       shipping_address = null,
       is_deposit = false,
-      deposit_status = "none",
       items = [],
     } = req.body;
+
+    let deposit_status = req.body.deposit_status ?? "none";
 
     if (!customer_id) {
       await t.rollback();
@@ -296,7 +312,7 @@ export const checkout = async (req, res) => {
     }
 
     const productIds = items.map((i) => i.product_id);
-    const products = await Product.findAll({
+    const products = await db.Product.findAll({
       where: { product_id: productIds },
       transaction: t,
       lock: t.LOCK.UPDATE,
@@ -329,15 +345,15 @@ export const checkout = async (req, res) => {
       sub_total += Number(item.price) * item.quantity;
     }
 
-    // Xử lý khuyến mãi (nếu có)
+    // Xử lý khuyến mãi (theo phần trăm)
     let discount = 0;
     let promotion_id = null;
     if (promotion_code) {
       const promo = await db.Promotion.findOne({
         where: {
           promotion_code,
-          start_date: { [Op.lte]: new Date() },
-          end_date: { [Op.gte]: new Date() },
+          start_date: { [db.Sequelize.Op.lte]: new Date() },
+          end_date: { [db.Sequelize.Op.gte]: new Date() },
         },
         transaction: t,
       });
@@ -345,7 +361,8 @@ export const checkout = async (req, res) => {
         await t.rollback();
         return res.status(400).json({ message: "Mã khuyến mãi không hợp lệ hoặc đã hết hạn." });
       }
-      discount = Number(promo.discount);
+      // Giả sử promo.discount là phần trăm, ví dụ 10 tương đương giảm 10%
+      discount = +(sub_total * (Number(promo.discount) / 100)).toFixed(2);
       promotion_id = promo.promotion_id;
     }
 
@@ -395,14 +412,14 @@ export const checkout = async (req, res) => {
       updated_at: new Date(),
     }));
 
-    await OrderItem.bulkCreate(orderItemsData, { transaction: t });
+    await db.OrderItem.bulkCreate(orderItemsData, { transaction: t });
 
     // Cập nhật tồn kho, sold_quantity
     for (const item of items) {
-      await Product.update(
+      await db.Product.update(
         {
-          quantity: Sequelize.literal(`quantity - ${item.quantity}`),
-          sold_quantity: Sequelize.literal(`sold_quantity + ${item.quantity}`),
+          quantity: db.Sequelize.literal(`quantity - ${item.quantity}`),
+          sold_quantity: db.Sequelize.literal(`sold_quantity + ${item.quantity}`),
         },
         {
           where: { product_id: item.product_id },
@@ -412,22 +429,25 @@ export const checkout = async (req, res) => {
     }
 
     await t.commit();
+    finished = true;
 
     // Lấy lại đơn hàng với các thông tin liên quan để trả về
     const createdOrder = await db.Order.findOne({
       where: { order_id: order.order_id },
       include: [
-        { model: OrderItem },
-        { model: Customer, attributes: ["name", "email", "phone"] },
-        { model: User, attributes: ["name"] },
+        { model: db.OrderItem },
+        { model: db.Customer, attributes: ["name", "email", "phone"] },
+        { model: db.User, attributes: ["name"] },
         { model: db.Promotion },
-        { model: OrderStatus },
+        { model: db.OrderStatus },
       ],
     });
 
     return res.status(201).json({ message: "Tạo đơn hàng thành công.", order: createdOrder });
   } catch (error) {
-    if (t) await t.rollback();
+    if (!finished) {
+      await t.rollback();
+    }
     console.error("checkout error:", error);
     return res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
   }
