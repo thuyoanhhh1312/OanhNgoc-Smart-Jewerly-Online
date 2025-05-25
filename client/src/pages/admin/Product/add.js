@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router';
 import categoryApi from '../../../api/categoryApi';
 import subCategoryApi from '../../../api/subCategoryApi';
 import Swal from 'sweetalert2';
-import { useSelector } from "react-redux";
+import { useSelector } from 'react-redux';
 import ProductAPI from '../../../api/productApi';
 import FullScreenLoader from '../../../components/ui/loading/FullScreenLoader';
 
@@ -24,7 +24,6 @@ const AddProduct = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isActive, setIsActive] = useState(false); // Mặc định là DỪNG BÁN
-
 
   const navigate = useNavigate();
 
@@ -48,14 +47,19 @@ const AddProduct = () => {
     e.preventDefault();
 
     if (
-      !productName || !description || !price || !quantity ||
-      !categoryId || !subCategory_id || images.length === 0
+      !productName ||
+      !description ||
+      !price ||
+      !quantity ||
+      !categoryId ||
+      !subCategory_id ||
+      images.length === 0
     ) {
       return Swal.fire({
         icon: 'warning',
         title: 'Thiếu thông tin',
         text: 'Vui lòng điền đầy đủ các trường và chọn ít nhất 1 ảnh.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
     }
 
@@ -71,14 +75,14 @@ const AddProduct = () => {
         subCategory_id,
         images,
         user?.token,
-        isActive
+        isActive,
       );
 
       Swal.fire({
         icon: 'success',
         title: 'Thành công!',
         text: 'Sản phẩm đã được thêm thành công.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
       });
 
       navigate('/admin/products');
@@ -88,7 +92,7 @@ const AddProduct = () => {
         icon: 'error',
         title: 'Thất bại!',
         text: error?.response?.data?.message || 'Không thể thêm sản phẩm.',
-        confirmButtonText: 'Thử lại'
+        confirmButtonText: 'Thử lại',
       });
     } finally {
       setLoading(false);
@@ -103,7 +107,7 @@ const AddProduct = () => {
   };
 
   const filteredSubCategories = subCategories.filter(
-    (sub) => sub.category_id === Number(categoryId)
+    (sub) => sub.category_id === Number(categoryId),
   );
 
   return (
@@ -113,7 +117,9 @@ const AddProduct = () => {
         <form onSubmit={handleSubmit} method="POST" encType="multipart/form-data">
           <div className="space-y-6">
             <div>
-              <Label>Tên sản phẩm <span className="text-red">*</span></Label>
+              <Label>
+                Tên sản phẩm <span className="text-red">*</span>
+              </Label>
               <Input
                 type="text"
                 placeholder="Tên sản phẩm"
@@ -123,7 +129,9 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <Label>Mô tả <span className="text-red">*</span></Label>
+              <Label>
+                Mô tả <span className="text-red">*</span>
+              </Label>
               <Input
                 type="text"
                 placeholder="Mô tả"
@@ -133,7 +141,9 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <Label>Giá <span className="text-red">*</span></Label>
+              <Label>
+                Giá <span className="text-red">*</span>
+              </Label>
               <Input
                 type="number"
                 placeholder="Giá"
@@ -143,7 +153,9 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <Label>Số lượng <span className="text-red">*</span></Label>
+              <Label>
+                Số lượng <span className="text-red">*</span>
+              </Label>
               <Input
                 type="number"
                 placeholder="Số lượng"
@@ -153,7 +165,9 @@ const AddProduct = () => {
             </div>
 
             <div>
-              <Label>Danh mục <span className="text-red">*</span></Label>
+              <Label>
+                Danh mục <span className="text-red">*</span>
+              </Label>
               <select
                 value={categoryId}
                 onChange={(e) => {
@@ -173,7 +187,9 @@ const AddProduct = () => {
 
             {filteredSubCategories.length > 0 && (
               <div>
-                <Label>Danh mục con <span className="text-red">*</span></Label>
+                <Label>
+                  Danh mục con <span className="text-red">*</span>
+                </Label>
                 <select
                   value={subCategory_id}
                   onChange={(e) => setSubCategoryId(e.target.value)}
@@ -190,7 +206,9 @@ const AddProduct = () => {
             )}
 
             <div>
-              <Label>Hình ảnh sản phẩm <span className="text-red">*</span></Label>
+              <Label>
+                Hình ảnh sản phẩm <span className="text-red">*</span>
+              </Label>
               <input
                 type="file"
                 accept="image/*"
@@ -202,16 +220,28 @@ const AddProduct = () => {
                 <div className="grid grid-cols-3 gap-3 mt-3">
                   {imagePreviews.map((url, index) => (
                     <div key={index} className="border rounded overflow-hidden">
-                      <img src={url} alt={`Ảnh ${index + 1}`} className="w-full h-24 object-cover" />
+                      <img
+                        src={url}
+                        alt={`Ảnh ${index + 1}`}
+                        className="w-full h-24 object-cover"
+                        style={{
+                          width: '120px', // hoặc kích thước bạn muốn
+                          height: '120px',
+                          objectFit: 'cover', // giữ tỉ lệ, cắt vừa khung
+                          borderRadius: '8px', // bo góc nếu muốn
+                          marginRight: '8px',
+                        }}
+                      />
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-
             <div>
-              <Button type="submit" onClick={handleSubmit} className="w-full">Thêm sản phẩm</Button>
+              <Button type="submit" onClick={handleSubmit} className="w-full">
+                Thêm sản phẩm
+              </Button>
             </div>
           </div>
         </form>
