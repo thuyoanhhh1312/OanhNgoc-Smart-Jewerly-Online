@@ -112,6 +112,37 @@ const updateIsDeposit = async (id, isDeposit, accessToken) => {
   }
 };
 
+// Tạo đơn hàng (checkout)
+const checkout = async (orderData, accessToken) => {
+  try {
+    const response = await axiosInstance.post(`${API_URL}/checkout`, orderData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error during checkout:', error);
+    throw error;
+  }
+};
+
+// Tính toán giá với mã khuyến mãi
+const calculatePrice = async (priceData, accessToken) => {
+  try {
+    const response = await axiosInstance.post(`${API_URL}/calculate-price`, priceData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating price:', error);
+    throw error;
+  }
+};
+
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   getAllOrders,
   getOrderById,
@@ -120,4 +151,6 @@ export default {
   getOrderByUserId,
   createOrder,
   updateIsDeposit,
+  checkout,
+  calculatePrice
 };

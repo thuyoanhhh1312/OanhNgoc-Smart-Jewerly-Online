@@ -1,4 +1,5 @@
 import db from "../models/index.js";
+import { Sequelize, Op } from 'sequelize';
 
 export const getAllOrders = async (req, res) => {
   try {
@@ -167,6 +168,7 @@ export const getOrderByUserId = async (req, res) => {
     });
   }
 };
+
 export const createOrder = async (req, res) => {
   const { customer_id, user_id, promotion_id, sub_total, discount, total, shipping_address, payment_method } = req.body;
 
@@ -206,5 +208,227 @@ export const updateIsDeposit = async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi cập nhật trạng thái đặt cọc:", error);
     res.status(500).json({ message: "Lỗi khi cập nhật trạng thái đặt cọc", error: error.message });
+  }
+};
+
+export const calculatePrice = async (req, res) => {
+  try {
+    const { items, promotion_code } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
+    }
+
+    const productIds = items.map((i) => i.product_id);
+    const products = await Product.findAll({ where: { product_id: productIds } });
+
+    if (products.length !== productIds.length) {
+      return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
+    }
+
+    let sub_total = 0;
+
+    for (const item of items) {
+      const product = products.find((p) => p.product_id === item.product_id);
+      if (!product) {
+        return res.status(400).json({ message: `Sản phẩm có ID ${item.product_id} không tồn tại.` });
+      }
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({
+          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`,
+        });
+      }
+      sub_total += Number(product.price) * item.quantity;
+    }
+
+    let discount = 0;
+    let valid = false;
+    let message = "Không có mã khuyến mãi áp dụng.";
+
+    if (promotion_code) {
+      const promo = await Promotion.findOne({
+        where: {
+          promotion_code,
+          start_date: { [Op.lte]: new Date() },
+          end_date: { [Op.gte]: new Date() },
+        },
+      });
+      if (promo) {
+        discount = Number(promo.discount);
+        valid = true;
+        message = "Mã khuyến mãi hợp lệ và được áp dụng.";
+      } else {
+        message = "Mã khuyến mãi không hợp lệ hoặc đã hết hạn.";
+      }
+    }
+
+    let total = sub_total - discount;
+    if (total < 0) total = 0;
+
+    return res.json({ sub_total, discount, total, valid, message });
+  } catch (error) {
+    console.error("calculatePrice error:", error);
+    return res.status(500).json({ message: "Lỗi hệ thống khi tính toán giá." });
+  }
+};
+
+export const checkout = async (req, res) => {
+  const t = await db.sequelize.transaction();
+  try {
+    const {
+      customer_id,
+      user_id = null,
+      promotion_code = null,
+      payment_method = null,
+      shipping_address = null,
+      is_deposit = false,
+      deposit_status = "none",
+      items = [],
+    } = req.body;
+
+    if (!customer_id) {
+      await t.rollback();
+      return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      await t.rollback();
+      return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
+    }
+
+    const productIds = items.map((i) => i.product_id);
+    const products = await Product.findAll({
+      where: { product_id: productIds },
+      transaction: t,
+      lock: t.LOCK.UPDATE,
+    });
+
+    if (products.length !== productIds.length) {
+      await t.rollback();
+      return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
+    }
+
+    let sub_total = 0;
+    for (const item of items) {
+      const product = products.find((p) => p.product_id === item.product_id);
+      if (!product) {
+        await t.rollback();
+        return res.status(400).json({ message: `Sản phẩm có ID ${item.product_id} không tồn tại.` });
+      }
+      if (product.quantity < item.quantity) {
+        await t.rollback();
+        return res.status(400).json({
+          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`,
+        });
+      }
+      if (Number(product.price) !== Number(item.price)) {
+        await t.rollback();
+        return res.status(400).json({
+          message: `Giá sản phẩm "${product.product_name}" không khớp với giá hiện tại.`,
+        });
+      }
+      sub_total += Number(item.price) * item.quantity;
+    }
+
+    // Xử lý khuyến mãi (nếu có)
+    let discount = 0;
+    let promotion_id = null;
+    if (promotion_code) {
+      const promo = await db.Promotion.findOne({
+        where: {
+          promotion_code,
+          start_date: { [Op.lte]: new Date() },
+          end_date: { [Op.gte]: new Date() },
+        },
+        transaction: t,
+      });
+      if (!promo) {
+        await t.rollback();
+        return res.status(400).json({ message: "Mã khuyến mãi không hợp lệ hoặc đã hết hạn." });
+      }
+      discount = Number(promo.discount);
+      promotion_id = promo.promotion_id;
+    }
+
+    let total = sub_total - discount;
+    if (total < 0) total = 0;
+
+    let deposit = 0;
+    if (is_deposit) {
+      deposit = Number((total * 0.1).toFixed(2)); // 10% đặt cọc
+      if (!["pending", "paid", "none"].includes(deposit_status)) {
+        await t.rollback();
+        return res.status(400).json({ message: "Trạng thái đặt cọc không hợp lệ." });
+      }
+    } else {
+      deposit_status = "none";
+    }
+
+    // Tạo đơn hàng
+    const order = await db.Order.create(
+      {
+        customer_id,
+        user_id,
+        promotion_id,
+        status_id: 1, // trạng thái mới
+        sub_total,
+        discount,
+        total,
+        deposit,
+        is_deposit,
+        deposit_status,
+        shipping_address,
+        payment_method,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      { transaction: t }
+    );
+
+    // Tạo chi tiết đơn hàng
+    const orderItemsData = items.map((item) => ({
+      order_id: order.order_id,
+      product_id: item.product_id,
+      quantity: item.quantity,
+      price: item.price,
+      total_price: item.quantity * item.price,
+      created_at: new Date(),
+      updated_at: new Date(),
+    }));
+
+    await OrderItem.bulkCreate(orderItemsData, { transaction: t });
+
+    // Cập nhật tồn kho, sold_quantity
+    for (const item of items) {
+      await Product.update(
+        {
+          quantity: Sequelize.literal(`quantity - ${item.quantity}`),
+          sold_quantity: Sequelize.literal(`sold_quantity + ${item.quantity}`),
+        },
+        {
+          where: { product_id: item.product_id },
+          transaction: t,
+        }
+      );
+    }
+
+    await t.commit();
+
+    // Lấy lại đơn hàng với các thông tin liên quan để trả về
+    const createdOrder = await db.Order.findOne({
+      where: { order_id: order.order_id },
+      include: [
+        { model: OrderItem },
+        { model: Customer, attributes: ["name", "email", "phone"] },
+        { model: User, attributes: ["name"] },
+        { model: db.Promotion },
+        { model: OrderStatus },
+      ],
+    });
+
+    return res.status(201).json({ message: "Tạo đơn hàng thành công.", order: createdOrder });
+  } catch (error) {
+    if (t) await t.rollback();
+    console.error("checkout error:", error);
+    return res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
   }
 };
