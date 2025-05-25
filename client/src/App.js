@@ -51,6 +51,7 @@ import ProductCategoryPage from "./pages/ProductCategoryPage"
 import OrderPage from "./pages/OrderPage";
 import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
+import OrderSuccess from "./pages/OrderSuccess";
 
 import { useDispatch } from "react-redux";
 function App() {
@@ -256,6 +257,14 @@ function App() {
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
         <Route path="/promotions" element={<PromotionsPage />} />
 
+        <Route
+          path="/order-success"
+          element={
+            <UserRoute>
+              <OrderSuccess />
+            </UserRoute>
+          }
+        />
         <Route
           path="/profile"
           element={
