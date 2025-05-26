@@ -104,33 +104,24 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div
-          className="
-            flex flex-col sm:flex-row
-            items-center sm:items-center
-            justify-between gap-3
-            mb-0 sm:mb-4
-            mt-auto
-          "
+          className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3 mb-0 sm:mb-4 mt-auto min-w-0"
         >
-          <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
+          <span
+            className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap min-w-0"
+            title={new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(product.price)}
+          >
+            {new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
             }).format(product.price)}
           </span>
 
           <button
             onClick={(e) => handleAddToCart(e, 1)}
-            className="
-              w-full sm:w-auto
-              bg-blue-600 hover:bg-blue-700
-              text-white font-semibold
-              py-2 px-6
-              rounded-md
-              transition-colors duration-300
-              focus:outline-none focus:ring-2 focus:ring-blue-400
-              whitespace-nowrap
-            "
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2 rounded-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 max-w-full sm:max-w-[140px] md:max-w-[160px] break-words text-center"
             type="button"
             aria-label={`Thêm ${product.product_name} vào giỏ hàng`}
           >
