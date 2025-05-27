@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import productApi from "../api/productApi";
 import MainLayout from "../layout/MainLayout";
 import ProductCard from "../components/ui/product/productCard";
-import Breadcrumb from "../components/ui/Breadcrumb";  // Đường dẫn theo project bạn
+import Breadcrumb from "../components/ui/Breadcrumb";
+import { ToastContainer } from "react-toastify";
 
 const ProductCategoryPage = () => {
   const { categoryName } = useParams();
@@ -39,30 +40,8 @@ const ProductCategoryPage = () => {
     }
   }, [categoryName]);
 
-  if (loading)
-    return (
-      <MainLayout>
-        <div>Đang tải sản phẩm...</div>
-      </MainLayout>
-    );
-
-  if (error)
-    return (
-      <MainLayout>
-        <div className="text-red-600">{error}</div>
-      </MainLayout>
-    );
-
-  if (products.length === 0)
-    return (
-      <MainLayout>
-        <div>Không có sản phẩm trong danh mục này.</div>
-      </MainLayout>
-    );
-
   const decodedCategoryName = decodeURIComponent(categoryName);
 
-  // Mảng breadcrumb
   const breadcrumbItems = [
     { label: "Trang chủ", to: "/" },
     { label: decodedCategoryName },
@@ -70,16 +49,47 @@ const ProductCategoryPage = () => {
 
   return (
     <MainLayout>
-      <div>
-        <Breadcrumb items={breadcrumbItems} />       
-        <div className="p-[40px] grid grid-cols-4 gap-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.product_id || product.id}
-              product={product}
-            />
-          ))}
-        </div>
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Breadcrumb items={breadcrumbItems} />
+
+        {loading && (
+          <div className="text-center text-gray-600 text-lg py-20">
+            Đang tải sản phẩm...
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center text-red-600 text-lg py-20">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && products.length === 0 && (
+          <div className="text-center text-gray-500 text-lg py-20">
+            Không có sản phẩm trong danh mục này.
+          </div>
+        )}
+
+        {!loading && !error && products.length > 0 && (
+          <div
+            className="
+              mt-6
+              grid grid-cols-1
+              sm:grid-cols-2
+              md:grid-cols-3
+              lg:grid-cols-4
+              gap-6
+            "
+          >
+            {products.map((product) => (
+              <ProductCard
+                key={product.product_id || product.id}
+                product={product}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </MainLayout>
   );

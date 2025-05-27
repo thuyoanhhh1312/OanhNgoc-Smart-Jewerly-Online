@@ -5,8 +5,9 @@ import ProductApi from "../api/productApi";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import { BannerTabSaleMay, BannerTopProduct } from "../assets";
-import Header from "../components/ui/home/HomeHeader";
 import BenefitCard from "../components/ui/home/HomeBenefitCard";
+import { ToastContainer } from "react-toastify";
+
 const LazyProductCard = lazy(() =>
   import("../components/ui/product/productCard")
 );
@@ -85,6 +86,7 @@ const Home = () => {
   return (
     <MainLayout>
       {/* Banner Carousel */}
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="mb-2">
         <Carousel
           infiniteLoop={true}
@@ -101,7 +103,7 @@ const Home = () => {
         </Carousel>
       </div>
       {/* Benefit Cards */}
-      <div className="flex justify-between gap-1 max-w-[860px] sm:mx-auto my-[16px] px-[10px]">
+      <div className="flex flex-col sm:flex-row justify-between gap-2 max-w-[860px] sm:mx-auto my-4 px-4">
         {benefitItems.map((item, index) => (
           <BenefitCard key={index} {...item} />
         ))}
@@ -113,10 +115,20 @@ const Home = () => {
           </div>
         }
       >
-        <div className="p-[40px] grid grid-cols-4 gap-4">
-          {products.map((product, index) => (
-            <LazyLoadProductCard key={index} product={product} />
-          ))}
+        <div className="p-4 sm:p-8 max-w-auto w-auto mx-auto flex justify-center">
+          <div
+            className="
+              grid grid-cols-1
+              sm:grid-cols-2
+              md:grid-cols-3
+              lg:grid-cols-4
+              gap-4
+            "
+          >
+            {products.map((product, index) => (
+              <LazyLoadProductCard key={index} product={product} />
+            ))}
+          </div>
         </div>
       </Suspense>
     </MainLayout>

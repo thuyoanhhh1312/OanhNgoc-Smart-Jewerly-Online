@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import apiRoutes from './routes/apiRoutes.js'; // Đảm bảo file này cũng dùng export default nếu là ES Module
 import { errorHandler } from './middlewares/errorHandler.js';
+import runScraper from './pnjScraper.js';
 
 const app = express();
 
@@ -22,8 +23,15 @@ app.use("/api", apiRoutes);
 app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server đang chạy trên http://localhost:${port}`);
+
+  // try {
+  //   await runScraper();
+  //   console.log('Scraper chạy xong!');
+  // } catch (error) {
+  //   console.error('Lỗi khi chạy scraper:', error);
+  // }
 });
 
 export default app;
