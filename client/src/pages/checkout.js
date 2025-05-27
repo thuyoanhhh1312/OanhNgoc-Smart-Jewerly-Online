@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -10,105 +10,117 @@ import {
   FormControl,
   Select,
   MenuItem,
-} from "@mui/material";
-import { toast, ToastContainer } from "react-toastify";
-import { QRCodeSVG } from "qrcode.react";
-import MainLayout from "../layout/MainLayout";
-import orderApi from "../api/orderApi";
-import { QRPay, BanksObject } from "vietnam-qr-pay";
-import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
+} from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
+import { QRCodeSVG } from 'qrcode.react'; //QRCodeSVG để tạo mã QR. từ "qrcode.react" package
+import MainLayout from '../layout/MainLayout';
+import orderApi from '../api/orderApi'; // orderApi để gọi các API liên quan đến đơn hàng
+import { QRPay, BanksObject } from 'vietnam-qr-pay'; // QRPay và BanksObject để tạo mã QR thanh toán theo chuẩn Việt QR.
+import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from 'react-redux';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDispatch } from "react-redux";
+import { useDispatch } from 'react-redux';
 
-const provinces = ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng"];
-const districts = ["Quận 1", "Quận 2", "Quận 3"];
-const wards = ["Phường A", "Phường B", "Phường C"];
+const provinces = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'];
+const districts = ['Quận 1', 'Quận 2', 'Quận 3'];
+const wards = ['Phường A', 'Phường B', 'Phường C'];
 
 // Thông tin ngân hàng MB Bank
-const BANK_NAME = "MB Bank";
+const BANK_NAME = 'MB Bank';
 const BANK_CODE = BanksObject.mbbank.bin;
-const BANK_ACCOUNT = "0816837690";
+const BANK_ACCOUNT = '0816837690';
 
 // Thông tin tài khoản ví MoMo của bạn
-const MOMO_ACCOUNT = "99MM23332M53758772";
+const MOMO_ACCOUNT = '99MM23332M53758772';
 
 const CheckoutPage = () => {
-  const { user } = useSelector(state => ({ ...state }));
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { selectedItems = [], totalAmount = 0 } = location.state || {};
+  const { user } = useSelector((state) => ({ ...state })); // Lấy thông tin người dùng từ Redux store ( Redux store: nơi lưu trữ toàn bộ trạng thái (state) của ứng dụng )
+  const dispatch = useDispatch(); // Redux dispatch để xóa giỏ hàng sau khi đặt hàng thành công
+  const location = useLocation(); // Lấy thông tin từ location state (được truyền từ trang giỏ hàng)
+  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng đến các trang khác
+  const { selectedItems = [], totalAmount = 0 } = location.state || {}; // Lấy thông tin sản phẩm đã chọn và tổng tiền từ state của location
 
-  const [gender, setGender] = useState("");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [sendCardSms, setSendCardSms] = useState(false);
+  // Khởi tạo các state để quản lý thông tin đặt hàng
+  const [gender, setGender] = useState(''); // Giới tính của người đặt hàng
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [dob, setDob] = useState(''); // Ngày sinh của người đặt hàng
+  const [sendCardSms, setSendCardSms] = useState(false); // Biến để xác định có gửi tin nhắn SMS chứa mã thẻ hay không
 
-  const [deliveryMethod, setDeliveryMethod] = useState("delivery");
-  const [province, setProvince] = useState("");
-  const [district, setDistrict] = useState("");
-  const [ward, setWard] = useState("");
-  const [addressDetail, setAddressDetail] = useState("");
+  // State để quản lý thông tin giao hàng
+  // Các biến để lưu trữ thông tin địa chỉ giao hàng
+  const [deliveryMethod, setDeliveryMethod] = useState('delivery'); // Phương thức giao hàng, mặc định là giao hàng tận nơi
+  const [province, setProvince] = useState('');
+  const [district, setDistrict] = useState('');
+  const [ward, setWard] = useState(''); // Phường/xã của địa chỉ giao hàng
+  const [addressDetail, setAddressDetail] = useState('');
 
-  const [promoCode, setPromoCode] = useState("");
-  const [promoLoading, setPromoLoading] = useState(false);
-  const [promoResult, setPromoResult] = useState({ valid: false, message: "", discount: 0, promotion: null });
+  // Các biến để quản lý mã khuyến mãi
+  const [promoCode, setPromoCode] = useState(''); // Mã khuyến mãi được nhập bởi người dùng
+  const [promoLoading, setPromoLoading] = useState(false); // Biến để hiển thị loading khi đang áp dụng mã khuyến mãi
+  const [promoResult, setPromoResult] = useState({
+    valid: false,
+    message: '',
+    discount: 0,
+    promotion: null,
+  }); // Kết quả áp dụng mã khuyến mãi, bao gồm trạng thái hợp lệ, thông điệp, số tiền giảm giá và thông tin chương trình khuyến mãi
 
-  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // Phương thức thanh toán, mặc định là thanh toán khi nhận hàng (COD)
 
-  const [subTotal, setSubTotal] = useState(totalAmount || 0);
+  // Các biến để quản lý tổng tiền và giảm giá
+  const [subTotal, setSubTotal] = useState(totalAmount || 0); // Tổng tiền trước khi áp dụng mã khuyến mãi
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(totalAmount || 0);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [qrValue, setQrValue] = useState("");
+  // Biến để xác định trạng thái gửi đơn hàng
+  const [submitting, setSubmitting] = useState(false); // Biến để xác định trạng thái đang gửi đơn hàng hay không
+  const [qrValue, setQrValue] = useState(''); // Giá trị mã QR để hiển thị thông tin thanh toán
 
   // Hiển thị box thông tin mã khuyến mãi đã áp dụng
   const promoInfo = promoResult.valid && promoResult.promotion;
 
+  // Hàm để xử lý việc xóa mã khuyến mãi đã áp dụng
   const handleRemovePromo = () => {
-    setPromoCode("");
+    setPromoCode(''); // Xóa mã khuyến mãi đã nhập
     setDiscount(0);
     setTotal(subTotal);
-    setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
-    toast.info("Đã bỏ áp dụng mã khuyến mãi.");
+    setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
+    toast.info('Đã bỏ áp dụng mã khuyến mãi.');
   };
-
+  // Hàm để xác thực thông tin đơn hàng trước khi gửi (địa chỉ giao hàng)
   const validateForm = () => {
-    if (deliveryMethod === "delivery") {
+    if (deliveryMethod === 'delivery') {
       if (!province) {
-        toast.error("Vui lòng chọn tỉnh/thành.");
+        toast.error('Vui lòng chọn tỉnh/thành.');
         return false;
       }
       if (!district) {
-        toast.error("Vui lòng chọn quận/huyện.");
+        toast.error('Vui lòng chọn quận/huyện.');
         return false;
       }
       if (!ward) {
-        toast.error("Vui lòng chọn phường/xã.");
+        toast.error('Vui lòng chọn phường/xã.');
         return false;
       }
       if (!addressDetail.trim()) {
-        toast.error("Vui lòng nhập địa chỉ chi tiết.");
+        toast.error('Vui lòng nhập địa chỉ chi tiết.');
         return false;
       }
     }
     return true;
   };
-
+  // Hàm để áp dụng mã khuyến mãi
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) {
-      toast.warn("Vui lòng nhập mã ưu đãi.");
+      toast.warn('Vui lòng nhập mã ưu đãi.');
       setDiscount(0);
       setTotal(subTotal);
-      setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
+      setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
       return;
     }
-    setPromoLoading(true);
+    setPromoLoading(true); // Bật loading khi đang xử lý mã khuyến mãi
     try {
       const priceData = {
         items: selectedItems.map((item) => ({
@@ -117,7 +129,7 @@ const CheckoutPage = () => {
         })),
         promotion_code: promoCode.trim(),
       };
-      const res = await orderApi.calculatePrice(priceData, user?.token);
+      const res = await orderApi.calculatePrice(priceData, user?.token); // Gọi API để tính toán giá sau khi áp dụng mã khuyến mãi
       if (res.valid) {
         setDiscount(res.discount);
         setTotal(res.total);
@@ -127,27 +139,28 @@ const CheckoutPage = () => {
         setTotal(subTotal);
         toast.error(res.message);
       }
-      setPromoResult(res);
+      setPromoResult(res); // Cập nhật kết quả áp dụng mã khuyến mãi
     } catch (err) {
-      toast.error("Lỗi khi áp dụng mã ưu đãi.");
+      toast.error('Lỗi khi áp dụng mã ưu đãi.');
       setDiscount(0);
       setTotal(subTotal);
-      setPromoResult({ valid: false, message: "", discount: 0, promotion: null });
+      setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
     } finally {
-      setPromoLoading(false);
+      setPromoLoading(false); // Tắt loading sau khi xử lý xong
     }
   };
-
+  // Hàm để xử lý việc gửi đơn hàng
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+    e.preventDefault(); // Ngăn chặn hành vi mặc định của form
+    if (!validateForm()) return; // nếu form không hợp lệ thì không gửi đơn hàng
 
     if (selectedItems.length === 0) {
-      toast.error("Không có sản phẩm nào trong đơn hàng.");
+      // Kiểm tra xem có sản phẩm nào trong giỏ hàng không
+      toast.error('Không có sản phẩm nào trong đơn hàng.');
       return;
     }
 
-    setSubmitting(true);
+    setSubmitting(true); // Bật trạng thái loading
     try {
       const orderData = {
         customer_id: user?.id,
@@ -156,62 +169,67 @@ const CheckoutPage = () => {
         payment_method: paymentMethod,
         shipping_address: `${addressDetail}, ${ward}, ${district}, ${province}`,
         is_deposit: false,
-        deposit_status: paymentMethod === "cod" ? "pending" : "none",
+        deposit_status: paymentMethod === 'cod' ? 'pending' : 'none',
         items: selectedItems.map((item) => ({
           product_id: item.product_id,
           quantity: item.count,
           price: item.price,
         })),
       };
-      const res = await orderApi.checkout(orderData, user?.token);
-      toast.success("Đặt hàng thành công! Mã đơn hàng: " + res.order.order_id);
-      dispatch({ type: "CLEAR_CART" });
-      navigate("/order-success", { state: { order: res.order } });
+      const res = await orderApi.checkout(orderData, user?.token); // gọi API đặt hàng
+      toast.success('Đặt hàng thành công! Mã đơn hàng: ' + res.order.order_id);
+      dispatch({ type: 'CLEAR_CART' }); // Xóa giỏ hàng sau khi đặt hàng thành công
+      navigate('/order-success', { state: { order: res.order } }); // Điều hướng đến trang thành công sau khi đặt hàng
     } catch (error) {
       toast.error(
-        "Lỗi khi đặt hàng: " +
-        (error.response?.data?.message || error.message || "Vui lòng thử lại sau.")
+        'Lỗi khi đặt hàng: ' +
+          (error.response?.data?.message || error.message || 'Vui lòng thử lại sau.'),
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Tạo QR code string
+  // Tạo QR động
   useEffect(() => {
     let amount = 0;
-    if (paymentMethod === "cod") {
-      amount = Math.round(total * 0.1);
-    } else if (paymentMethod === "momo" || paymentMethod === "ck") {
-      amount = Math.round(total);
+    if (paymentMethod === 'cod') {
+      amount = Math.round(total * 0.1); // Thanh toán COD, đặt cọc 10% tổng tiền
+    } else if (paymentMethod === 'momo' || paymentMethod === 'ck') {
+      amount = Math.round(total); // Thanh toán qua MoMo hoặc chuyển khoản ngân hàng, thanh toán toàn bộ số tiền
     }
 
-    let qrStr = "";
+    let qrStr = ''; // Biến để lưu trữ chuỗi mã QR
+    // Tạo mã QR dựa trên phương thức thanh toán
 
-    if (paymentMethod === "cod") {
+    if (paymentMethod === 'cod') {
       const qrPay = QRPay.initVietQR({
-        bankBin: BANK_CODE,
-        bankNumber: BANK_ACCOUNT,
-        amount: amount.toString(),
-        purpose: "Thanh toan đat coc",
+        // Khởi tạo mã QR theo chuẩn Việt QR
+        bankBin: BANK_CODE, // Mã BIN của ngân hàng MB Bank
+        bankNumber: BANK_ACCOUNT, // Số tài khoản ngân hàng
+        amount: amount.toString(), // Số tiền đặt cọc
+        purpose: 'Thanh toan đat coc',
       });
-      qrStr = qrPay.build();
-    } else if (paymentMethod === "momo") {
+      qrStr = qrPay.build(); // Tạo chuỗi mã QR
+    } else if (paymentMethod === 'momo') {
       const momoQR = QRPay.initVietQR({
         bankBin: BanksObject.banviet.bin,
         bankNumber: MOMO_ACCOUNT,
         amount: amount.toString(),
-        purpose: "Thanh toan don hang qua MoMo",
+        purpose: 'Thanh toan don hang qua MoMo',
       });
-      momoQR.additionalData.reference = "MOMOW2W" + MOMO_ACCOUNT.slice(-3);
-      momoQR.setUnreservedField("80", "046");
+      momoQR.additionalData.reference = 'MOMOW2W' + MOMO_ACCOUNT.slice(-3); // Thêm tham chiếu vào mã QR: Tham chiếu này dùng để nhận biết giao dịch hoặc định danh riêng cho mã QR MoMo, giúp bên nhận tiền kiểm tra hoặc đối chiếu dễ dàng hơn.
+      //MOMO_ACCOUNT.slice(-3)  lấy 3 ký tự cuối cùng của số tài khoản MoMo. (ví dụ tài khoản "99MM23332M53758772", thì lấy "772").Kết hợp lại thành chuỗi tham chiếu ví dụ: "MOMOW2W772".
+      momoQR.setUnreservedField('80', '046'); // Thêm trường không được đặt trước
+      // Mã QR của MoMo có thêm 1 trường ID 80 với giá trị là 3 số cuối của SỐ ĐIỆN THOẠI của tài khoản nhận tiền
+
       qrStr = momoQR.build();
-    } else if (paymentMethod === "ck") {
+    } else if (paymentMethod === 'ck') {
       const qrPay = QRPay.initVietQR({
         bankBin: BANK_CODE,
         bankNumber: BANK_ACCOUNT,
         amount: amount.toString(),
-        purpose: "Thanh toan",
+        purpose: 'Thanh toan',
       });
       qrStr = qrPay.build();
     }
@@ -226,21 +244,21 @@ const CheckoutPage = () => {
         onSubmit={handleSubmit}
         sx={{
           maxWidth: 1200,
-          width: "100%",
-          mx: "auto",
+          width: '100%',
+          mx: 'auto',
           my: 5,
           p: 4,
-          bgcolor: "background.paper",
+          bgcolor: 'background.paper',
           borderRadius: 2,
           boxShadow: 3,
-          color: "text.primary",
+          color: 'text.primary',
         }}
       >
         <ToastContainer position="top-right" autoClose={3000} />
         <Button
           onClick={() => navigate(-1)}
           startIcon={<ArrowBackIcon />}
-          sx={{ mb: 3, color: "#003468", fontWeight: "bold" }}
+          sx={{ mb: 3, color: '#003468', fontWeight: 'bold' }}
         >
           Quay lại
         </Button>
@@ -249,7 +267,7 @@ const CheckoutPage = () => {
         </Typography>
 
         {/* Sản phẩm đã chọn */}
-        <Box mb={4} borderRadius={0} p={2} sx={{ border: 0, borderColor: "none" }}>
+        <Box mb={4} borderRadius={0} p={2} sx={{ border: 0, borderColor: 'none' }}>
           {selectedItems.length === 0 && (
             <Typography color="text.secondary">Không có sản phẩm nào.</Typography>
           )}
@@ -262,14 +280,17 @@ const CheckoutPage = () => {
               borderColor="divider"
               pb={1}
               mb={1}
-              sx={{ "&:last-child": { borderBottom: "none", mb: 0, pb: 0 } }}
+              sx={{ '&:last-child': { borderBottom: 'none', mb: 0, pb: 0 } }}
             >
               <img
-                src={item.ProductImages?.[0]?.image_url || "https://cdn.pnj.io/images/logo/pnj.com.vn.png"}
+                src={
+                  item.ProductImages?.[0]?.image_url ||
+                  'https://cdn.pnj.io/images/logo/pnj.com.vn.png'
+                }
                 alt={item.product_name}
                 width={64}
                 height={64}
-                style={{ objectFit: "cover", borderRadius: 4 }}
+                style={{ objectFit: 'cover', borderRadius: 4 }}
               />
               <Box ml={2}>
                 <Typography fontWeight="bold" color="#003468">
@@ -283,7 +304,9 @@ const CheckoutPage = () => {
                     Đơn giá:
                   </Typography>
                   <Typography variant="body2" fontWeight="bold" color="#C58C46" mt={0.5} ml={0.5}>
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                      item.price,
+                    )}
                   </Typography>
                 </div>
               </Box>
@@ -306,36 +329,34 @@ const CheckoutPage = () => {
                   textAlign: 'center',
                 },
               },
-              endAdornment: (
-                promoLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <Box ml={1} display="flex" alignItems="center" height="100%">
-                    <Button
-                      size="medium"
-                      onClick={handleApplyPromo}
-                      disabled={promoLoading || (promoResult.valid && !!promoResult.promotion)}
-                      sx={{
-                        color: "#fff",
-                        fontWeight: "bold",
-                        px: 4,
-                        minWidth: 110,
-                        backgroundColor: "#b1b1b1",
-                        borderRadius: 2,
-                        whiteSpace: 'nowrap',
-                        '&:hover': {
-                          backgroundColor: "#979797"
-                        }
-                      }}
-                    >
-                      Áp dụng
-                    </Button>
-                  </Box>
-                )
+              endAdornment: promoLoading ? (
+                <CircularProgress size={20} />
+              ) : (
+                <Box ml={1} display="flex" alignItems="center" height="100%">
+                  <Button
+                    size="medium"
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || (promoResult.valid && !!promoResult.promotion)}
+                    sx={{
+                      color: '#fff',
+                      fontWeight: 'bold',
+                      px: 4,
+                      minWidth: 110,
+                      backgroundColor: '#b1b1b1',
+                      borderRadius: 2,
+                      whiteSpace: 'nowrap',
+                      '&:hover': {
+                        backgroundColor: '#979797',
+                      },
+                    }}
+                  >
+                    Áp dụng
+                  </Button>
+                </Box>
               ),
             }}
             helperText={promoResult.message}
-            error={!promoResult.valid && promoResult.message !== ""}
+            error={!promoResult.valid && promoResult.message !== ''}
           />
 
           {/* BOX THÔNG TIN MÃ KHUYẾN MÃI ĐÃ ÁP DỤNG */}
@@ -345,13 +366,13 @@ const CheckoutPage = () => {
               p={2}
               borderRadius={2}
               sx={{
-                bgcolor: "#e3f1fc",
-                border: "1px solid #1976d2",
-                color: "#003468",
-                display: "flex",
-                alignItems: "center",
+                bgcolor: '#e3f1fc',
+                border: '1px solid #1976d2',
+                color: '#003468',
+                display: 'flex',
+                alignItems: 'center',
                 gap: 2,
-                justifyContent: "space-between"
+                justifyContent: 'space-between',
               }}
             >
               <Box>
@@ -360,7 +381,7 @@ const CheckoutPage = () => {
                 </Typography>
                 {promoInfo.discount_percent && (
                   <Typography fontSize="1rem" color="#003468" mt={0.5}>
-                    Giảm {promoInfo.discount_percent}% ({discount.toLocaleString("vi-VN")} đ)
+                    Giảm {promoInfo.discount_percent}% ({discount.toLocaleString('vi-VN')} đ)
                   </Typography>
                 )}
                 {promoInfo.description && (
@@ -375,11 +396,11 @@ const CheckoutPage = () => {
                 color="primary"
                 sx={{
                   minWidth: 40,
-                  borderRadius: "50%",
+                  borderRadius: '50%',
                   p: 1,
                   ml: 2,
-                  color: "#1976d2",
-                  '&:hover': { bgcolor: "#e0e0e0" }
+                  color: '#1976d2',
+                  '&:hover': { bgcolor: '#e0e0e0' },
                 }}
                 title="Bỏ mã khuyến mãi"
               >
@@ -394,17 +415,17 @@ const CheckoutPage = () => {
           mb={2}
           p={2}
           borderRadius={1}
-          sx={{ border: 0, borderColor: "divider" }}
+          sx={{ border: 0, borderColor: 'divider' }}
           color="text.primary"
           fontWeight="bold"
         >
           <Typography display="flex" justifyContent="space-between" mb={1}>
             <span>Tạm tính</span>
-            <span>{subTotal.toLocaleString("vi-VN")} đ</span>
+            <span>{subTotal.toLocaleString('vi-VN')} đ</span>
           </Typography>
           <Typography display="flex" justifyContent="space-between" mb={1}>
             <span>Giảm giá</span>
-            <span style={{ color: "#d32f2f" }}>- {discount.toLocaleString("vi-VN")} đ</span>
+            <span style={{ color: '#d32f2f' }}>- {discount.toLocaleString('vi-VN')} đ</span>
           </Typography>
           <Typography
             display="flex"
@@ -415,7 +436,7 @@ const CheckoutPage = () => {
             fontSize="1.2rem"
           >
             <span>Tổng tiền</span>
-            <span>{total.toLocaleString("vi-VN")} đ</span>
+            <span>{total.toLocaleString('vi-VN')} đ</span>
           </Typography>
           <Typography fontSize="0.75rem" fontStyle="italic" mt={1} color="text.secondary">
             (Giá tham khảo đã bao gồm VAT)
@@ -424,10 +445,10 @@ const CheckoutPage = () => {
 
         {/* Địa chỉ nhận hàng */}
         <Box mb={2}>
-          <Typography variant="h6" sx={{ color: "text.primary", mb: 2 }}>
+          <Typography variant="h6" sx={{ color: 'text.primary', mb: 2 }}>
             Địa chỉ nhận hàng
           </Typography>
-          {deliveryMethod === "delivery" && (
+          {deliveryMethod === 'delivery' && (
             <Box
               mt={3}
               display="grid"
@@ -435,7 +456,7 @@ const CheckoutPage = () => {
               gap={2}
               sx={{
                 maxWidth: 1200,
-                width: "100%",
+                width: '100%',
               }}
             >
               <FormControl fullWidth required>
@@ -443,7 +464,7 @@ const CheckoutPage = () => {
                   value={province}
                   onChange={(e) => setProvince(e.target.value)}
                   displayEmpty
-                  sx={{ color: province ? "inherit" : "text.secondary" }}
+                  sx={{ color: province ? 'inherit' : 'text.secondary' }}
                 >
                   <MenuItem disabled value="">
                     Chọn tỉnh/thành *
@@ -460,7 +481,7 @@ const CheckoutPage = () => {
                   value={district}
                   onChange={(e) => setDistrict(e.target.value)}
                   displayEmpty
-                  sx={{ color: district ? "inherit" : "text.secondary" }}
+                  sx={{ color: district ? 'inherit' : 'text.secondary' }}
                 >
                   <MenuItem disabled value="">
                     Quận/huyện *
@@ -477,7 +498,7 @@ const CheckoutPage = () => {
                   value={ward}
                   onChange={(e) => setWard(e.target.value)}
                   displayEmpty
-                  sx={{ color: ward ? "inherit" : "text.secondary" }}
+                  sx={{ color: ward ? 'inherit' : 'text.secondary' }}
                 >
                   <MenuItem disabled value="">
                     Phường/xã *
@@ -507,45 +528,45 @@ const CheckoutPage = () => {
           </Typography>
           <Stack spacing={1}>
             <Button
-              variant={paymentMethod === "cod" ? "contained" : "outlined"}
-              onClick={() => setPaymentMethod("cod")}
+              variant={paymentMethod === 'cod' ? 'contained' : 'outlined'}
+              onClick={() => setPaymentMethod('cod')}
               fullWidth
               sx={{
-                justifyContent: "flex-start",
-                ...(paymentMethod === "cod" && {
-                  backgroundColor: "#003468",
-                  color: "#fff",
-                  '&:hover': { backgroundColor: "#002954" },
+                justifyContent: 'flex-start',
+                ...(paymentMethod === 'cod' && {
+                  backgroundColor: '#003468',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: '#002954' },
                 }),
               }}
             >
               Thanh toán tiền mặt khi nhận hàng (COD)
             </Button>
             <Button
-              variant={paymentMethod === "momo" ? "contained" : "outlined"}
-              onClick={() => setPaymentMethod("momo")}
+              variant={paymentMethod === 'momo' ? 'contained' : 'outlined'}
+              onClick={() => setPaymentMethod('momo')}
               fullWidth
               sx={{
-                justifyContent: "flex-start",
-                ...(paymentMethod === "momo" && {
-                  backgroundColor: "#003468",
-                  color: "#fff",
-                  '&:hover': { backgroundColor: "#002954" },
+                justifyContent: 'flex-start',
+                ...(paymentMethod === 'momo' && {
+                  backgroundColor: '#003468',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: '#002954' },
                 }),
               }}
             >
               Thanh toán bằng MoMo
             </Button>
             <Button
-              variant={paymentMethod === "ck" ? "contained" : "outlined"}
-              onClick={() => setPaymentMethod("ck")}
+              variant={paymentMethod === 'ck' ? 'contained' : 'outlined'}
+              onClick={() => setPaymentMethod('ck')}
               fullWidth
               sx={{
-                justifyContent: "flex-start",
-                ...(paymentMethod === "ck" && {
-                  backgroundColor: "#003468",
-                  color: "#fff",
-                  '&:hover': { backgroundColor: "#002954" },
+                justifyContent: 'flex-start',
+                ...(paymentMethod === 'ck' && {
+                  backgroundColor: '#003468',
+                  color: '#fff',
+                  '&:hover': { backgroundColor: '#002954' },
                 }),
               }}
             >
@@ -553,7 +574,7 @@ const CheckoutPage = () => {
             </Button>
           </Stack>
 
-          {(paymentMethod === "cod" || paymentMethod === "momo" || paymentMethod === "ck") && (
+          {(paymentMethod === 'cod' || paymentMethod === 'momo' || paymentMethod === 'ck') && (
             <Box
               mt={3}
               p={2}
@@ -564,33 +585,33 @@ const CheckoutPage = () => {
               maxWidth={300}
               mx="auto"
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <QRCodeSVG value={qrValue} size={180} />
               <Typography mt={1} fontWeight="medium" color="text.primary">
-                Số tiền:{" "}
+                Số tiền:{' '}
                 <strong>
-                  {paymentMethod === "cod"
-                    ? Math.round(total * 0.1).toLocaleString("vi-VN")
-                    : Math.round(total).toLocaleString("vi-VN")}{" "}
+                  {paymentMethod === 'cod'
+                    ? Math.round(total * 0.1).toLocaleString('vi-VN')
+                    : Math.round(total).toLocaleString('vi-VN')}{' '}
                   đ
                 </strong>
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {paymentMethod === "momo"
-                  ? "Ví MoMo"
-                  : paymentMethod === "ck"
+                {paymentMethod === 'momo'
+                  ? 'Ví MoMo'
+                  : paymentMethod === 'ck'
                     ? BANK_NAME
                     : BANK_NAME}
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={1}>
-                {paymentMethod === "momo"
+                {paymentMethod === 'momo'
                   ? MOMO_ACCOUNT
-                  : paymentMethod === "ck"
+                  : paymentMethod === 'ck'
                     ? BANK_ACCOUNT
                     : BANK_ACCOUNT}
               </Typography>
@@ -606,15 +627,15 @@ const CheckoutPage = () => {
           size="large"
           disabled={submitting}
           sx={{
-            justifyContent: "flex-center",
-            ...({
-              backgroundColor: "#003468",
-              color: "#fff",
-              '&:hover': { backgroundColor: "#002954" },
-            }),
+            justifyContent: 'flex-center',
+            ...{
+              backgroundColor: '#003468',
+              color: '#fff',
+              '&:hover': { backgroundColor: '#002954' },
+            },
           }}
         >
-          {submitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "ĐẶT HÀNG"}
+          {submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'ĐẶT HÀNG'}
         </Button>
       </Box>
     </MainLayout>
