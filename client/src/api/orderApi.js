@@ -78,9 +78,9 @@ const updateStaff = async (id, staff_id, accessToken) => {
   }
 };
 
-const getOrderByUserId = async (userId, accessToken) => {
+const getOrderByCustomer = async (customerId, accessToken) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/orders/user/${userId}`, {
+    const response = await axiosInstance.get(`${API_URL}/orders/user/${customerId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -157,7 +157,7 @@ export default {
   getOrderById,
   updateOrder,
   updateStaff,
-  getOrderByUserId,
+  getOrderByCustomer,
   createOrder,
   updateIsDeposit,
   checkout,

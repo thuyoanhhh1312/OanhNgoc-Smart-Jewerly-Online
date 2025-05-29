@@ -135,15 +135,19 @@ export const updatedStaff = async (req, res) => {
   }
 };
 
-export const getOrderByUserId = async (req, res) => {
-  const { user_id } = req.params;
+export const getOrderByCustomer = async (req, res) => {
+  const { customer_id } = req.params;
   try {
     const orders = await db.Order.findAll({
-      where: { user_id: user_id },
+      where: { customer_id: customer_id },
       include: [
         {
           model: db.Customer,
           attributes: ["name", "email", "phone"],
+        },
+        {
+          model: db.Promotion,
+          attributes: ["promotion_code"],
         },
         {
           model: db.OrderStatus,
@@ -160,6 +164,7 @@ export const getOrderByUserId = async (req, res) => {
           ],
         },
       ],
+      order: [['created_at', 'DESC']],
     });
     if (!orders) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
@@ -192,7 +197,7 @@ export const createOrder = async (req, res) => {
       payment_method,
       status_id: 1, // trạng thái mới tạo
     });
-// trả về client thông tin đơn hàng vừa tạo
+    // trả về client thông tin đơn hàng vừa tạo
     res.status(201).json(order);
   } catch (err) {
     res.status(500).json({ message: "Lỗi tạo đơn hàng", error: err.message });
@@ -223,7 +228,7 @@ export const calculatePrice = async (req, res) => {
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
-//items là một mảng chứa các sản phẩm trong đơn hàng, mỗi sản phẩm có cấu trúc { product_id, quantity, price } do client gửi lên.
+    //items là một mảng chứa các sản phẩm trong đơn hàng, mỗi sản phẩm có cấu trúc { product_id, quantity, price } do client gửi lên.
     const productIds = items.map((i) => i.product_id); // Lấy danh sách ID sản phẩm từ mảng items
     //db.product là mô hình đại diện cho bảng sản phẩm trong cơ sở dữ liệu, được định nghĩa trong models/index.js.
     //findAll là một phương thức của Sequelize để truy vấn tất cả các bản ghi trong bảng sản phẩm.
@@ -233,7 +238,7 @@ export const calculatePrice = async (req, res) => {
     if (products.length !== productIds.length) {
       return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
     }
-//tính sub_total là tổng giá trị của các sản phẩm trong đơn hàng, được tính bằng cách nhân giá của từng sản phẩm với số lượng tương ứng.
+    //tính sub_total là tổng giá trị của các sản phẩm trong đơn hàng, được tính bằng cách nhân giá của từng sản phẩm với số lượng tương ứng.
     let sub_total = 0;
 
     for (const item of items) {
@@ -316,7 +321,7 @@ export const checkout = async (req, res) => {
     } = req.body; // Destructuring để lấy các trường cần thiết từ request body
 
     let deposit_status = req.body.deposit_status ?? "none"; // Trạng thái đặt cọc, mặc định là "none" nếu không có trong request body
-// deposit_status có thể là "pending", "paid" hoặc "none" (không yêu cầu đặt cọc).
+    // deposit_status có thể là "pending", "paid" hoặc "none" (không yêu cầu đặt cọc).
     if (!customer_id) { // Kiểm tra xem customer_id có được cung cấp hay không
       await t.rollback(); // Nếu không có customer_id, rollback transaction và trả về lỗi
       return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
@@ -347,13 +352,13 @@ export const checkout = async (req, res) => {
         await t.rollback();
         return res.status(400).json({ message: `Sản phẩm có ID ${item.product_id} không tồn tại.` });
       }
-      if (product.quantity < item.quantity) { 
+      if (product.quantity < item.quantity) {
         await t.rollback();
         return res.status(400).json({
           message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`,
         });
       }
-      if (Number(product.price) !== Number(item.price)) { 
+      if (Number(product.price) !== Number(item.price)) {
         await t.rollback();
         return res.status(400).json({
           message: `Giá sản phẩm "${product.product_name}" không khớp với giá hiện tại.`,
