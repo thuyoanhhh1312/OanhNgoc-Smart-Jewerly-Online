@@ -118,20 +118,23 @@ const Product = () => {
   };
 
   // Chuyển trạng thái bán (toggle)
+
   const toggleStatus = async (product) => {
     setLoadingStatus(product.product_id);
     try {
-      await ProductAPI.updateProduct(
-        product.product_id,
-        product.product_name,
-        product.description,
-        product.price,
-        product.quantity,
-        product.category_id,
-        product.subcategory_id,
-        null,
-        !product.is_active,
-      );
+      const formData = new FormData();
+      formData.append('product_name', product.product_name);
+      formData.append('description', product.description || '');
+      formData.append('price', product.price);
+      formData.append('quantity', product.quantity);
+      formData.append('category_id', product.category_id);
+      formData.append('subcategory_id', product.subcategory_id);
+      formData.append('is_active', !product.is_active); // cập nhật trạng thái mới
+
+      // Lấy token từ store hoặc localStorage (ví dụ)
+      const accessToken = localStorage.getItem('accessToken') || '';
+
+      await ProductAPI.updateProduct(product.product_id, formData, accessToken);
 
       setProducts((prev) =>
         prev.map((p) =>

@@ -2,14 +2,21 @@ import axiosInstance from './axiosInstance';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+// Lấy tất cả đơn hàng
 const getAllOrders = async (accessToken) => {
+  // accessToken: là token xác thực người dùng, để đảm bảo chỉ người dùng đã đăng nhập mới có thể truy cập dữ liệu
   try {
+    //Cấu trúc câu lệnh gọi API: const response = await axiosInstance.get(url, config);
+    //Trong đó:url: địa chỉ endpoint API bạn muốn gọi (ví dụ: ${API_URL}/orders).
+    // config: một object chứa các cấu hình bổ sung cho request, như: headers: gửi thêm các header HTTP, ví dụ token xác thực.params: tham số truy vấ
+    //axiosInstance: là một instance của axios đã được cấu hình sẵn (ví dụ: baseURL, headers, timeout, v.v.)
     const response = await axiosInstance.get(`${API_URL}/orders`, {
+      //dùng Get để lấy data từ server (xem thông tin, không thay đổi gì trên server)
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return response.data;
+    return response.data; //response.data: chứa dữ liệu trả về từ server, thường là một mảng các đơn hàng
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
@@ -33,6 +40,7 @@ const getOrderById = async (id, accessToken) => {
 const updateOrder = async (id, status, accessToken) => {
   try {
     const response = await axiosInstance.put(
+      //dùng Put: Cập nhật toàn bộ tài nguyên (thay thế) ( để cập nhật thông tin của đơn hàng)
       `${API_URL}/orders/${id}`,
       {
         status_id: status,
@@ -86,7 +94,7 @@ const getOrderByUserId = async (userId, accessToken) => {
 
 export const createOrder = async (orderData) => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/orders`, orderData);
+    const response = await axiosInstance.post(`${API_URL}/orders`, orderData); //post tạo mới tài nguyên trên server (Khi muốn tạo mới một đơn hàng, hay yêu cầu server thực hiện một hành động như tính giá, đặt hàng.)
     return response.data;
   } catch (error) {
     console.error('Error creating order:', error);
@@ -97,6 +105,7 @@ export const createOrder = async (orderData) => {
 const updateIsDeposit = async (id, isDeposit, accessToken) => {
   try {
     const response = await axiosInstance.patch(
+      //Patch: Cập nhật một phần tài nguyên (để cập nhật trạng thái đặt cọc của đơn hàng)
       `${API_URL}/orders/${id}/deposit`,
       { is_deposit: isDeposit },
       {
@@ -152,5 +161,5 @@ export default {
   createOrder,
   updateIsDeposit,
   checkout,
-  calculatePrice
+  calculatePrice,
 };

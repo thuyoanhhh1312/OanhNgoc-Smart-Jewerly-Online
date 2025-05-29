@@ -126,12 +126,14 @@ const getProductBySlug = async (slug) => {
 //   }
 // };
 // Thay thế hàm updateProduct hiện tại bằng hàm nhận FormData
+
 const updateProduct = async (id, formData, accessToken) => {
   try {
+    const safeToken = encodeURIComponent(accessToken);
     const response = await axiosInstance.put(`${API_URL}/products/${id}`, formData, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${safeToken}`,
+        //'Content-Type': 'multipart/form-data',
       },
     });
     return response.data;
