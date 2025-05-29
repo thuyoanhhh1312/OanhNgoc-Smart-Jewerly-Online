@@ -52,6 +52,7 @@ import OrderPage from "./pages/OrderPage";
 import Checkout from "./pages/checkout";
 import PromotionsPage from "./pages/PromotionsPage";
 import OrderSuccess from "./pages/OrderSuccess";
+import UserOrderHistory from "./pages/UserOrderHistory";
 
 import { useDispatch } from "react-redux";
 function App() {
@@ -252,7 +253,6 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot/password" element={<ForgotPassword />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/search" element={<Search />} />
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
         <Route path="/promotions" element={<PromotionsPage />} />
@@ -266,10 +266,26 @@ function App() {
           }
         />
         <Route
+          path="/checkout"
+          element={
+            <UserRoute>
+              <Checkout />
+            </UserRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <UserRoute>
               <UpdateProfile />
+            </UserRoute>
+          }
+        />
+        <Route
+          path="/order-history"
+          element={
+            <UserRoute>
+              <UserOrderHistory />
             </UserRoute>
           }
         />

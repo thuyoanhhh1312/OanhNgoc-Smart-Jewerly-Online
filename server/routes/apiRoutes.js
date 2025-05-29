@@ -28,6 +28,7 @@ import * as orderStatusController from '../controllers/orderStatusController.js'
 import * as productReviewController from '../controllers/productReviewController.js';
 import * as searchController from '../controllers/searchController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
+import * as vietnamLocationController from '../controllers/vietnamLocationController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -104,7 +105,7 @@ router.get('/orders/:id', authenticateToken, isAdminOrStaff, orderController.get
 router.post('/orders', authenticateToken, orderController.createOrder);
 router.put('/orders/:id', authenticateToken, isAdminOrStaff, orderController.updatedOrder);
 router.put('/update-staff/:id', authenticateToken, isAdmin, orderController.updatedStaff);
-router.get('/orders/user/:user_id', authenticateToken, isAdminOrStaff, orderController.getOrderByUserId);
+router.get('/orders/user/:customer_id', authenticateToken, orderController.getOrderByCustomer);
 router.patch('/orders/:id/deposit', authenticateToken, isAdminOrStaff, orderController.updateIsDeposit);
 router.post('/calculate-price', authenticateToken, validateRequest(calculatePriceSchema), orderController.calculatePrice);
 router.post('/checkout', authenticateToken, validateRequest(checkoutSchema), orderController.checkout);
@@ -125,5 +126,10 @@ router.get("/quick-search-products", searchController.quickSearchProducts);
 //Dashboard routes
 router.get('/dashboard/revenue', authenticateToken, isAdmin, dashboardController.getRevenueByPeriod);
 router.get('/dashboard/orders/count', authenticateToken, isAdmin, dashboardController.getOrderCountByPeriod);
+
+//Location
+router.get('/locations/provinces', vietnamLocationController.getProvinces);
+router.get('/locations/districts/:provinceCode', vietnamLocationController.getDistrictsByProvince);
+router.get('/locations/wards/:districtCode', vietnamLocationController.getWardsByDistrict);
 
 export default router;

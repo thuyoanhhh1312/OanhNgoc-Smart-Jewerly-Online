@@ -12,19 +12,15 @@ import {
   MenuItem,
 } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
-import { QRCodeSVG } from 'qrcode.react'; //QRCodeSVG để tạo mã QR. từ "qrcode.react" package
+import { QRCodeSVG } from 'qrcode.react';
 import MainLayout from '../layout/MainLayout';
-import orderApi from '../api/orderApi'; // orderApi để gọi các API liên quan đến đơn hàng
-import { QRPay, BanksObject } from 'vietnam-qr-pay'; // QRPay và BanksObject để tạo mã QR thanh toán theo chuẩn Việt QR.
+import orderApi from '../api/orderApi';
+import { QRPay, BanksObject } from 'vietnam-qr-pay';
 import 'react-toastify/dist/ReactToastify.css';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
-import { useDispatch } from 'react-redux';
-
-const provinces = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng'];
-const districts = ['Quận 1', 'Quận 2', 'Quận 3'];
-const wards = ['Phường A', 'Phường B', 'Phường C'];
+import { getProvinces, getDistricts, getWards } from '../api/vietnamLocationApi';
 
 // Thông tin ngân hàng MB Bank
 const BANK_NAME = 'MB Bank';
@@ -35,61 +31,111 @@ const BANK_ACCOUNT = '0816837690';
 const MOMO_ACCOUNT = '99MM23332M53758772';
 
 const CheckoutPage = () => {
-  const { user } = useSelector((state) => ({ ...state })); // Lấy thông tin người dùng từ Redux store ( Redux store: nơi lưu trữ toàn bộ trạng thái (state) của ứng dụng )
-  const dispatch = useDispatch(); // Redux dispatch để xóa giỏ hàng sau khi đặt hàng thành công
-  const location = useLocation(); // Lấy thông tin từ location state (được truyền từ trang giỏ hàng)
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng đến các trang khác
-  const { selectedItems = [], totalAmount = 0 } = location.state || {}; // Lấy thông tin sản phẩm đã chọn và tổng tiền từ state của location
+  const { user } = useSelector((state) => ({ ...state }));
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { selectedItems = [], totalAmount = 0 } = location.state || {};
 
-  // Khởi tạo các state để quản lý thông tin đặt hàng
-  const [gender, setGender] = useState(''); // Giới tính của người đặt hàng
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [dob, setDob] = useState(''); // Ngày sinh của người đặt hàng
-  const [sendCardSms, setSendCardSms] = useState(false); // Biến để xác định có gửi tin nhắn SMS chứa mã thẻ hay không
-
-  // State để quản lý thông tin giao hàng
-  // Các biến để lưu trữ thông tin địa chỉ giao hàng
-  const [deliveryMethod, setDeliveryMethod] = useState('delivery'); // Phương thức giao hàng, mặc định là giao hàng tận nơi
+  // Địa chỉ giao hàng động
+  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
-  const [ward, setWard] = useState(''); // Phường/xã của địa chỉ giao hàng
+  const [ward, setWard] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
 
-  // Các biến để quản lý mã khuyến mãi
-  const [promoCode, setPromoCode] = useState(''); // Mã khuyến mãi được nhập bởi người dùng
-  const [promoLoading, setPromoLoading] = useState(false); // Biến để hiển thị loading khi đang áp dụng mã khuyến mãi
+  // Danh sách tỉnh, huyện, xã từ API
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+
+  // Mã khuyến mãi
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
   const [promoResult, setPromoResult] = useState({
     valid: false,
     message: '',
     discount: 0,
     promotion: null,
-  }); // Kết quả áp dụng mã khuyến mãi, bao gồm trạng thái hợp lệ, thông điệp, số tiền giảm giá và thông tin chương trình khuyến mãi
+  });
 
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // Phương thức thanh toán, mặc định là thanh toán khi nhận hàng (COD)
+  // Thanh toán
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
-  // Các biến để quản lý tổng tiền và giảm giá
-  const [subTotal, setSubTotal] = useState(totalAmount || 0); // Tổng tiền trước khi áp dụng mã khuyến mãi
+  // Tính tiền
+  const [subTotal, setSubTotal] = useState(totalAmount || 0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(totalAmount || 0);
 
-  // Biến để xác định trạng thái gửi đơn hàng
-  const [submitting, setSubmitting] = useState(false); // Biến để xác định trạng thái đang gửi đơn hàng hay không
-  const [qrValue, setQrValue] = useState(''); // Giá trị mã QR để hiển thị thông tin thanh toán
+  // Gửi đơn hàng
+  const [submitting, setSubmitting] = useState(false);
+  const [qrValue, setQrValue] = useState('');
 
-  // Hiển thị box thông tin mã khuyến mãi đã áp dụng
+  // Thông tin mã ưu đãi hiển thị
   const promoInfo = promoResult.valid && promoResult.promotion;
 
-  // Hàm để xử lý việc xóa mã khuyến mãi đã áp dụng
-  const handleRemovePromo = () => {
-    setPromoCode(''); // Xóa mã khuyến mãi đã nhập
-    setDiscount(0);
-    setTotal(subTotal);
-    setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
-    toast.info('Đã bỏ áp dụng mã khuyến mãi.');
-  };
-  // Hàm để xác thực thông tin đơn hàng trước khi gửi (địa chỉ giao hàng)
+  // Load danh sách tỉnh/thành lúc mount
+  useEffect(() => {
+    async function fetchProvincesData() {
+      try {
+        const data = await getProvinces();
+        setProvinces(data);
+      } catch (error) {
+        toast.error('Lỗi khi tải danh sách tỉnh/thành');
+      }
+    }
+    fetchProvincesData();
+  }, []);
+
+  // Load danh sách quận/huyện khi chọn tỉnh thay đổi
+  useEffect(() => {
+    async function fetchDistrictsData() {
+      if (!province) {
+        setDistricts([]);
+        setDistrict('');
+        setWards([]);
+        setWard('');
+        return;
+      }
+      try {
+        const data = await getDistricts(province);
+        setDistricts(data);
+        setDistrict('');
+        setWards([]);
+        setWard('');
+      } catch (error) {
+        toast.error('Lỗi khi tải danh sách quận/huyện');
+      }
+    }
+    fetchDistrictsData();
+  }, [province]);
+
+  // Load danh sách phường/xã khi chọn quận thay đổi
+  useEffect(() => {
+    async function fetchWardsData() {
+      if (!district) {
+        setWards([]);
+        setWard('');
+        return;
+      }
+      try {
+        const data = await getWards(district);
+        setWards(data);
+        setWard('');
+      } catch (error) {
+        toast.error('Lỗi khi tải danh sách phường/xã');
+      }
+    }
+    fetchWardsData();
+  }, [district]);
+
+  // Hàm giúp tìm tên theo code trong danh sách
+  function findNameByCode(list, code) {
+    const found = list.find((item) => item.code === code);
+    return found ? found.name : '';
+  }
+
+  // Xác thực form
   const validateForm = () => {
     if (deliveryMethod === 'delivery') {
       if (!province) {
@@ -111,7 +157,8 @@ const CheckoutPage = () => {
     }
     return true;
   };
-  // Hàm để áp dụng mã khuyến mãi
+
+  // Áp dụng mã khuyến mãi
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) {
       toast.warn('Vui lòng nhập mã ưu đãi.');
@@ -120,7 +167,7 @@ const CheckoutPage = () => {
       setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
       return;
     }
-    setPromoLoading(true); // Bật loading khi đang xử lý mã khuyến mãi
+    setPromoLoading(true);
     try {
       const priceData = {
         items: selectedItems.map((item) => ({
@@ -129,7 +176,7 @@ const CheckoutPage = () => {
         })),
         promotion_code: promoCode.trim(),
       };
-      const res = await orderApi.calculatePrice(priceData, user?.token); // Gọi API để tính toán giá sau khi áp dụng mã khuyến mãi
+      const res = await orderApi.calculatePrice(priceData, user?.token);
       if (res.valid) {
         setDiscount(res.discount);
         setTotal(res.total);
@@ -139,35 +186,35 @@ const CheckoutPage = () => {
         setTotal(subTotal);
         toast.error(res.message);
       }
-      setPromoResult(res); // Cập nhật kết quả áp dụng mã khuyến mãi
+      setPromoResult(res);
     } catch (err) {
       toast.error('Lỗi khi áp dụng mã ưu đãi.');
       setDiscount(0);
       setTotal(subTotal);
       setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
     } finally {
-      setPromoLoading(false); // Tắt loading sau khi xử lý xong
+      setPromoLoading(false);
     }
   };
-  // Hàm để xử lý việc gửi đơn hàng
+
+  // Gửi đơn hàng
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngăn chặn hành vi mặc định của form
-    if (!validateForm()) return; // nếu form không hợp lệ thì không gửi đơn hàng
+    e.preventDefault();
+    if (!validateForm()) return;
 
     if (selectedItems.length === 0) {
-      // Kiểm tra xem có sản phẩm nào trong giỏ hàng không
       toast.error('Không có sản phẩm nào trong đơn hàng.');
       return;
     }
 
-    setSubmitting(true); // Bật trạng thái loading
+    setSubmitting(true);
     try {
       const orderData = {
         customer_id: user?.id,
         user_id: null,
         promotion_code: promoResult.valid ? promoCode.trim() : null,
         payment_method: paymentMethod,
-        shipping_address: `${addressDetail}, ${ward}, ${district}, ${province}`,
+        shipping_address: `${addressDetail}, ${findNameByCode(wards, ward)}, ${findNameByCode(districts, district)}, ${findNameByCode(provinces, province)}`,
         is_deposit: false,
         deposit_status: paymentMethod === 'cod' ? 'pending' : 'none',
         items: selectedItems.map((item) => ({
@@ -176,14 +223,13 @@ const CheckoutPage = () => {
           price: item.price,
         })),
       };
-      const res = await orderApi.checkout(orderData, user?.token); // gọi API đặt hàng
+      const res = await orderApi.checkout(orderData, user?.token);
       toast.success('Đặt hàng thành công! Mã đơn hàng: ' + res.order.order_id);
-      dispatch({ type: 'CLEAR_CART' }); // Xóa giỏ hàng sau khi đặt hàng thành công
-      navigate('/order-success', { state: { order: res.order } }); // Điều hướng đến trang thành công sau khi đặt hàng
+      dispatch({ type: 'CLEAR_CART' });
+      navigate('/order-success', { state: { order: res.order } });
     } catch (error) {
       toast.error(
-        'Lỗi khi đặt hàng: ' +
-          (error.response?.data?.message || error.message || 'Vui lòng thử lại sau.'),
+        'Lỗi khi đặt hàng: ' + (error.response?.data?.message || error.message || 'Vui lòng thử lại sau.'),
       );
     } finally {
       setSubmitting(false);
@@ -194,23 +240,21 @@ const CheckoutPage = () => {
   useEffect(() => {
     let amount = 0;
     if (paymentMethod === 'cod') {
-      amount = Math.round(total * 0.1); // Thanh toán COD, đặt cọc 10% tổng tiền
+      amount = Math.round(total * 0.1);
     } else if (paymentMethod === 'momo' || paymentMethod === 'ck') {
-      amount = Math.round(total); // Thanh toán qua MoMo hoặc chuyển khoản ngân hàng, thanh toán toàn bộ số tiền
+      amount = Math.round(total);
     }
 
-    let qrStr = ''; // Biến để lưu trữ chuỗi mã QR
-    // Tạo mã QR dựa trên phương thức thanh toán
+    let qrStr = '';
 
     if (paymentMethod === 'cod') {
       const qrPay = QRPay.initVietQR({
-        // Khởi tạo mã QR theo chuẩn Việt QR
-        bankBin: BANK_CODE, // Mã BIN của ngân hàng MB Bank
-        bankNumber: BANK_ACCOUNT, // Số tài khoản ngân hàng
-        amount: amount.toString(), // Số tiền đặt cọc
+        bankBin: BANK_CODE,
+        bankNumber: BANK_ACCOUNT,
+        amount: amount.toString(),
         purpose: 'Thanh toan đat coc',
       });
-      qrStr = qrPay.build(); // Tạo chuỗi mã QR
+      qrStr = qrPay.build();
     } else if (paymentMethod === 'momo') {
       const momoQR = QRPay.initVietQR({
         bankBin: BanksObject.banviet.bin,
@@ -218,11 +262,8 @@ const CheckoutPage = () => {
         amount: amount.toString(),
         purpose: 'Thanh toan don hang qua MoMo',
       });
-      momoQR.additionalData.reference = 'MOMOW2W' + MOMO_ACCOUNT.slice(-3); // Thêm tham chiếu vào mã QR: Tham chiếu này dùng để nhận biết giao dịch hoặc định danh riêng cho mã QR MoMo, giúp bên nhận tiền kiểm tra hoặc đối chiếu dễ dàng hơn.
-      //MOMO_ACCOUNT.slice(-3)  lấy 3 ký tự cuối cùng của số tài khoản MoMo. (ví dụ tài khoản "99MM23332M53758772", thì lấy "772").Kết hợp lại thành chuỗi tham chiếu ví dụ: "MOMOW2W772".
-      momoQR.setUnreservedField('80', '046'); // Thêm trường không được đặt trước
-      // Mã QR của MoMo có thêm 1 trường ID 80 với giá trị là 3 số cuối của SỐ ĐIỆN THOẠI của tài khoản nhận tiền
-
+      momoQR.additionalData.reference = 'MOMOW2W' + MOMO_ACCOUNT.slice(-3);
+      momoQR.setUnreservedField('80', '046');
       qrStr = momoQR.build();
     } else if (paymentMethod === 'ck') {
       const qrPay = QRPay.initVietQR({
@@ -268,9 +309,7 @@ const CheckoutPage = () => {
 
         {/* Sản phẩm đã chọn */}
         <Box mb={4} borderRadius={0} p={2} sx={{ border: 0, borderColor: 'none' }}>
-          {selectedItems.length === 0 && (
-            <Typography color="text.secondary">Không có sản phẩm nào.</Typography>
-          )}
+          {selectedItems.length === 0 && <Typography color="text.secondary">Không có sản phẩm nào.</Typography>}
           {selectedItems.map((item) => (
             <Box
               key={item.product_id}
@@ -283,10 +322,7 @@ const CheckoutPage = () => {
               sx={{ '&:last-child': { borderBottom: 'none', mb: 0, pb: 0 } }}
             >
               <img
-                src={
-                  item.ProductImages?.[0]?.image_url ||
-                  'https://cdn.pnj.io/images/logo/pnj.com.vn.png'
-                }
+                src={item.ProductImages?.[0]?.image_url || 'https://cdn.pnj.io/images/logo/pnj.com.vn.png'}
                 alt={item.product_name}
                 width={64}
                 height={64}
@@ -304,9 +340,7 @@ const CheckoutPage = () => {
                     Đơn giá:
                   </Typography>
                   <Typography variant="body2" fontWeight="bold" color="#C58C46" mt={0.5} ml={0.5}>
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                      item.price,
-                    )}
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
                   </Typography>
                 </div>
               </Box>
@@ -359,7 +393,6 @@ const CheckoutPage = () => {
             error={!promoResult.valid && promoResult.message !== ''}
           />
 
-          {/* BOX THÔNG TIN MÃ KHUYẾN MÃI ĐÃ ÁP DỤNG */}
           {promoInfo && (
             <Box
               mt={2}
@@ -391,7 +424,13 @@ const CheckoutPage = () => {
                 )}
               </Box>
               <Button
-                onClick={handleRemovePromo}
+                onClick={() => {
+                  setPromoCode('');
+                  setDiscount(0);
+                  setTotal(subTotal);
+                  setPromoResult({ valid: false, message: '', discount: 0, promotion: null });
+                  toast.info('Đã bỏ áp dụng mã khuyến mãi.');
+                }}
                 variant="text"
                 color="primary"
                 sx={{
@@ -470,8 +509,8 @@ const CheckoutPage = () => {
                     Chọn tỉnh/thành *
                   </MenuItem>
                   {provinces.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
+                    <MenuItem key={p.code} value={p.code}>
+                      {p.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -482,13 +521,14 @@ const CheckoutPage = () => {
                   onChange={(e) => setDistrict(e.target.value)}
                   displayEmpty
                   sx={{ color: district ? 'inherit' : 'text.secondary' }}
+                  disabled={!districts.length}
                 >
                   <MenuItem disabled value="">
                     Quận/huyện *
                   </MenuItem>
                   {districts.map((d) => (
-                    <MenuItem key={d} value={d}>
-                      {d}
+                    <MenuItem key={d.code} value={d.code}>
+                      {d.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -499,13 +539,14 @@ const CheckoutPage = () => {
                   onChange={(e) => setWard(e.target.value)}
                   displayEmpty
                   sx={{ color: ward ? 'inherit' : 'text.secondary' }}
+                  disabled={!wards.length}
                 >
                   <MenuItem disabled value="">
                     Phường/xã *
                   </MenuItem>
                   {wards.map((w) => (
-                    <MenuItem key={w} value={w}>
-                      {w}
+                    <MenuItem key={w.code} value={w.code}>
+                      {w.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -628,11 +669,9 @@ const CheckoutPage = () => {
           disabled={submitting}
           sx={{
             justifyContent: 'flex-center',
-            ...{
-              backgroundColor: '#003468',
-              color: '#fff',
-              '&:hover': { backgroundColor: '#002954' },
-            },
+            backgroundColor: '#003468',
+            color: '#fff',
+            '&:hover': { backgroundColor: '#002954' },
           }}
         >
           {submitting ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'ĐẶT HÀNG'}

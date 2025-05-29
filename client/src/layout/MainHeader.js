@@ -36,6 +36,11 @@ const MainHeader = () => {
     }
   };
 
+  const goToOrderHistory = () => {
+    closeDropdown();
+    navigate("/order-history");
+  };
+
   function toggleDropdown() {
     setIsOpen(!isOpen);
   }
@@ -71,9 +76,8 @@ const MainHeader = () => {
                   {user?.name ? user?.name : user?.email.split('@')[0]}
                 </span>
                 <svg
-                  className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
+                  className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                    }`}
                   width="18"
                   height="20"
                   viewBox="0 0 18 20"
@@ -94,6 +98,23 @@ const MainHeader = () => {
                 onClose={closeDropdown}
                 className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
               >
+                <button
+                  className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                  onClick={goToOrderHistory}
+                >
+                  <svg
+                    className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    {/* Icon lịch sử đơn hàng (ví dụ dùng biểu tượng lịch) */}
+                    <path d="M7 10H9V12H7V10ZM11 10H13V12H11V10ZM15 10H17V12H15V10ZM19 4H18V2H16V4H8V2H6V4H5C3.9 4 3 4.9 3 6V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V9H19V20Z" />
+                  </svg>
+                  Order History
+                </button>
                 <button
                   className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                   onClick={handleLogout}
