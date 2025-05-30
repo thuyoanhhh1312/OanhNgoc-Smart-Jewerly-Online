@@ -44,7 +44,7 @@ const AddUser = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto bg-white rounded shadow">
+    <form onSubmit={handleSubmit} className="p-4 max-w-full mx-auto bg-white rounded shadow">
       <h2 className="text-xl font-semibold mb-4">Thêm nhân viên mới</h2>
 
       <div className="mb-4">

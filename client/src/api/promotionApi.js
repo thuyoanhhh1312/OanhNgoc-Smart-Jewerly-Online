@@ -11,27 +11,21 @@ const getPromotions = async () => {
         console.error("Error fetching promotions:", error);
         throw error;
     }
-}
+};
 
-const createPromotion = async (promotion_code, discount, start_date, end_date, description, accessToken) => {
+const createPromotion = async (data, accessToken) => {
     try {
-        const response = await axiosInstance.post(`${API_URL}/promotions`, {
-            promotion_code,
-            discount,
-            start_date,
-            end_date,
-            description
-        }, {
+        const response = await axiosInstance.post(`${API_URL}/promotions`, data, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
-            }
+            },
         });
         return response.data;
     } catch (error) {
         console.error("Error creating promotion:", error);
         throw error;
     }
-}
+};
 
 const getPromotionById = async (id) => {
     try {
@@ -41,46 +35,41 @@ const getPromotionById = async (id) => {
         console.error("Error fetching promotion by ID:", error);
         throw error;
     }
-}
+};
 
-const updatePromotion = async (id, promotion_code, discount, start_date, end_date, description, accessToken) => {
+const updatePromotion = async (id, data, accessToken) => {
     try {
-        const response = await axiosInstance.put(`${API_URL}/promotions/${id}`, {
-            promotion_code,
-            discount,
-            start_date,
-            end_date,
-            description
-        }, {
+        const response = await axiosInstance.put(`${API_URL}/promotions/${id}`, data, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
-            }
+            },
         });
         return response.data;
     } catch (error) {
         console.error("Error updating promotion:", error);
         throw error;
     }
-}
+};
 
 const deletePromotion = async (id, accessToken) => {
     try {
         const response = await axiosInstance.delete(`${API_URL}/promotions/${id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
-            }
+            },
         });
         return response.data;
     } catch (error) {
         console.error("Error deleting promotion:", error);
         throw error;
     }
-}
+};
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default {
     getPromotions,
     createPromotion,
     getPromotionById,
     updatePromotion,
-    deletePromotion
-}
+    deletePromotion,
+};

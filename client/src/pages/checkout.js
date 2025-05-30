@@ -197,6 +197,7 @@ const CheckoutPage = () => {
           quantity: item.count,
         })),
         promotion_code: promoCode.trim(),
+        customer_id: user?.id
       };
       const res = await orderApi.calculatePrice(priceData, user?.token);
       if (res.valid) {

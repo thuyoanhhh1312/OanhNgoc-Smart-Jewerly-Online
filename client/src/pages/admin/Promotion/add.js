@@ -1,119 +1,157 @@
 import React, { useState } from "react";
-import Input from "../../../components/form/input/InputField";
-import Label from "../../../components/form/Label";
-import Button from "../../../components/ui/button/Button";
-import promotionApi from "../../../api/promotionApi";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import promotionApi from "../../../api/promotionApi";
 import Swal from "sweetalert2";
+import Label from "../../../components/form/Label";
+import Input from "../../../components/form/input/InputField";
+import Button from "../../../components/ui/button/Button";
 
 const AddPromotion = () => {
     const { user } = useSelector((state) => ({ ...state }));
-    const [promotionCode, setPromotionCode] = useState('');
-    const [discount, setDiscount] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [description, setDescription] = useState('');
     const navigate = useNavigate();
 
+    const [formData, setFormData] = useState({
+        promotion_code: "",
+        discount: "",
+        start_date: "",
+        end_date: "",
+        description: "",
+        usage_limit: "",
+    });
+
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            await promotionApi.createPromotion(promotionCode, discount, startDate, endDate, description, user.token);
-            setPromotionCode('');
-            setDiscount('');
-            setStartDate('');
-            setEndDate('');
-            setDescription('');
 
-            await Swal.fire({
-                icon: 'success',
-                title: 'Thêm thành công!',
-                text: 'Mã giảm giá đã được thêm thành công.',
-                confirmButtonText: 'OK',
-            });
-            
-            navigate('/admin/promotions');
-        } catch (err) {
-            console.error(err);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Thêm thất bại!',
-                text: 'Có lỗi xảy ra khi thêm mã giảm giá.',
-                confirmButtonText: 'OK',
-            });
+        if (!formData.promotion_code || !formData.discount || !formData.start_date || !formData.end_date) {
+            Swal.fire("Thông báo", "Vui lòng nhập đầy đủ các trường bắt buộc", "warning");
+            return;
         }
-    }
+
+        setLoading(true);
+        try {
+            await promotionApi.createPromotion(
+                {
+                    promotion_code: formData.promotion_code,
+                    discount: Number(formData.discount),
+                    start_date: formData.start_date,
+                    end_date: formData.end_date,
+                    description: formData.description,
+                    usage_limit: formData.usage_limit ? Number(formData.usage_limit) : null,
+                },
+                user.token
+            );
+            await Swal.fire({
+                icon: "success",
+                title: "Thành công",
+                text: "Thêm khuyến mãi thành công!",
+                confirmButtonText: "OK",
+            });
+            navigate("/admin/promotions");
+        } catch (error) {
+            await Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Không thể thêm khuyến mãi. Vui lòng thử lại!",
+                confirmButtonText: "OK",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="flex flex-col flex-1">
-            <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+        <div className="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+            <h2 className="text-2xl font-semibold mb-6">Thêm Khuyến mãi Mới</h2>
+            <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                    <form onSubmit={handleSubmit} method="POST">
-                        <div className="space-y-6">
-                            <div>
-                                <Label>Promotion Code <span className="text-red">*</span></Label>
-                                <Input
-                                    type="text"
-                                    name="promotion_code"
-                                    id="promotion_code"
-                                    placeholder="Promotion Code"
-                                    value={promotionCode}
-                                    onChange={(e) => setPromotionCode(e?.target?.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label>Discount<span className="text-red">*</span></Label>
-                                <Input
-                                    type="number"
-                                    name="discount"
-                                    id="discount"
-                                    placeholder="Discount Percent"
-                                    value={discount}
-                                    onChange={(e) => setDiscount(e?.target?.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label>Start Date <span className="text-red">*</span></Label>
-                                <Input
-                                    type="date"
-                                    name="start_date"
-                                    id="start_date"
-                                    placeholder="Start Date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e?.target?.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label>End Date <span className="text-red">*</span></Label>
-                                <Input
-                                    type="date"
-                                    name="end_date"
-                                    id="end_date"
-                                    placeholder="End Date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e?.target?.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label>Description <span className="text-red">*</span></Label>
-                                <Input
-                                    type="text"
-                                    name="description"
-                                    id="description"
-                                    placeholder="Description"
-                                    value={description}
-                                    onChange={(e) => setDescription(e?.target?.value)}
-                                />
-                            </div>
-                            <div>
-                                <Button type="submit" onClick={handleSubmit} className="w-full">Add Promotion</Button>
-                            </div>
-                        </div>
-                    </form>
+                    <Label htmlFor="promotion_code">Mã Khuyến mãi <span className="text-red-600">*</span></Label>
+                    <Input
+                        id="promotion_code"
+                        name="promotion_code"
+                        type="text"
+                        value={formData.promotion_code}
+                        onChange={handleChange}
+                        placeholder="Nhập mã khuyến mãi"
+                        required
+                    />
                 </div>
-            </div>
+
+                <div>
+                    <Label htmlFor="discount">Phần trăm Giảm giá <span className="text-red-600">*</span></Label>
+                    <Input
+                        id="discount"
+                        name="discount"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.discount}
+                        onChange={handleChange}
+                        placeholder="Nhập phần trăm giảm giá"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <Label htmlFor="usage_limit">Giới hạn Số lượt dùng</Label>
+                    <Input
+                        id="usage_limit"
+                        name="usage_limit"
+                        type="number"
+                        min="1"
+                        value={formData.usage_limit}
+                        onChange={handleChange}
+                        placeholder="Để trống nếu không giới hạn"
+                    />
+                </div>
+
+                <div>
+                    <Label htmlFor="start_date">Ngày bắt đầu <span className="text-red-600">*</span></Label>
+                    <Input
+                        id="start_date"
+                        name="start_date"
+                        type="date"
+                        value={formData.start_date}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <Label htmlFor="end_date">Ngày kết thúc <span className="text-red-600">*</span></Label>
+                    <Input
+                        id="end_date"
+                        name="end_date"
+                        type="date"
+                        value={formData.end_date}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <Label htmlFor="description">Mô tả</Label>
+                    <Input
+                        id="description"
+                        name="description"
+                        type="text"
+                        value={formData.description}
+                        onChange={handleChange}
+                        placeholder="Mô tả thêm về khuyến mãi"
+                    />
+                </div>
+
+                <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">
+                    {loading ? "Đang xử lý..." : "Thêm Khuyến mãi"}
+                </Button>
+            </form>
         </div>
     );
 };

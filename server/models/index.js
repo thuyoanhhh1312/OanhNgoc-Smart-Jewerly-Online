@@ -34,7 +34,8 @@ const {
   Order,
   OrderItem,
   OrderStatus,
-  BankAccount
+  BankAccount,
+  PromotionUsage
 } = db;
 
 // Associations:
@@ -121,6 +122,43 @@ if (Order && OrderStatus) {
   Order.belongsTo(OrderStatus, { foreignKey: 'status_id' });
   OrderStatus.hasMany(Order, { foreignKey: 'status_id' });
 }
+
+// PromotionUsage - Customer (N:1)
+if (PromotionUsage && Customer) {
+  PromotionUsage.belongsTo(Customer, { foreignKey: 'customer_id' });
+  Customer.hasMany(PromotionUsage, { foreignKey: 'customer_id' });
+}
+
+// PromotionUsage - Promotion (N:1)
+if (PromotionUsage && Promotion) {
+  PromotionUsage.belongsTo(Promotion, { foreignKey: 'promotion_id' });
+  Promotion.hasMany(PromotionUsage, { foreignKey: 'promotion_id' });
+}
+
+// PromotionUsage - Order (N:1)
+if (PromotionUsage && Order) {
+  PromotionUsage.belongsTo(Order, { foreignKey: 'order_id' });
+  Order.hasMany(PromotionUsage, { foreignKey: 'order_id' });
+}
+
+// PromotionUsage - Customer (N:1)
+if (PromotionUsage && Customer) {
+  PromotionUsage.belongsTo(Customer, { foreignKey: 'customer_id' });
+  Customer.hasMany(PromotionUsage, { foreignKey: 'customer_id' });
+}
+
+// PromotionUsage - Promotion (N:1)
+if (PromotionUsage && Promotion) {
+  PromotionUsage.belongsTo(Promotion, { foreignKey: 'promotion_id' });
+  Promotion.hasMany(PromotionUsage, { foreignKey: 'promotion_id' });
+}
+
+// PromotionUsage - Order (N:1)
+if (PromotionUsage && Order) {
+  PromotionUsage.belongsTo(Order, { foreignKey: 'order_id' });
+  Order.hasMany(PromotionUsage, { foreignKey: 'order_id' });
+}
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
