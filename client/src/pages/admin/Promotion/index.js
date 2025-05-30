@@ -1,8 +1,8 @@
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import React, { useEffect, useState } from "react";
-import PromotionAPI from "../../../api/promotionApi"; // Đường dẫn đến file promotionApi.js
-import { Link } from "react-router";
+import PromotionAPI from "../../../api/promotionApi";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import Swal from "sweetalert2";
@@ -10,11 +10,19 @@ import Swal from "sweetalert2";
 const Promotion = () => {
   const { user } = useSelector((state) => ({ ...state }));
   const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchPromotions = async () => {
-      const data = await PromotionAPI.getPromotions();
-      setPromotions(data);
+      setLoading(true);
+      try {
+        const data = await PromotionAPI.getPromotions();
+        setPromotions(data);
+      } catch (error) {
+        Swal.fire("Lỗi", "Không thể tải danh sách khuyến mãi", "error");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPromotions();
   }, []);
@@ -25,66 +33,31 @@ const Promotion = () => {
       text: "Thao tác này không thể hoàn tác!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "OK",
-      cancelButtonText: "HỦY",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
     });
 
     if (result.isConfirmed) {
       try {
-        await PromotionAPI.deleteSubCategory(id, user?.token);
-
+        await PromotionAPI.deletePromotion(id, user?.token);
         setPromotions(promotions.filter((pro) => pro.promotion_id !== id));
-
-        Swal.fire("Đã xóa!", "Danh mục đã được xóa thành công.", "success");
+        Swal.fire("Đã xóa!", "Khuyến mãi đã được xóa thành công.", "success");
       } catch (error) {
-        console.error("Lỗi khi xóa danh mục:", error);
-        Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa danh mục!", "error");
+        Swal.fire("Lỗi", "Không thể xóa khuyến mãi", "error");
       }
     }
   };
 
-  const createdDateBodyTemplate = (rowData) => {
-    const start_date = rowData.start_date;
-    return (
-      <div>
-        {start_date ? (
-          <p className="text-gray-700">
-            {dayjs(start_date).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
-        ) : (
-          <p className="text-gray-700"></p>
-        )}
-      </div>
-    );
-  };
-
-  const endDateBodyTemplate = (rowData) => {
-    const endDate = rowData.end_date;
-    return (
-      <div>
-        {endDate ? (
-          <p className="text-gray-700">
-            {dayjs(endDate).format("DD/MM/YYYY HH:mm:ss")}
-          </p>
-        ) : (
-          <p className="text-gray-700"></p>
-        )}
-      </div>
-    );
-  };
-
-  const discountBodyTemplate = (rowData) => {
-    return <span>{rowData.discount}%</span>;
-  };
+  const formatDate = (dateStr) =>
+    dateStr ? dayjs(dateStr).format("DD/MM/YYYY") : "";
 
   return (
-    <div className="bg-[#FFFFFF] p-4 rounded-lg shadow-md">
-      {/* Tiêu đề */}
-      <div className="flex flex-row justify-between items-center mb-4">
-        <h1 className="text-[32px] font-bold ">Promotion List</h1>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-semibold">Danh sách Khuyến mãi</h1>
         <Link to="/admin/promotions/add">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-            Add Promotion
+          <button className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2 rounded">
+            Thêm Khuyến mãi
           </button>
         </Link>
       </div>
@@ -93,69 +66,76 @@ const Promotion = () => {
         value={promotions}
         paginator
         rows={10}
-        showGridlines
-        paginatorTemplate="PrevPageLink PageLinks NextPageLink"
+        loading={loading}
+        stripedRows
+        responsiveLayout="scroll"
       >
-        <Column
-          field="promotion_id"
-          header="ID"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        ></Column>
-        <Column
-          field="promotion_code"
-          header="Mã khuyến mãi"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
-        ></Column>
+        <Column field="promotion_code" header="Mã Khuyến mãi" sortable headerClassName="bg-gray-200"></Column>
         <Column
           field="description"
           header="Mô tả"
-          sortable
-          headerClassName="bg-[#d2d4d6]"
+          bodyStyle={{ maxWidth: "300px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+          headerClassName="bg-gray-200"
         ></Column>
         <Column
           field="discount"
-          header="Phần trăm giảm giá"
+          header="Giảm (%)"
           sortable
-          headerClassName="bg-[#d2d4d6]"
-          body={discountBodyTemplate}
-        ></Column>
+          style={{ width: "110px" }}
+          body={(row) => <span>{row.discount}%</span>}
+          headerClassName="bg-gray-200"
+        />
+        <Column
+          field="usage_count"
+          header="Đã dùng"
+          sortable
+          style={{ width: "100px" }}
+          headerClassName="bg-gray-200"
+        />
+        <Column
+          field="usage_limit"
+          header="Giới hạn"
+          sortable
+          style={{ width: "100px" }}
+          body={(row) => (row.usage_limit === null ? "Không giới hạn" : row.usage_limit)}
+          headerClassName="bg-gray-200"
+        />
         <Column
           field="start_date"
-          header="Ngày bắt đầu"
+          header="Bắt đầu"
           sortable
-          headerClassName="bg-[#d2d4d6]"
-          body={createdDateBodyTemplate}
-        ></Column>
+          style={{ width: "140px" }}
+          body={(row) => formatDate(row.start_date)}
+          headerClassName="bg-gray-200"
+        />
         <Column
           field="end_date"
-          header="Ngày kết thúc"
+          header="Kết thúc"
           sortable
-          headerClassName="bg-[#d2d4d6]"
-          body={endDateBodyTemplate}
-        ></Column>
+          style={{ width: "140px" }}
+          body={(row) => formatDate(row.end_date)}
+          headerClassName="bg-gray-200"
+        />
         <Column
+          headerClassName="bg-gray-200"
+          header="Hành động"
           body={(rowData) => (
-            <div className="flex flex-row gap-2">
+            <div className="flex gap-2 justify-center">
               <Link to={`/admin/promotions/edit/${rowData.promotion_id}`}>
-                <button className="bg-green-500 text-white px-4 py-2 rounded">
-                  Edit
+                <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
+                  Sửa
                 </button>
               </Link>
-              {/* Xóa nút điều hướng */}
               <button
                 onClick={() => handleDelete(rowData.promotion_id)}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
               >
-                Delete
+                Xóa
               </button>
             </div>
           )}
-          headerStyle={{ width: "8rem", textAlign: "center" }}
-          bodyStyle={{ textAlign: "center" }}
-          headerClassName="bg-[#d2d4d6]"
-        ></Column>
+          style={{ width: "150px", textAlign: "center" }}
+        />
       </DataTable>
     </div>
   );

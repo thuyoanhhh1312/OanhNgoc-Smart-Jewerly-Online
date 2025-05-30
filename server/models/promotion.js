@@ -34,6 +34,16 @@ const Promotion = sequelize.define('Promotion', {
         allowNull: true,
     },
 
+    usage_limit: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    usage_count: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+    },
+
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

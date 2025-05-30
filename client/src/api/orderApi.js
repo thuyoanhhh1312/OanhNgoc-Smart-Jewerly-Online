@@ -139,7 +139,11 @@ const checkout = async (orderData, accessToken) => {
 // Tính toán giá với mã khuyến mãi
 const calculatePrice = async (priceData, accessToken) => {
   try {
-    const response = await axiosInstance.post(`${API_URL}/calculate-price`, priceData, {
+    const response = await axiosInstance.post(`${API_URL}/calculate-price`, {
+      items: priceData?.items,
+      promotion_code: priceData?.promotion_code,
+      customer_id: priceData?.customer_id,
+    }, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

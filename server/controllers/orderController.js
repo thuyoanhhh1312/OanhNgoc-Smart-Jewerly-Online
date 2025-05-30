@@ -220,84 +220,92 @@ export const updateIsDeposit = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi cập nhật trạng thái đặt cọc", error: error.message });
   }
 };
-// Tính toán giá đơn hàng với mã khuyến mãi
+
 export const calculatePrice = async (req, res) => {
   try {
-    const { items, promotion_code } = req.body;
-
+    console.log(" req",  req);
+    const { items, promotion_code, customer_id } = req.body;
+    
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
-    //items là một mảng chứa các sản phẩm trong đơn hàng, mỗi sản phẩm có cấu trúc { product_id, quantity, price } do client gửi lên.
-    const productIds = items.map((i) => i.product_id); // Lấy danh sách ID sản phẩm từ mảng items
-    //db.product là mô hình đại diện cho bảng sản phẩm trong cơ sở dữ liệu, được định nghĩa trong models/index.js.
-    //findAll là một phương thức của Sequelize để truy vấn tất cả các bản ghi trong bảng sản phẩm.
-    //where: { product_id: productIds } là điều kiện để chỉ lấy các sản phẩm có ID nằm trong mảng productIds.
+    if (!customer_id) {
+      return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
+    }
+
+    const productIds = items.map(i => i.product_id);
     const products = await db.Product.findAll({ where: { product_id: productIds } });
 
     if (products.length !== productIds.length) {
       return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
     }
-    //tính sub_total là tổng giá trị của các sản phẩm trong đơn hàng, được tính bằng cách nhân giá của từng sản phẩm với số lượng tương ứng.
-    let sub_total = 0;
 
+    let sub_total = 0;
     for (const item of items) {
-      const product = products.find((p) => p.product_id === item.product_id);
+      const product = products.find(p => p.product_id === item.product_id);
       if (!product) {
         return res.status(400).json({ message: `Sản phẩm có ID ${item.product_id} không tồn tại.` });
       }
-      // Kiểm tra số lượng sản phẩm trong kho
       if (product.quantity < item.quantity) {
         return res.status(400).json({
-          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`,
+          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`
         });
       }
-      // sub_total = giá sản phẩm * số lượng đặt.Number() được sử dụng để chuyển đổi giá trị sang kiểu số, đảm bảo tính toán chính xác.
       sub_total += Number(product.price) * item.quantity;
     }
 
-    let discount = 0; // Khởi tạo discount là 0, sẽ được cập nhật nếu có mã khuyến mãi hợp lệ.
-    let valid = false; // Biến này sẽ cho biết mã khuyến mãi có hợp lệ hay không. (true nếu hợp lệ, false nếu không hợp lệ).
+    let discount = 0;
+    let valid = false;
     let message = "Không có mã khuyến mãi áp dụng.";
-    let promoInfo = null; // Thông tin về mã khuyến mãi nếu có, sẽ được trả về cho client.(null nếu không có mã khuyến mãi hoặc mã không hợp lệ).
+    let promoInfo = null;
 
     if (promotion_code) {
-      // Kiểm tra mã khuyến mãi trong cơ sở dữ liệu
+      // Kiểm tra mã khuyến mãi, ngày bắt đầu/kết thúc, usage_limit
       const promo = await db.Promotion.findOne({
         where: {
-          promotion_code, // mã trùng với mã khách hàng nhập vào
-          start_date: { [Op.lte]: new Date() }, // Ngày bắt đầu khuyến mãi phải nhỏ hơn hoặc bằng ngày hiện tại
-          end_date: { [Op.gte]: new Date() }, // Ngày kết thúc khuyến mãi phải lớn hơn hoặc bằng ngày hiện tại
-          // Op.lte: là toán tử so sánh "nhỏ hơn hoặc bằng" trong Sequelize.
-          // Op.gte: là toán tử so sánh "lớn hơn hoặc bằng" trong Sequelize.
+          promotion_code,
+          start_date: { [Op.lte]: new Date() },
+          end_date: { [Op.gte]: new Date() },
         },
       });
-      if (promo) { // Nếu tìm thấy mã khuyến mãi hợp lệ
-        // Giả sử promo.discount là phần trăm, ví dụ 10 tương đương giảm 10%
-        discount = sub_total * (Number(promo.discount) / 100);
-        valid = true; // Đặt valid là true nếu mã khuyến mãi hợp lệ
-        message = `Mã khuyến mãi hợp lệ, giảm ${promo.discount}% (${discount.toLocaleString('vi-VN')} đ).`; // Thông báo cho người dùng biết mã khuyến mãi hợp lệ và số tiền giảm.
-        // promoInfo chứa thông tin chi tiết về mã khuyến mãi để trả về cho client
-        promoInfo = {
-          promotion_code: promo.promotion_code, // Mã khuyến mãi
-          description: promo.description,
-          discount_percent: promo.discount, // Phần trăm giảm giá
-        };
-      } else {
+
+      if (!promo) {
         message = "Mã khuyến mãi không hợp lệ hoặc đã hết hạn.";
+      } else if (promo.usage_limit !== null && promo.usage_count >= promo.usage_limit) {
+        message = "Mã khuyến mãi đã hết lượt sử dụng.";
+      } else {
+        // Kiểm tra khách hàng đã dùng mã này chưa
+        const used = await db.PromotionUsage.findOne({
+          where: {
+            customer_id,
+            promotion_id: promo.promotion_id,
+          }
+        });
+        if (used) {
+          message = "Bạn đã sử dụng mã này rồi.";
+        } else {
+          discount = sub_total * (Number(promo.discount) / 100);
+          valid = true;
+          message = `Mã khuyến mãi hợp lệ, giảm ${promo.discount}% (${discount.toLocaleString('vi-VN')} đ).`;
+          promoInfo = {
+            promotion_code: promo.promotion_code,
+            description: promo.description,
+            discount_percent: promo.discount,
+          };
+        }
       }
     }
 
-    let total = sub_total - discount; // Tính tổng sau khi áp dụng giảm giá
-    if (total < 0) total = 0; // Đảm bảo tổng không âm
+    let total = sub_total - discount;
+    if (total < 0) total = 0;
 
     return res.json({
-      sub_total, // Tổng giá trị trước giảm giá
+      sub_total,
       discount,
-      total, // Tổng giá trị sau giảm giá
-      valid, // Trả về true nếu mã khuyến mãi hợp lệ, false nếu không
-      message, // Thông báo cho người dùng về kết quả áp dụng mã khuyến mãi
-      promotion: promoInfo, // Trả về object hoặc null
+      total,
+      valid,
+      message,
+      promotion: promoInfo,
     });
   } catch (error) {
     console.error("calculatePrice error:", error);
@@ -306,48 +314,45 @@ export const calculatePrice = async (req, res) => {
 };
 
 export const checkout = async (req, res) => {
-  const t = await db.sequelize.transaction(); // Tạo một transaction(giao dịchdịch) mới để đảm bảo tính toàn vẹn dữ liệu trong quá trình tạo đơn hàng.
-  // Transaction giúp đảm bảo rằng tất cả các thao tác liên quan đến đơn hàng sẽ được thực hiện thành công hoặc không có thao tác nào được thực hiện nếu có lỗi xảy ra.
-  let finished = false; // Biến này dùng để theo dõi xem transaction đã hoàn thành hay chưa, tránh rollback không cần thiết nếu đã commit thành công.
+  const t = await db.sequelize.transaction();
+  let finished = false;
   try {
-    const { // Lấy thông tin từ request body
+    const {
       customer_id,
       user_id = null,
       promotion_code = null,
       payment_method = null,
-      shipping_address = null, // Địa chỉ giao hàng
-      is_deposit = false, // Biến này xác định xem đơn hàng có yêu cầu đặt cọc hay không
-      items = [], // Danh sách sản phẩm trong đơn hàng, mỗi sản phẩm có cấu trúc { product_id, quantity, price }
-    } = req.body; // Destructuring để lấy các trường cần thiết từ request body
+      shipping_address = null,
+      is_deposit = false,
+      items = [],
+    } = req.body;
 
-    let deposit_status = req.body.deposit_status ?? "none"; // Trạng thái đặt cọc, mặc định là "none" nếu không có trong request body
-    // deposit_status có thể là "pending", "paid" hoặc "none" (không yêu cầu đặt cọc).
-    if (!customer_id) { // Kiểm tra xem customer_id có được cung cấp hay không
-      await t.rollback(); // Nếu không có customer_id, rollback transaction và trả về lỗi
+    let deposit_status = req.body.deposit_status ?? "none";
+
+    if (!customer_id) {
+      await t.rollback();
       return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
     }
-    if (!Array.isArray(items) || items.length === 0) { // Kiểm tra xem items có phải là mảng và không rỗng hay không
+    if (!Array.isArray(items) || items.length === 0) {
       await t.rollback();
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
 
-    const productIds = items.map((i) => i.product_id); // Lấy danh sách ID sản phẩm từ mảng items
-    const products = await db.Product.findAll({ // Truy vấn tất cả sản phẩm có ID nằm trong mảng productIds
+    const productIds = items.map(i => i.product_id);
+    const products = await db.Product.findAll({
       where: { product_id: productIds },
-      transaction: t, // Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu 
-      // t là biến đại diện cho một giao dịch (transaction) Sequelize đã tạo trước đóđó
-      lock: t.LOCK.UPDATE, // Khóa các bản ghi sản phẩm để tránh xung đột khi cập nhật tồn kho
+      transaction: t,
+      lock: t.LOCK.UPDATE,
     });
 
-    if (products.length !== productIds.length) { // Kiểm tra xem có đủ sản phẩm trong cơ sở dữ liệu không
+    if (products.length !== productIds.length) {
       await t.rollback();
       return res.status(400).json({ message: "Một số sản phẩm không tồn tại trong hệ thống." });
     }
 
-    let sub_total = 0; // Khởi tạo sub_total là 0, sẽ được tính toán dựa trên giá và số lượng của các sản phẩm trong đơn hàng
-    // Duyệt qua từng sản phẩm trong đơn hàng để tính toán sub_total và kiểm tra tồn kho
+    let sub_total = 0;
     for (const item of items) {
-      const product = products.find((p) => p.product_id === item.product_id);
+      const product = products.find(p => p.product_id === item.product_id);
       if (!product) {
         await t.rollback();
         return res.status(400).json({ message: `Sản phẩm có ID ${item.product_id} không tồn tại.` });
@@ -355,35 +360,57 @@ export const checkout = async (req, res) => {
       if (product.quantity < item.quantity) {
         await t.rollback();
         return res.status(400).json({
-          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`,
+          message: `Sản phẩm "${product.product_name}" không đủ số lượng trong kho (còn ${product.quantity}).`
         });
       }
       if (Number(product.price) !== Number(item.price)) {
         await t.rollback();
         return res.status(400).json({
-          message: `Giá sản phẩm "${product.product_name}" không khớp với giá hiện tại.`,
+          message: `Giá sản phẩm "${product.product_name}" không khớp với giá hiện tại.`
         });
       }
-      sub_total += Number(item.price) * item.quantity; // Tính toán sub_total bằng cách nhân giá sản phẩm với số lượng đặt
+      sub_total += Number(item.price) * item.quantity;
     }
 
-    // Xử lý khuyến mãi (theo phần trăm)
     let discount = 0;
     let promotion_id = null;
+
     if (promotion_code) {
       const promo = await db.Promotion.findOne({
         where: {
           promotion_code,
-          start_date: { [db.Sequelize.Op.lte]: new Date() },
-          end_date: { [db.Sequelize.Op.gte]: new Date() },
+          start_date: { [Op.lte]: new Date() },
+          end_date: { [Op.gte]: new Date() },
         },
         transaction: t,
+        lock: t.LOCK.UPDATE,
       });
+
       if (!promo) {
         await t.rollback();
         return res.status(400).json({ message: "Mã khuyến mãi không hợp lệ hoặc đã hết hạn." });
       }
-      // Giả sử promo.discount là phần trăm, ví dụ 10 tương đương giảm 10%
+
+      // Kiểm tra lượt dùng
+      if (promo.usage_limit !== null && promo.usage_count >= promo.usage_limit) {
+        await t.rollback();
+        return res.status(400).json({ message: "Mã khuyến mãi đã hết lượt sử dụng." });
+      }
+
+      // Kiểm tra khách đã dùng chưa
+      const used = await db.PromotionUsage.findOne({
+        where: {
+          customer_id,
+          promotion_id: promo.promotion_id,
+        },
+        transaction: t,
+        lock: t.LOCK.UPDATE,
+      });
+      if (used) {
+        await t.rollback();
+        return res.status(400).json({ message: "Bạn đã sử dụng mã này rồi." });
+      }
+
       discount = +(sub_total * (Number(promo.discount) / 100)).toFixed(2);
       promotion_id = promo.promotion_id;
     }
@@ -393,7 +420,7 @@ export const checkout = async (req, res) => {
 
     let deposit = 0;
     if (is_deposit) {
-      deposit = Number((total * 0.1).toFixed(2)); // 10% đặt cọc
+      deposit = Number((total * 0.1).toFixed(2));
       if (!["pending", "paid", "none"].includes(deposit_status)) {
         await t.rollback();
         return res.status(400).json({ message: "Trạng thái đặt cọc không hợp lệ." });
@@ -403,28 +430,25 @@ export const checkout = async (req, res) => {
     }
 
     // Tạo đơn hàng
-    const order = await db.Order.create(
-      {
-        customer_id,
-        user_id,
-        promotion_id,
-        status_id: 1, // trạng thái mới
-        sub_total,
-        discount,
-        total,
-        deposit,
-        is_deposit,
-        deposit_status,
-        shipping_address,
-        payment_method,
-        created_at: new Date(),
-        updated_at: new Date(),
-      },
-      { transaction: t }
-    );
+    const order = await db.Order.create({
+      customer_id,
+      user_id,
+      promotion_id,
+      status_id: 1,
+      sub_total,
+      discount,
+      total,
+      deposit,
+      is_deposit,
+      deposit_status,
+      shipping_address,
+      payment_method,
+      created_at: new Date(),
+      updated_at: new Date(),
+    }, { transaction: t });
 
     // Tạo chi tiết đơn hàng
-    const orderItemsData = items.map((item) => ({
+    const orderItemsData = items.map(item => ({
       order_id: order.order_id,
       product_id: item.product_id,
       quantity: item.quantity,
@@ -436,40 +460,52 @@ export const checkout = async (req, res) => {
 
     await db.OrderItem.bulkCreate(orderItemsData, { transaction: t });
 
-    // Cập nhật tồn kho, sold_quantity
+    // Cập nhật tồn kho và số lượng bán
     for (const item of items) {
-      await db.Product.update(
-        {
-          quantity: db.Sequelize.literal(`quantity - ${item.quantity}`),
-          sold_quantity: db.Sequelize.literal(`sold_quantity + ${item.quantity}`),
-        },
-        {
-          where: { product_id: item.product_id },
-          transaction: t,
-        }
-      );
+      await db.Product.update({
+        quantity: db.Sequelize.literal(`quantity - ${item.quantity}`),
+        sold_quantity: db.Sequelize.literal(`sold_quantity + ${item.quantity}`),
+      }, {
+        where: { product_id: item.product_id },
+        transaction: t,
+      });
+    }
+
+    // Tăng usage_count + lưu lịch sử dùng mã khuyến mãi
+    if (promotion_id) {
+      await db.Promotion.update({
+        usage_count: db.Sequelize.literal('usage_count + 1'),
+      }, {
+        where: { promotion_id },
+        transaction: t,
+      });
+
+      await db.PromotionUsage.create({
+        customer_id,
+        promotion_id,
+        order_id: order.order_id,
+        used_at: new Date(),
+      }, { transaction: t });
     }
 
     await t.commit();
     finished = true;
 
-    // Lấy lại đơn hàng với các thông tin liên quan để trả về
     const createdOrder = await db.Order.findOne({
       where: { order_id: order.order_id },
       include: [
         { model: db.OrderItem },
-        { model: db.Customer, attributes: ["name", "email", "phone"] },
-        { model: db.User, attributes: ["name"] },
+        { model: db.Customer, attributes: ['name', 'email', 'phone'] },
+        { model: db.User, attributes: ['name'] },
         { model: db.Promotion },
         { model: db.OrderStatus },
       ],
     });
 
     return res.status(201).json({ message: "Tạo đơn hàng thành công.", order: createdOrder });
+
   } catch (error) {
-    if (!finished) {
-      await t.rollback();
-    }
+    if (!finished) await t.rollback();
     console.error("checkout error:", error);
     return res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
   }

@@ -16,6 +16,7 @@ export const calculatePriceSchema = Joi.object({
     })
   ).min(1).required(),
   promotion_code: Joi.string().trim().optional().allow('', null),
+  customer_id: Joi.number().integer().positive().required(),
 });
 
 // Validator cho /checkout
