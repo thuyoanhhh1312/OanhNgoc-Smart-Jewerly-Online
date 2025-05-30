@@ -21,6 +21,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloseIcon from '@mui/icons-material/Close';
 import { getProvinces, getDistricts, getWards } from '../api/vietnamLocationApi';
+import bankApi from '../api/bankApi';
 
 // Thông tin ngân hàng MB Bank
 const BANK_NAME = 'MB Bank';
@@ -61,6 +62,11 @@ const CheckoutPage = () => {
 
   // Thanh toán
   const [paymentMethod, setPaymentMethod] = useState('cod');
+
+  // Danh sách tài khoản ngân hàng (lấy từ backend)
+  const [bankAccounts, setBankAccounts] = useState([]);
+  // Tài khoản ngân hàng được chọn khi paymentMethod='ck'
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState(null);
 
   // Tính tiền
   const [subTotal, setSubTotal] = useState(totalAmount || 0);
@@ -128,6 +134,22 @@ const CheckoutPage = () => {
     }
     fetchWardsData();
   }, [district]);
+
+  // Load danh sách ngân hàng từ backend khi trang mount
+  useEffect(() => {
+    const fetchBankAccounts = async () => {
+      try {
+        const data = await bankApi.getBankAccounts({ all: false });
+        setBankAccounts(data);
+        if (data.length > 0) {
+          setSelectedBankAccountId(data[0].id);
+        }
+      } catch (error) {
+        toast.error('Lỗi khi tải danh sách tài khoản ngân hàng');
+      }
+    };
+    fetchBankAccounts();
+  }, []);
 
   // Hàm giúp tìm tên theo code trong danh sách
   function findNameByCode(list, code) {
@@ -256,6 +278,7 @@ const CheckoutPage = () => {
       });
       qrStr = qrPay.build();
     } else if (paymentMethod === 'momo') {
+      const MOMO_ACCOUNT = '99MM23332M53758772';
       const momoQR = QRPay.initVietQR({
         bankBin: BanksObject.banviet.bin,
         bankNumber: MOMO_ACCOUNT,
@@ -266,13 +289,17 @@ const CheckoutPage = () => {
       momoQR.setUnreservedField('80', '046');
       qrStr = momoQR.build();
     } else if (paymentMethod === 'ck') {
-      const qrPay = QRPay.initVietQR({
-        bankBin: BANK_CODE,
-        bankNumber: BANK_ACCOUNT,
-        amount: amount.toString(),
-        purpose: 'Thanh toan',
-      });
-      qrStr = qrPay.build();
+      // Lấy bank được chọn từ danh sách
+      const selectedBank = bankAccounts.find((b) => b.id === selectedBankAccountId);
+      if (selectedBank) {
+        const qrPay = QRPay.initVietQR({
+          bankBin: selectedBank.bank_code || BanksObject.mbbank.bin, // fallback nếu ko có code
+          bankNumber: selectedBank.account_number,
+          amount: amount.toString(),
+          purpose: 'Thanh toan don hang',
+        });
+        qrStr = qrPay.build();
+      }
     }
 
     setQrValue(qrStr);
@@ -615,6 +642,30 @@ const CheckoutPage = () => {
             </Button>
           </Stack>
 
+          {paymentMethod === 'ck' && (
+            <Box mt={3} mb={2}>
+              <Typography variant="subtitle1" color="text.primary" gutterBottom>
+                Chọn ngân hàng
+              </Typography>
+              <FormControl fullWidth>
+                <Select
+                  value={selectedBankAccountId || ''}
+                  onChange={(e) => setSelectedBankAccountId(e.target.value)}
+                  displayEmpty
+                >
+                  <MenuItem disabled value="">
+                    Chọn ngân hàng
+                  </MenuItem>
+                  {bankAccounts.map((bank) => (
+                    <MenuItem key={bank.id} value={bank.id}>
+                      {bank.bank_name} - {bank.account_number}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          )}
+
           {(paymentMethod === 'cod' || paymentMethod === 'momo' || paymentMethod === 'ck') && (
             <Box
               mt={3}
@@ -646,15 +697,15 @@ const CheckoutPage = () => {
                 {paymentMethod === 'momo'
                   ? 'Ví MoMo'
                   : paymentMethod === 'ck'
-                    ? BANK_NAME
-                    : BANK_NAME}
+                    ? bankAccounts.find(b => b.id === selectedBankAccountId)?.bank_name || ''
+                    : 'MB Bank'}
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={1}>
                 {paymentMethod === 'momo'
-                  ? MOMO_ACCOUNT
+                  ? '99MM23332M53758772'
                   : paymentMethod === 'ck'
-                    ? BANK_ACCOUNT
-                    : BANK_ACCOUNT}
+                    ? bankAccounts.find(b => b.id === selectedBankAccountId)?.account_number || ''
+                    : '0816837690'}
               </Typography>
             </Box>
           )}

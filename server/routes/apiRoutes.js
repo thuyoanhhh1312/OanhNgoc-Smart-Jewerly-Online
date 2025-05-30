@@ -29,6 +29,7 @@ import * as productReviewController from '../controllers/productReviewController
 import * as searchController from '../controllers/searchController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
 import * as vietnamLocationController from '../controllers/vietnamLocationController.js';
+import * as bankController from '../controllers/bankController.js';
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -131,5 +132,14 @@ router.get('/dashboard/orders/count', authenticateToken, isAdmin, dashboardContr
 router.get('/locations/provinces', vietnamLocationController.getProvinces);
 router.get('/locations/districts/:provinceCode', vietnamLocationController.getDistrictsByProvince);
 router.get('/locations/wards/:districtCode', vietnamLocationController.getWardsByDistrict);
+
+
+//Bank
+router.get('/bank-accounts', bankController.getBankAccounts);
+router.post('/bank-accounts', authenticateToken, isAdmin, bankController.createBankAccount);
+router.put('/bank-accounts/:id', authenticateToken, isAdmin, bankController.updateBankAccount);
+router.delete('/bank-accounts/:id', authenticateToken, isAdmin, bankController.deleteBankAccount);
+router.patch('/bank-accounts/:id/enable', authenticateToken, isAdmin, bankController.toggleBankAccountStatus);
+
 
 export default router;
