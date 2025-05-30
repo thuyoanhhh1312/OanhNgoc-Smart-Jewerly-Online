@@ -40,6 +40,8 @@ import EditUser from "./pages/admin/User/edit";
 
 import Dashboard from "./pages/admin/Dashboard";
 
+import AdminBankAccounts from "./pages/admin/Bank/AdminBankAccounts";
+
 import CustomerList from './pages/admin/Customer/index';
 
 import Home from "./pages/Home";
@@ -241,6 +243,24 @@ function App() {
             element={
               <AdminOrStaffRoute>
                 <EditOrder />
+              </AdminOrStaffRoute>
+            }
+          />
+          <Route
+            path="/admin/orders/edit/:id"
+            element={
+              <AdminOrStaffRoute>
+                <EditOrder />
+              </AdminOrStaffRoute>
+            }
+          />
+
+          {/*Bank */}
+          <Route
+            path="/admin/bank-accounts"
+            element={
+              <AdminOrStaffRoute>
+                <AdminBankAccounts />
               </AdminOrStaffRoute>
             }
           />

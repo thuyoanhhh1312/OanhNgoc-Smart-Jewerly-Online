@@ -33,7 +33,8 @@ const {
   ProductReview,
   Order,
   OrderItem,
-  OrderStatus
+  OrderStatus,
+  BankAccount
 } = db;
 
 // Associations:
