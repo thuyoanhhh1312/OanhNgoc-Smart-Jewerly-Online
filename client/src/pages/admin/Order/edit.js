@@ -169,7 +169,7 @@ const EditOrder = () => {
                 id="staff_id"
                 value={staffId}
                 onChange={(e) => setStaffId(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded"
+                className={`w-full p-2 border border-gray-300 rounded ${!isAdmin && 'bg-[F3F4F6] border-[F3F4F6]'}`}
                 required
                 disabled={!isAdmin}
               >

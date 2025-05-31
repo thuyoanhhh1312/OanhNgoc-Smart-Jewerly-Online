@@ -223,9 +223,8 @@ export const updateIsDeposit = async (req, res) => {
 
 export const calculatePrice = async (req, res) => {
   try {
-    console.log(" req",  req);
     const { items, promotion_code, customer_id } = req.body;
-    
+
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
@@ -508,5 +507,56 @@ export const checkout = async (req, res) => {
     if (!finished) await t.rollback();
     console.error("checkout error:", error);
     return res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
+  }
+};
+
+export const getOrderByUserId = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    if (!user_id) {
+      return res.status(400).json({ message: "Thiếu tham số user_id." });
+    }
+
+    const orders = await db.Order.findAll({
+      where: { user_id: user_id },
+      include: [
+        {
+          model: db.Customer,
+          attributes: ["name", "email", "phone"],
+        },
+        {
+          model: db.Promotion,
+          attributes: ["promotion_code"],
+        },
+        {
+          model: db.OrderStatus,
+          attributes: ["status_name", "color_code"],
+        },
+        {
+          model: db.OrderItem,
+          attributes: ["quantity", "price", "total_price"],
+          include: [
+            {
+              model: db.Product,
+              attributes: ["product_name"],
+            },
+          ],
+        },
+      ],
+      order: [["created_at", "DESC"]],
+    });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng của user này." });
+    }
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error("Lỗi khi lấy đơn hàng theo user_id:", error);
+    return res.status(500).json({
+      message: "Lỗi khi lấy đơn hàng theo user_id.",
+      error: error.message,
+    });
   }
 };
