@@ -37,3 +37,26 @@ export const getCustomers = async (keyword = "") => {
     throw error;
   }
 };
+
+export const updateCustomerProfile = async (data, accessToken) => {
+  try {
+    const response = await axiosInstance.put(`${API_URL}/customers/profile`, data, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating customer profile:", error);
+    throw error;
+  }
+};
+
+export const getCustomerByUserId = async (userId) => {
+  try {
+    const response = await axios.get(`${API_URL}/customers/by-user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching customer by userId=${userId}:`, error);
+    throw error;
+  }
+};
+

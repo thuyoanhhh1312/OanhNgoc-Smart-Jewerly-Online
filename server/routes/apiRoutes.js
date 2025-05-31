@@ -43,6 +43,8 @@ router.get('/auth/current-admin', authenticateToken, isAdmin, authController.cur
 router.get('/auth/current-admin-or-staff', authenticateToken, isAdminOrStaff, authController.currentStaffOrAdmin);
 router.get('/auth/current-user', authenticateToken, authController.currentUser);
 router.post('/auth/refresh-token', authController.refreshToken);
+router.post('/auth/forgot-password', authController.forgotPassword);
+router.post('/auth/reset-password', authController.resetPassword);
 
 
 // User routes
@@ -59,10 +61,8 @@ router.delete('/users/:id', authenticateToken, isAdminOrStaff, userController.de
 router.get('/customers', customerController.getAllCustomers);
 router.get('/customers/:id', customerController.getCustomerById);
 router.delete('/customers/:id', authenticateToken, customerController.deleteCustomer);
-
-
-// //Customer routes
-// router.post("/profile", authenticateToken, customerController.upsertCustomerProfile);
+router.put('/customers/profile', authenticateToken, customerController.updateCustomerProfile);
+router.get('/customers/by-user/:userId', customerController.getCustomer);
 
 // Category routes
 router.get('/categories', categoryController.getAllCategories);

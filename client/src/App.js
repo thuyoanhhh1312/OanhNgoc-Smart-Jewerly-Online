@@ -14,6 +14,7 @@ import "./App.css";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
+import ResetPassword from "./pages/AuthPages/ResetPassword";
 
 import Category from "./pages/admin/Category/index";
 import AddCategory from "./pages/admin/Category/add";
@@ -272,7 +273,8 @@ function App() {
         <Route path="/:slug" element={<ProductDetail />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/forgot/password" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/search" element={<Search />} />
         <Route path="/product-by-category/:categoryName" element={<ProductCategoryPage />} />
         <Route path="/promotions" element={<PromotionsPage />} />
