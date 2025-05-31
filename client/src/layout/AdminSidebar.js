@@ -44,6 +44,7 @@ const allNavItems = [
     icon: <DashboardIcon fontSize="medium" />,
     name: "Dashboard",
     path: "/admin/dashboard",
+    rolesAllowed: [1],
   },
   {
     icon: <PeopleIcon fontSize="medium" />,
@@ -54,6 +55,7 @@ const allNavItems = [
     icon: <AccountCircleIcon fontSize="medium" />,
     name: "User Profile",
     path: "/admin/user",
+    rolesAllowed: [1],
   },
   {
     icon: <AccountBalanceIcon fontSize="medium" />,
