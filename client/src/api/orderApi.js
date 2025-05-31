@@ -80,7 +80,21 @@ const updateStaff = async (id, staff_id, accessToken) => {
 
 const getOrderByCustomer = async (customerId, accessToken) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/orders/user/${customerId}`, {
+    const response = await axiosInstance.get(`${API_URL}/orders/by-customer/${customerId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching orders by user ID:', error);
+    throw error;
+  }
+};
+
+const getOrderByUserId = async (userId, accessToken) => {
+  try {
+    const response = await axiosInstance.get(`${API_URL}/orders/by-user/${userId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -166,4 +180,5 @@ export default {
   updateIsDeposit,
   checkout,
   calculatePrice,
+  getOrderByUserId
 };
