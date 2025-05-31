@@ -1,76 +1,69 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
-import { Link, useLocation } from "react-router";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useSidebar } from "../context/SidebarContext";
 
-import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  UserCircleIcon,
-  PlugInIcon,
-} from "./../icons";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import Inventory2Icon from "@mui/icons-material/Inventory2"; // icon hộp sản phẩm
+import CategoryIcon from "@mui/icons-material/Category";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer"; // icon khuyến mãi
+import ListAltIcon from "@mui/icons-material/ListAlt"; // icon đơn hàng
+import PeopleIcon from "@mui/icons-material/People"; // icon khách hàng
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // user profile
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance"; // bank account
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
-// Định nghĩa tất cả menu gốc, thêm menu "Bank Account"
 const allNavItems = [
   {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/admin/dashboard",
-  },
-  {
-    icon: <GridIcon />,
+    icon: <Inventory2Icon fontSize="medium" />,
     name: "Product",
     path: "/admin/products",
   },
   {
-    icon: <CalenderIcon />,
+    icon: <CategoryIcon fontSize="medium" />,
     name: "Category",
     path: "/admin/categories",
   },
   {
-    icon: <CalenderIcon />,
+    icon: <CategoryIcon fontSize="medium" />,
     name: "Subcategory",
     path: "/admin/subcategories",
   },
   {
-    icon: <CalenderIcon />,
+    icon: <LocalOfferIcon fontSize="medium" />,
     name: "Promotion",
     path: "/admin/promotions",
   },
   {
-    icon: <ListIcon />,
+    icon: <ListAltIcon fontSize="medium" />,
     name: "Order",
     path: "/admin/orders",
   },
   {
-    icon: <UserCircleIcon />,
+    icon: <DashboardIcon fontSize="medium" />,
+    name: "Dashboard",
+    path: "/admin/dashboard",
+  },
+  {
+    icon: <PeopleIcon fontSize="medium" />,
     name: "Customer",
     path: "/admin/customers",
   },
   {
-    icon: <UserCircleIcon />,
+    icon: <AccountCircleIcon fontSize="medium" />,
     name: "User Profile",
     path: "/admin/user",
   },
   {
-    icon: <PlugInIcon />,
+    icon: <AccountBalanceIcon fontSize="medium" />,
     name: "Bank Account",
     path: "/admin/bank-accounts",
-    rolesAllowed: [1], // Chỉ admin xem được
+    rolesAllowed: [1], // chỉ admin xem được
   },
 ];
 
-// Hàm lọc menu theo role
+// Hàm lọc menu theo role (giữ nguyên)
 const filterNavItemsByRole = (items, roleId) => {
   return items.filter((item) => {
     if (item.rolesAllowed && Array.isArray(item.rolesAllowed)) {
@@ -143,11 +136,7 @@ const AdminSidebar = () => {
 
   const handleSubmenuToggle = (index, menuType) => {
     setOpenSubmenu((prev) => {
-      if (
-        prev &&
-        prev.type === menuType &&
-        prev.index === index
-      ) {
+      if (prev && prev.type === menuType && prev.index === index) {
         return null;
       }
       return { type: menuType, index };
@@ -161,20 +150,16 @@ const AdminSidebar = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${openSubmenu?.type === menuType &&
-                  openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-                } cursor-pointer ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
+              className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
+                ? "menu-item-active"
+                : "menu-item-inactive"
+                } cursor-pointer ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
                 }`}
             >
               <span
-                className={`menu-item-icon-size ${openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
+                className={`menu-item-icon-size ${openSubmenu?.type === menuType && openSubmenu?.index === index
+                  ? "menu-item-icon-active"
+                  : "menu-item-icon-inactive"
                   }`}
               >
                 {nav.icon}
@@ -183,11 +168,10 @@ const AdminSidebar = () => {
                 <span className="menu-item-text">{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
-                      openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
+                <ExpandMoreIcon
+                  className={`ml-auto transition-transform duration-200 ${openSubmenu?.type === menuType && openSubmenu?.index === index
+                    ? "rotate-180 text-brand-500"
+                    : ""
                     }`}
                 />
               )}
@@ -196,15 +180,13 @@ const AdminSidebar = () => {
             nav.path && (
               <Link
                 to={nav.path}
-                className={`menu-item group ${isActive(nav.path)
-                    ? "menu-item-active"
-                    : "menu-item-inactive"
+                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                   }`}
               >
                 <span
                   className={`menu-item-icon-size ${isActive(nav.path)
-                      ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
+                    ? "menu-item-icon-active"
+                    : "menu-item-icon-inactive"
                     }`}
                 >
                   {nav.icon}
@@ -215,60 +197,58 @@ const AdminSidebar = () => {
               </Link>
             )
           )}
-          {nav.subItems &&
-            (isExpanded || isHovered || isMobileOpen) && (
-              <div
-                ref={(el) => {
-                  subMenuRefs.current[`${menuType}-${index}`] = el;
-                }}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height:
-                    openSubmenu?.type === menuType &&
-                      openSubmenu?.index === index
-                      ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                      : "0px",
-                }}
-              >
-                <ul className="mt-2 space-y-1 ml-9">
-                  {nav.subItems.map((subItem) => (
-                    <li key={subItem.name}>
-                      <Link
-                        to={subItem.path}
-                        className={`menu-dropdown-item ${isActive(subItem.path)
-                            ? "menu-dropdown-item-active"
-                            : "menu-dropdown-item-inactive"
-                          }`}
-                      >
-                        {subItem.name}
-                        <span className="flex items-center gap-1 ml-auto">
-                          {subItem.new && (
-                            <span
-                              className={`ml-auto ${isActive(subItem.path)
-                                  ? "menu-dropdown-badge-active"
-                                  : "menu-dropdown-badge-inactive"
-                                } menu-dropdown-badge`}
-                            >
-                              new
-                            </span>
-                          )}
-                          {subItem.pro && (
-                            <span
-                              className={`ml-auto ${isActive(subItem.path)
-                                  ? "menu-dropdown-badge-active"
-                                  : "menu-dropdown-badge-inactive"
-                                } menu-dropdown-badge`}
-                            >
-                              pro
-                            </span>
-                          )}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
+            <div
+              ref={(el) => {
+                subMenuRefs.current[`${menuType}-${index}`] = el;
+              }}
+              className="overflow-hidden transition-all duration-300"
+              style={{
+                height:
+                  openSubmenu?.type === menuType && openSubmenu?.index === index
+                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
+                    : "0px",
+              }}
+            >
+              <ul className="mt-2 space-y-1 ml-9">
+                {nav.subItems.map((subItem) => (
+                  <li key={subItem.name}>
+                    <Link
+                      to={subItem.path}
+                      className={`menu-dropdown-item ${isActive(subItem.path)
+                        ? "menu-dropdown-item-active"
+                        : "menu-dropdown-item-inactive"
+                        }`}
+                    >
+                      {subItem.name}
+                      <span className="flex items-center gap-1 ml-auto">
+                        {subItem.new && (
+                          <span
+                            className={`ml-auto ${isActive(subItem.path)
+                              ? "menu-dropdown-badge-active"
+                              : "menu-dropdown-badge-inactive"
+                              } menu-dropdown-badge`}
+                          >
+                            new
+                          </span>
+                        )}
+                        {subItem.pro && (
+                          <span
+                            className={`ml-auto ${isActive(subItem.path)
+                              ? "menu-dropdown-badge-active"
+                              : "menu-dropdown-badge-inactive"
+                              } menu-dropdown-badge`}
+                          >
+                            pro
+                          </span>
+                        )}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </li>
       ))}
     </ul>
@@ -326,7 +306,7 @@ const AdminSidebar = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   "Menu"
                 ) : (
-                  <HorizontaLDots className="size-6" />
+                  <MoreHorizIcon fontSize="medium" />
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
