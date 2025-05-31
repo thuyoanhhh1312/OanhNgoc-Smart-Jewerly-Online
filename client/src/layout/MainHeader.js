@@ -41,6 +41,11 @@ const MainHeader = () => {
     navigate("/order-history");
   };
 
+  const goToProfile = () => {
+    closeDropdown();
+    navigate("/profile");
+  };
+
   function toggleDropdown() {
     setIsOpen(!isOpen);
   }
@@ -98,6 +103,23 @@ const MainHeader = () => {
                 onClose={closeDropdown}
                 className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
               >
+                <button
+                  className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                  onClick={goToProfile}
+                >
+                  <svg
+                    className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentColor" />
+                  </svg>
+                  Profile
+                </button>
+
                 <button
                   className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                   onClick={goToOrderHistory}

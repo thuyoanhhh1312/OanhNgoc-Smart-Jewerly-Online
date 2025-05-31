@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-import { Op, fn, col, literal  } from 'sequelize';
+import { Op, fn, col, literal } from 'sequelize';
 // Lấy khách hàng theo ID
 export const getCustomerById = async (req, res) => {
   const { id } = req.params;
@@ -100,3 +100,81 @@ export const getAllCustomers = async (req, res) => {
     });
   }
 };
+
+export const updateCustomerProfile = async (req, res) => {
+  // Lấy userId từ token (đã qua middleware authenticateToken)
+  const userId = req.user.userId;
+  const { name, phone, gender, address } = req.body;
+
+  const t = await db.sequelize.transaction();
+
+  try {
+    // Tìm customer theo user_id
+    let customer = await db.Customer.findOne({ where: { user_id: userId }, transaction: t });
+
+    if (!customer) {
+      // Nếu chưa có record customer, tạo mới
+      // Lấy email từ User để tạo Customer đầy đủ
+      const user = await db.User.findByPk(userId, { transaction: t });
+      if (!user) {
+        await t.rollback();
+        return res.status(404).json({ message: "Người dùng không tồn tại" });
+      }
+
+      customer = await db.Customer.create(
+        {
+          user_id: userId,
+          name: name || user.name,
+          email: user.email,
+          phone: phone || null,
+          gender: gender || null,
+          address: address || null,
+        },
+        { transaction: t }
+      );
+    } else {
+      // Cập nhật các trường thông tin cá nhân
+      if (name !== undefined) customer.name = name;
+      if (phone !== undefined) customer.phone = phone;
+      if (gender !== undefined) customer.gender = gender;
+      if (address !== undefined) customer.address = address;
+
+      await customer.save({ transaction: t });
+
+      // Đồng bộ lại tên User (nếu cần)
+      if (name !== undefined) {
+        const user = await db.User.findByPk(userId, { transaction: t });
+        if (user) {
+          user.name = name;
+          await user.save({ transaction: t });
+        }
+      }
+    }
+
+    await t.commit();
+
+    return res.status(200).json({
+      message: "Cập nhật thông tin cá nhân thành công",
+      customer,
+    });
+  } catch (err) {
+    await t.rollback();
+    return res.status(400).json({
+      message: "Lỗi khi cập nhật thông tin cá nhân",
+      error: err.message,
+    });
+  }
+};
+
+export const getCustomer = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const customer = await db.Customer.findOne({ where: { user_id: userId } });
+    if (!customer) return res.status(404).json({ message: 'Khách hàng không tìm thấy' });
+    res.status(200).json(customer);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy khách hàng', error: err.message });
+  }
+};
+

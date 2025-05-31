@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 import db from '../models/index.js';
 import { ERROR_CODES } from '../utils/errorCodes.js';
 
-// Đăng ký người dùng
+// Đăng ký người dùng (User + Customer)
 export const registerUser = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phone, gender, address } = req.body;
 
   if (!name || !email || !password) {
     return next({
@@ -15,9 +15,17 @@ export const registerUser = async (req, res, next) => {
     });
   }
 
+  const t = await db.sequelize.transaction(); // dùng transaction để đảm bảo toàn vẹn
+
   try {
-    const existingUser = await db.User.findOne({ where: { email } });
-    if (existingUser) {
+    // Kiểm tra email đã tồn tại ở bảng User hoặc Customer
+    const [existingUser, existingCustomer, existingPhone] = await Promise.all([
+      db.User.findOne({ where: { email } }),
+      db.Customer.findOne({ where: { email } }),
+      phone ? db.Customer.findOne({ where: { phone } }) : null
+    ]);
+
+    if (existingUser || existingCustomer) {
       return next({
         statusCode: 409,
         code: ERROR_CODES.EMAIL_ALREADY_EXISTS,
@@ -25,19 +33,44 @@ export const registerUser = async (req, res, next) => {
       });
     }
 
+    if (phone && existingPhone) {
+      return next({
+        statusCode: 409,
+        code: ERROR_CODES.PHONE_ALREADY_EXISTS,
+        message: 'Số điện thoại đã tồn tại.'
+      });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = await db.User.create({ name, email, password: hashedPassword });
+    // Tạo user
+    const newUser = await db.User.create(
+      { name, email, password: hashedPassword, role_id: 2 }, // role_id=2 là customer
+      { transaction: t }
+    );
 
-    //token xác thực người dùng
+    // Tạo customer liên kết user_id
+    const newCustomer = await db.Customer.create(
+      {
+        user_id: newUser.id,
+        name,
+        email,
+        phone: phone || "0816837690",
+        gender: gender || null,
+        address: address || null
+      },
+      { transaction: t }
+    );
+
+    // Token xác thực người dùng
     const accessToken = jwt.sign(
       { userId: newUser.id, email: newUser.email, role_id: newUser.role_id },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '24h' }
     );
 
-    //token dùng refresh
+    // Token dùng refresh
     const refreshToken = jwt.sign(
       { userId: newUser.id },
       process.env.JWT_REFRESH_SECRET_KEY,
@@ -45,7 +78,9 @@ export const registerUser = async (req, res, next) => {
     );
 
     newUser.refresh_token = refreshToken;
-    await newUser.save();
+    await newUser.save({ transaction: t });
+
+    await t.commit();
 
     return res.status(201).json({
       message: 'Đăng ký thành công',
@@ -56,9 +91,18 @@ export const registerUser = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         role_id: newUser.role_id
+      },
+      customer: {
+        customer_id: newCustomer.customer_id,
+        name: newCustomer.name,
+        email: newCustomer.email,
+        phone: newCustomer.phone,
+        gender: newCustomer.gender,
+        address: newCustomer.address
       }
     });
   } catch (err) {
+    await t.rollback();
     return next({
       statusCode: 500,
       code: ERROR_CODES.INTERNAL_SERVER_ERROR,
@@ -260,6 +304,112 @@ export const currentStaffOrAdmin = async (req, res, next) => {
       statusCode: 500,
       code: ERROR_CODES.INTERNAL_SERVER_ERROR,
       message: "Không xác định được quyền truy cập.",
+    });
+  }
+};
+
+export const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return next({
+      statusCode: 400,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      message: 'Vui lòng nhập email.'
+    });
+  }
+
+  try {
+    const user = await db.User.findOne({ where: { email } });
+    if (!user) {
+      // Email không tồn tại trong DB
+      return res.status(404).json({
+        message: 'Email không tồn tại trong hệ thống.'
+      });
+    }
+
+    // Tạo token reset password chứa email, hạn 15 phút
+    const resetToken = jwt.sign(
+      { email: user.email },
+      process.env.JWT_RESET_PASSWORD_SECRET_KEY,
+      { expiresIn: '15m' }
+    );
+
+    // Trả token reset về frontend (frontend lưu token này để dùng cho bước reset-password)
+    return res.status(200).json({
+      message: 'Email hợp lệ. Vui lòng tiếp tục đổi mật khẩu.',
+      resetToken
+    });
+  } catch (err) {
+    return next({
+      statusCode: 500,
+      code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+      message: 'Lỗi server. Vui lòng thử lại sau.',
+      error: err.message
+    });
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { password, confirm_password, resetToken } = req.body;
+
+  if (!password || !confirm_password || !resetToken) {
+    return next({
+      statusCode: 400,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      message: 'Vui lòng nhập đầy đủ mật khẩu, xác nhận mật khẩu.'
+    });
+  }
+
+  if (password !== confirm_password) {
+    return next({
+      statusCode: 400,
+      code: ERROR_CODES.VALIDATION_ERROR,
+      message: 'Mật khẩu và xác nhận mật khẩu không khớp.'
+    });
+  }
+
+  try {
+    // Giải mã token lấy email
+    const decoded = jwt.verify(resetToken, process.env.JWT_RESET_PASSWORD_SECRET_KEY);
+    const email = decoded.email;
+
+    const user = await db.User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({
+        message: 'Người dùng không tồn tại.'
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Đổi mật khẩu thành công.'
+    });
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return next({
+        statusCode: 401,
+        code: ERROR_CODES.TOKEN_EXPIRED,
+        message: 'Token đổi mật khẩu đã hết hạn. Vui lòng thử lại.'
+      });
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return next({
+        statusCode: 401,
+        code: ERROR_CODES.TOKEN_INVALID,
+        message: 'Token đổi mật khẩu không hợp lệ.'
+      });
+    }
+    return next({
+      statusCode: 500,
+      code: ERROR_CODES.INTERNAL_SERVER_ERROR,
+      message: 'Lỗi server. Vui lòng thử lại sau.',
+      error: err.message
     });
   }
 };
