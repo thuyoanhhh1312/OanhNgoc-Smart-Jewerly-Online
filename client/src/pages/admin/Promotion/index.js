@@ -55,11 +55,13 @@ const Promotion = () => {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold">Danh sách Khuyến mãi</h1>
-        <Link to="/admin/promotions/add">
-          <button className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2 rounded">
-            Thêm Khuyến mãi
-          </button>
-        </Link>
+        {user?.role_id === 1 && (
+          <Link to="/admin/promotions/add">
+            <button className="bg-blue-600 hover:bg-blue-700 transition text-white px-5 py-2 rounded">
+              Thêm Khuyến mãi
+            </button>
+          </Link>
+        )}
       </div>
 
       <DataTable
@@ -116,26 +118,28 @@ const Promotion = () => {
           body={(row) => formatDate(row.end_date)}
           headerClassName="bg-gray-200"
         />
-        <Column
-          headerClassName="bg-gray-200"
-          header="Hành động"
-          body={(rowData) => (
-            <div className="flex gap-2 justify-center">
-              <Link to={`/admin/promotions/edit/${rowData.promotion_id}`}>
-                <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
-                  Sửa
+        {user?.role_id === 1 && (
+          <Column
+            headerClassName="bg-gray-200"
+            header="Hành động"
+            body={(rowData) => (
+              <div className="flex gap-2 justify-center">
+                <Link to={`/admin/promotions/edit/${rowData.promotion_id}`}>
+                  <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">
+                    Sửa
+                  </button>
+                </Link>
+                <button
+                  onClick={() => handleDelete(rowData.promotion_id)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                >
+                  Xóa
                 </button>
-              </Link>
-              <button
-                onClick={() => handleDelete(rowData.promotion_id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Xóa
-              </button>
-            </div>
-          )}
-          style={{ width: "150px", textAlign: "center" }}
-        />
+              </div>
+            )}
+            style={{ width: "150px", textAlign: "center" }}
+          />
+        )}
       </DataTable>
     </div>
   );

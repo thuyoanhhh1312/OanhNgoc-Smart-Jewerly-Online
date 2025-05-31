@@ -96,9 +96,9 @@ router.delete('/subcategories/:id', authenticateToken, isAdminOrStaff, subCatego
 // Promotion routes
 router.get('/promotions', promotionController.getAllPromotions);
 router.get('/promotions/:id', promotionController.getPromotionById);
-router.post('/promotions', authenticateToken, isAdminOrStaff, promotionController.createPromotion);
-router.put('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.updatePromotion);
-router.delete('/promotions/:id', authenticateToken, isAdminOrStaff, promotionController.deletePromotion);
+router.post('/promotions', authenticateToken, isAdmin, promotionController.createPromotion);
+router.put('/promotions/:id', authenticateToken, isAdmin, promotionController.updatePromotion);
+router.delete('/promotions/:id', authenticateToken, isAdmin, promotionController.deletePromotion);
 
 // Order routes
 router.get('/orders', authenticateToken, isAdmin, orderController.getAllOrders);
