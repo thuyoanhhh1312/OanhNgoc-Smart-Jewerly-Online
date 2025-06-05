@@ -3,10 +3,20 @@ import jwt from 'jsonwebtoken';
 import db from '../models/index.js';
 import { ERROR_CODES } from '../utils/errorCodes.js';
 
+
+const generateRandomPhone = () => {
+  let phone = '0'; // Bắt đầu với số 0
+  for (let i = 0; i < 9; i++) {
+    phone += Math.floor(Math.random() * 10); // Tạo mỗi chữ số ngẫu nhiên từ 0 đến 9
+  }
+  return phone;
+};
+
 // Đăng ký người dùng (User + Customer)
 export const registerUser = async (req, res, next) => {
-  const { name, email, password, phone, gender, address } = req.body;
+  const { name, email, password } = req.body;
 
+  // Kiểm tra các trường bắt buộc
   if (!name || !email || !password) {
     return next({
       statusCode: 400,
@@ -15,17 +25,13 @@ export const registerUser = async (req, res, next) => {
     });
   }
 
-  const t = await db.sequelize.transaction(); // dùng transaction để đảm bảo toàn vẹn
+  const t = await db.sequelize.transaction(); // Dùng transaction để đảm bảo toàn vẹn
 
   try {
-    // Kiểm tra email đã tồn tại ở bảng User hoặc Customer
-    const [existingUser, existingCustomer, existingPhone] = await Promise.all([
-      db.User.findOne({ where: { email } }),
-      db.Customer.findOne({ where: { email } }),
-      phone ? db.Customer.findOne({ where: { phone } }) : null
-    ]);
+    // Kiểm tra email đã tồn tại ở bảng User
+    const existingUser = await db.User.findOne({ where: { email } });
 
-    if (existingUser || existingCustomer) {
+    if (existingUser) {
       return next({
         statusCode: 409,
         code: ERROR_CODES.EMAIL_ALREADY_EXISTS,
@@ -33,15 +39,8 @@ export const registerUser = async (req, res, next) => {
       });
     }
 
-    if (phone && existingPhone) {
-      return next({
-        statusCode: 409,
-        code: ERROR_CODES.PHONE_ALREADY_EXISTS,
-        message: 'Số điện thoại đã tồn tại.'
-      });
-    }
-
-    const salt = await bcrypt.genSalt(10);
+    // Mã hóa mật khẩu
+    const salt = await bcrypt.genSalt(12);  // Sử dụng 12 vòng lặp thay vì 10
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Tạo user
@@ -50,27 +49,29 @@ export const registerUser = async (req, res, next) => {
       { transaction: t }
     );
 
+    // Tạo số điện thoại ngẫu nhiên
+    const randomPhone = generateRandomPhone();
+
     // Tạo customer liên kết user_id
     const newCustomer = await db.Customer.create(
       {
         user_id: newUser.id,
         name,
         email,
-        phone: phone || "0816837690",
-        gender: gender || null,
-        address: address || null
+        phone: randomPhone,  // Sử dụng số điện thoại ngẫu nhiên
+        gender: null,
+        address: null
       },
       { transaction: t }
     );
 
-    // Token xác thực người dùng
+    // Tạo token xác thực người dùng
     const accessToken = jwt.sign(
       { userId: newUser.id, email: newUser.email, role_id: newUser.role_id },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '24h' }
     );
 
-    // Token dùng refresh
     const refreshToken = jwt.sign(
       { userId: newUser.id },
       process.env.JWT_REFRESH_SECRET_KEY,
@@ -80,6 +81,7 @@ export const registerUser = async (req, res, next) => {
     newUser.refresh_token = refreshToken;
     await newUser.save({ transaction: t });
 
+    // Commit transaction sau khi thành công
     await t.commit();
 
     return res.status(201).json({
@@ -111,6 +113,7 @@ export const registerUser = async (req, res, next) => {
     });
   }
 };
+
 
 // Đăng nhập người dùng
 export const loginUser = async (req, res, next) => {

@@ -25,13 +25,6 @@ app.use(errorHandler);
 const port = process.env.PORT || 3000;
 app.listen(port, async () => {
   console.log(`Server đang chạy trên http://localhost:${port}`);
-
-  // try {
-  //   await runScraper();
-  //   console.log('Scraper chạy xong!');
-  // } catch (error) {
-  //   console.error('Lỗi khi chạy scraper:', error);
-  // }
 });
 
 export default app;
