@@ -223,14 +223,25 @@ export const updateIsDeposit = async (req, res) => {
 
 export const calculatePrice = async (req, res) => {
   try {
-    const { items, promotion_code, customer_id } = req.body;
+    const { items, promotion_code, user_id } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
-    if (!customer_id) {
-      return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
+    if (!user_id) {
+      return res.status(400).json({ message: "Vui lòng cung cấp mã người dùng." });
     }
+
+    // Lấy customer_id từ user_id
+    const customer = await db.Customer.findOne({
+      where: { user_id },
+    });
+
+    if (!customer) {
+      return res.status(400).json({ message: "Không tìm thấy khách hàng với user_id đã cho." });
+    }
+
+    const customer_id = customer.customer_id;
 
     const productIds = items.map(i => i.product_id);
     const products = await db.Product.findAll({ where: { product_id: productIds } });
@@ -315,9 +326,9 @@ export const calculatePrice = async (req, res) => {
 export const checkout = async (req, res) => {
   const t = await db.sequelize.transaction();
   let finished = false;
+
   try {
     const {
-      customer_id,
       user_id = null,
       promotion_code = null,
       payment_method = null,
@@ -326,8 +337,22 @@ export const checkout = async (req, res) => {
       items = [],
     } = req.body;
 
+    // Tìm customer_id từ user_id
+    const customer = await db.Customer.findOne({
+      where: { user_id },
+      transaction: t,
+    });
+
+    if (!customer) {
+      await t.rollback();
+      return res.status(400).json({ message: "Không tìm thấy khách hàng với user_id đã cho." });
+    }
+
+    const customer_id = customer.customer_id;
+
     let deposit_status = req.body.deposit_status ?? "none";
 
+    // Kiểm tra các điều kiện
     if (!customer_id) {
       await t.rollback();
       return res.status(400).json({ message: "Vui lòng cung cấp mã khách hàng." });
@@ -337,6 +362,7 @@ export const checkout = async (req, res) => {
       return res.status(400).json({ message: "Danh sách sản phẩm không được để trống." });
     }
 
+    // Kiểm tra các sản phẩm
     const productIds = items.map(i => i.product_id);
     const products = await db.Product.findAll({
       where: { product_id: productIds },
@@ -431,7 +457,6 @@ export const checkout = async (req, res) => {
     // Tạo đơn hàng
     const order = await db.Order.create({
       customer_id,
-      user_id,
       promotion_id,
       status_id: 1,
       sub_total,
@@ -509,6 +534,7 @@ export const checkout = async (req, res) => {
     return res.status(500).json({ message: "Lỗi hệ thống khi tạo đơn hàng." });
   }
 };
+
 
 export const getOrderByUserId = async (req, res) => {
   const { user_id } = req.params;
