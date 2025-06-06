@@ -9,7 +9,7 @@ const MainFooter = () => {
             <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-y-10 sm:gap-y-0">
                 {/* Logo & Copyright */}
                 <div className="text-center sm:text-left">
-                    <p>&copy; {year} Canim. All rights reserved.</p>
+                    <p>&copy; {year} Oanh Ngoc Jewelry Shop</p>
                 </div>
 
                 {/* Navigation Links */}
