@@ -7,8 +7,8 @@ import torch
 app = FastAPI()
 
 # Load PhoBERT Sentiment model
-tokenizer = AutoTokenizer.from_pretrained("./phobert-base-vi-sentiment-analysis", use_fast=False)
-model = RobertaForSequenceClassification.from_pretrained("./phobert-base-vi-sentiment-analysis")
+tokenizer = AutoTokenizer.from_pretrained("mr4/phobert-base-vi-sentiment-analysis", use_fast=False)
+model = RobertaForSequenceClassification.from_pretrained("mr4/phobert-base-vi-sentiment-analysis")
 
 label_map = {0: "Tiêu cực",  1: "Tích cực", 2: "Trung tính"}
 
