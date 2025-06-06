@@ -3,14 +3,13 @@ import express from 'express';
 import cors from 'cors';
 import apiRoutes from './routes/apiRoutes.js'; // Đảm bảo file này cũng dùng export default nếu là ES Module
 import { errorHandler } from './middlewares/errorHandler.js';
-import runScraper from './pnjScraper.js';
 
 const app = express();
 
 app.use(express.json());
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://oanhngocjewelry.online'],
   methods: 'GET,POST,PUT,DELETE,PATCH',
   allowedHeaders: 'Content-Type,Authorization,authtoken',
 };
