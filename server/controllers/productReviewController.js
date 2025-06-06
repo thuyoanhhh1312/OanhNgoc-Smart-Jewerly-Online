@@ -48,7 +48,7 @@ export const createReview = async (req, res, next) => {
 
   try {
     // Gọi API sentiment để phân tích nội dung
-    const sentimentRes = await axios.post('http://localhost:5001/sentiment', { text: content });
+    const sentimentRes = await axios.post('http://oanhngocjewelry.online/nlp/sentiment', { text: content });
     const vietnameseLabel = sentimentRes.data.label || null;
 
     const reverseMapping = {
