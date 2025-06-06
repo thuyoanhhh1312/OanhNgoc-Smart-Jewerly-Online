@@ -185,7 +185,7 @@ const addProductReview = async (productId, reviewData, accessToken) => {
     const response = await axiosInstance.post(
       `${API_URL}/products/${productId}/reviews`,
       {
-        customer_id: reviewData?.customer_id,
+        user_id: reviewData?.user_id,
         rating: reviewData?.rating,
         content: reviewData?.content,
       },
