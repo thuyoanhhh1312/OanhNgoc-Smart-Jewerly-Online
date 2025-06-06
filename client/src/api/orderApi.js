@@ -78,9 +78,9 @@ const updateStaff = async (id, staff_id, accessToken) => {
   }
 };
 
-const getOrderByCustomer = async (customerId, accessToken) => {
+const getOrderByCustomer = async (userId, accessToken) => {
   try {
-    const response = await axiosInstance.get(`${API_URL}/orders/by-customer/${customerId}`, {
+    const response = await axiosInstance.get(`${API_URL}/orders/by-customer/${userId}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

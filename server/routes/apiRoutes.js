@@ -106,7 +106,7 @@ router.get('/orders/:id', authenticateToken, isAdminOrStaff, orderController.get
 router.post('/orders', authenticateToken, orderController.createOrder);
 router.put('/orders/:id', authenticateToken, isAdminOrStaff, orderController.updatedOrder);
 router.put('/update-staff/:id', authenticateToken, isAdmin, orderController.updatedStaff);
-router.get('/orders/by-customer/:customer_id', authenticateToken, orderController.getOrderByCustomer);
+router.get('/orders/by-customer/:user_id', authenticateToken, orderController.getOrderByCustomer);
 router.patch('/orders/:id/deposit', authenticateToken, isAdminOrStaff, orderController.updateIsDeposit);
 router.post('/calculate-price', authenticateToken, validateRequest(calculatePriceSchema), orderController.calculatePrice);
 router.post('/checkout', authenticateToken, validateRequest(checkoutSchema), orderController.checkout);
