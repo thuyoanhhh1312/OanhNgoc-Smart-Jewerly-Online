@@ -2,80 +2,83 @@ import db from '../models/index.js';
 import axios from 'axios';
 
 export const getReviewsByProductId = async (req, res, next) => {
-    const productId = req.params.id;
+  const productId = req.params.id;
 
-    try {
-        const reviews = await db.ProductReview.findAll({
-            include: [
-                {
-                    model: db.Customer,
-                    attributes: ["name", "email", "phone"],
-                },
-            ],
-            where: { product_id: productId },
-            order: [['created_at', 'DESC']],
-        });
+  try {
+    const reviews = await db.ProductReview.findAll({
+      include: [
+        {
+          model: db.Customer,
+          attributes: ["name", "email", "phone"],
+        },
+      ],
+      where: { product_id: productId },
+      order: [['created_at', 'DESC']],
+    });
 
-        return res.status(200).json({
-            message: 'Lấy danh sách đánh giá thành công',
-            reviews,
-        });
-    } catch (err) {
-        return next({
-            statusCode: 500,
-            message: 'Lỗi lấy danh sách đánh giá',
-            error: err.message,
-        });
-    }
+    return res.status(200).json({
+      message: 'Lấy danh sách đánh giá thành công',
+      reviews,
+    });
+  } catch (err) {
+    return next({
+      statusCode: 500,
+      message: 'Lỗi lấy danh sách đánh giá',
+      error: err.message,
+    });
+  }
 };
 
 export const createReview = async (req, res, next) => {
-    const productId = req.params.id;
-    const { customer_id, rating, content } = req.body;
+  const productId = req.params.id;
+  const { user_id, rating, content } = req.body;
 
-    console.log("req.body", req.body);
+  const customer = await db.Customer.findOne({
+    where: { user_id }
+  });
 
+  const customer_id = customer.customer_id;
 
-    if (!customer_id || !rating || !content) {
-        return next({
-            statusCode: 400,
-            message: 'Thiếu dữ liệu bắt buộc: customer_id, rating hoặc nội dung đánh giá',
-        });
-    }
+  if (!customer_id || !rating || !content) {
+    return next({
+      statusCode: 400,
+      message: 'Thiếu dữ liệu bắt buộc: customer_id, rating hoặc nội dung đánh giá',
+    });
+  }
 
-    try {
-        // Gọi API sentiment để phân tích nội dung
-        const sentimentRes = await axios.post('http://localhost:5001/sentiment', { text: content });
-        const vietnameseLabel = sentimentRes.data.label || null;
+  try {
+    // Gọi API sentiment để phân tích nội dung
+    const sentimentRes = await axios.post('http://localhost:5001/sentiment', { text: content });
+    const vietnameseLabel = sentimentRes.data.label || null;
 
-        const reverseMapping = {
-            "Tích cực": "POS",
-            "Tiêu cực": "NEG",
-            "Trung tính": "NEU"
-        };
-        const sentiment = reverseMapping[vietnameseLabel] || null;
+    const reverseMapping = {
+      "Tích cực": "POS",
+      "Tiêu cực": "NEG",
+      "Trung tính": "NEU"
+    };
+    const sentiment = reverseMapping[vietnameseLabel] || null;
 
-        const newReview = await db.ProductReview.create({
-            product_id: productId,
-            customer_id,
-            rating,
-            content,
-            sentiment,
-            created_at: new Date(),
-            updated_at: new Date(),
-        });
+    const newReview = await db.ProductReview.create({
+      product_id: productId,
+      customer_id,
+      rating,
+      content,
+      sentiment,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
-        return res.status(201).json({
-            message: 'Tạo đánh giá thành công',
-            review: newReview,
-        });
-    } catch (err) {
-        return next({
-            statusCode: 500,
-            message: 'Lỗi tạo đánh giá',
-            error: err.message,
-        });
-    }
+    return res.status(201).json({
+      message: 'Tạo đánh giá thành công',
+      review: newReview,
+    });
+  } catch (err) {
+    return next({
+      statusCode: 500,
+      message: 'Lỗi tạo đánh giá',
+      error: err.message,
+    });
+  }
 };
 
 export const getReviewSummary = async (req, res, next) => {

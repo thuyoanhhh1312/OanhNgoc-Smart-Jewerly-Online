@@ -117,7 +117,7 @@ const ProductDetail = () => {
     try {
       await productApi.addProductReview(
         product?.product_id,
-        { customer_id: user.id, ...review },
+        { user_id: user.id, ...review },
         user?.token,
       );
       toast.success('Đánh giá đã gửi thành công!');
