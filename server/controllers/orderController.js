@@ -136,7 +136,12 @@ export const updatedStaff = async (req, res) => {
 };
 
 export const getOrderByCustomer = async (req, res) => {
-  const { customer_id } = req.params;
+  const { user_id } = req.params;
+  const customer = await db.Customer.findOne({
+    where: { user_id },
+  });
+
+  const customer_id = customer?.customer_id;
   try {
     const orders = await db.Order.findAll({
       where: { customer_id: customer_id },
