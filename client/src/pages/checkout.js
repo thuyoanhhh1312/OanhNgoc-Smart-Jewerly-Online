@@ -197,7 +197,7 @@ const CheckoutPage = () => {
           quantity: item.count,
         })),
         promotion_code: promoCode.trim(),
-        customer_id: user?.id
+        user_id: user?.id
       };
       const res = await orderApi.calculatePrice(priceData, user?.token);
       if (res.valid) {
@@ -233,8 +233,7 @@ const CheckoutPage = () => {
     setSubmitting(true);
     try {
       const orderData = {
-        customer_id: user?.id,
-        user_id: null,
+        user_id: user?.id,
         promotion_code: promoResult.valid ? promoCode.trim() : null,
         payment_method: paymentMethod,
         shipping_address: `${addressDetail}, ${findNameByCode(wards, ward)}, ${findNameByCode(districts, district)}, ${findNameByCode(provinces, province)}`,
