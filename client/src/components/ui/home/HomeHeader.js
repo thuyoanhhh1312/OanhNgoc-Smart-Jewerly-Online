@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import categoryApi from "../../../api/categoryApi";
-import QuickSearchPopup from "../../QuickSearchPopup";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import categoryApi from '../../../api/categoryApi';
+import QuickSearchPopup from '../../QuickSearchPopup';
+import { useLocation } from 'react-router-dom';
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
@@ -17,7 +17,7 @@ const Header = () => {
         const data = await categoryApi.getCategories();
         setCategories(data);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách category:", error);
+        console.error('Lỗi khi lấy danh sách category:', error);
       } finally {
         setLoadingCategories(false);
       }
@@ -34,8 +34,11 @@ const Header = () => {
   };
 
   const handlePromotionClick = () => {
-    navigate("/promotions");
+    navigate('/promotions');
   };
+  const handleNewsClick = () => navigate('/tin-tuc'); // ← đường dẫn trang Tin tức
+  // tô màu khi đang ở trang tương ứng
+  const isActive = (pathPrefix) => location.pathname.startsWith(pathPrefix);
 
   return (
     <header id="siteHeader" className="w-full relative z-20">
@@ -71,9 +74,21 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Menu Khuyến Mãi */}
+          {/*Tin tức / Blog */}
+          <div className="menuItem cursor-pointer py-2" onClick={handleNewsClick}>
+            <a
+              className={`inline-flex items-center text-[18px] font-normal relative
+                ${isActive('/tin-tuc') ? 'text-[#ac2b36]' : 'text-[#000] hover:text-[#c48c46]'}`}
+            >
+              Blog
+            </a>
+          </div>
+          {/* Khuyến Mãi */}
           <div className="menuItem cursor-pointer py-2" onClick={handlePromotionClick}>
-            <a className="inline-flex items-center text-[18px] font-normal relative text-[#ac2b36]">
+            <a
+              className={`inline-flex items-center text-[18px] font-normal relative
+      ${isActive('/promotions') ? 'text-[#ac2b36]' : 'text-[#000] hover:text-[#c48c46]'}`}
+            >
               Khuyến Mãi
             </a>
           </div>
@@ -82,23 +97,20 @@ const Header = () => {
           <div className="relative h-[35px] w-[360px] mt-[3px]">
             <button
               className="w-full h-[35px] rounded-[100px] pl-[14px] italic bg-[#ededed] leading-[35px] text-left text-gray-700 outline-none border-2 border-solid hover:border-yellow-500 transition"
-              style={{ border: "2px solid #ededed" }}
+              style={{ border: '2px solid #ededed' }}
               onClick={() => setOpenQuickSearch(true)}
             >
-              <span style={{ color: "#888" }}>Tìm kiếm nhanh</span>
+              <span style={{ color: '#888' }}>Tìm kiếm nhanh</span>
               <img
                 alt="Tìm kiếm nhanh"
                 loading="lazy"
                 width="16"
                 height="16"
                 src="https://cdn.pnj.io/images/image-update/layout/mobile/find-icon.svg"
-                style={{ position: "absolute", right: 20, top: 10 }}
+                style={{ position: 'absolute', right: 20, top: 10 }}
               />
             </button>
-            <QuickSearchPopup
-              open={openQuickSearch}
-              onClose={() => setOpenQuickSearch(false)}
-            />
+            <QuickSearchPopup open={openQuickSearch} onClose={() => setOpenQuickSearch(false)} />
           </div>
         </nav>
       </div>

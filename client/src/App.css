@@ -36,3 +36,22 @@
     transform: rotate(360deg);
   }
 }
+/* Ticker chạy ngang */
+@keyframes news-ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  } /* vì ta nhân đôi mảng để cuộn vô hạn */
+}
+
+/* class dùng trong JSX */
+.animate-news-ticker {
+  animation: news-ticker 30s linear infinite;
+}
+
+/* dừng khi hover (dùng cùng group-hover) */
+.pause-on-hover {
+  animation-play-state: paused;
+}

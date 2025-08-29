@@ -8,6 +8,8 @@ const router = express.Router();
 // Middleware
 import { isAdmin, authenticateToken, isAdminOrStaff } from '../middlewares/auth.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
+import * as articleController from '../controllers/articleController.js';
+import { createArticleSchema, updateArticleSchema } from '../validators/articleValidator.js';
 
 //validators
 import { calculatePriceSchema, checkoutSchema } from '../validators/orderValidator.js';
@@ -30,6 +32,14 @@ import * as searchController from '../controllers/searchController.js';
 import * as dashboardController from '../controllers/dashboardController.js';
 import * as vietnamLocationController from '../controllers/vietnamLocationController.js';
 import * as bankController from '../controllers/bankController.js';
+
+import * as tagController from '../controllers/tagController.js';
+router.get('/tags', tagController.getAllTags);
+
+import * as articleCategoryController from '../controllers/articleCategoryController.js';
+
+router.get('/news-categories', articleCategoryController.getAll);
+
 // Role routes
 router.get('/role', roleController.getAllRoles);
 router.post('/role', roleController.createRole);
@@ -142,5 +152,34 @@ router.put('/bank-accounts/:id', authenticateToken, isAdmin, bankController.upda
 router.delete('/bank-accounts/:id', authenticateToken, isAdmin, bankController.deleteBankAccount);
 router.patch('/bank-accounts/:id/enable', authenticateToken, isAdmin, bankController.toggleBankAccountStatus);
 
+// Public
+router.get('/news', articleController.getNews);
+router.get('/news/:slug', articleController.getNewsBySlug);
+
+// Admin/Staff
+router.post(
+  '/admin/news',
+  authenticateToken,
+  isAdminOrStaff,
+  // upload.single('thumbnail'),    // bật nếu có upload ảnh
+  validateRequest(createArticleSchema),
+  articleController.createNews
+);
+
+router.put(
+  '/admin/news/:id',
+  authenticateToken,
+  isAdminOrStaff,
+  // upload.single('thumbnail'),
+  validateRequest(updateArticleSchema),
+  articleController.updateNews
+);
+
+router.delete(
+  '/admin/news/:id',
+  authenticateToken,
+  isAdminOrStaff,
+  articleController.deleteNews
+);
 
 export default router;
