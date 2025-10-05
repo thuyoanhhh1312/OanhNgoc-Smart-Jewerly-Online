@@ -35,7 +35,11 @@ const {
   OrderItem,
   OrderStatus,
   BankAccount,
-  PromotionUsage
+  PromotionUsage,
+   Article,   // 👈 thêm
+  Tag,       // nếu đã tạo
+  ArticleTag ,
+  ArticleCategory
 } = db;
 
 // Associations:
@@ -153,12 +157,23 @@ if (PromotionUsage && Promotion) {
   Promotion.hasMany(PromotionUsage, { foreignKey: 'promotion_id' });
 }
 
-// PromotionUsage - Order (N:1)
-if (PromotionUsage && Order) {
-  PromotionUsage.belongsTo(Order, { foreignKey: 'order_id' });
-  Order.hasMany(PromotionUsage, { foreignKey: 'order_id' });
+// // PromotionUsage - Order (N:1)
+// if (PromotionUsage && Order) {
+//   PromotionUsage.belongsTo(Order, { foreignKey: 'order_id' });
+//   Order.hasMany(PromotionUsage, { foreignKey: 'order_id' });
+// }
+
+// Article - ArticleCategory (N:1)
+if (Article && ArticleCategory) {
+  Article.belongsTo(ArticleCategory, { foreignKey: 'article_category_id', as: 'category' });
+  ArticleCategory.hasMany(Article, { foreignKey: 'article_category_id', as: 'articles' });
 }
 
+// Tag many-to-many (nếu đã tạo Tag & ArticleTag)
+if (Article && Tag && ArticleTag) {
+  Article.belongsToMany(Tag, { through: ArticleTag, foreignKey: 'article_id', otherKey: 'tag_id', as: 'tags' });
+  Tag.belongsToMany(Article, { through: ArticleTag, foreignKey: 'tag_id', otherKey: 'article_id', as: 'articles' });
+}
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
